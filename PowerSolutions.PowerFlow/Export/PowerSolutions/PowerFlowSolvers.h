@@ -2,7 +2,6 @@
 #ifndef __POWERSOLUTIONS_POWERFLOWSOLVERS_H
 #define __POWERSOLUTIONS_POWERFLOWSOLVERS_H
 
-#include "stdafx.h"
 #include "NetworkCase.h"
 #include "PowerFlowSolution.h"
 #include <memory>

@@ -303,15 +303,12 @@ namespace PowerSolutions
 			if (abs(z1.imag()) < 1e-10) z1.imag(1e-10);
 			if (abs(z2.imag()) < 1e-10) z2.imag(1e-10);
 			if (abs(z3.imag()) < 1e-10) z3.imag(1e-10);
-			m_Transformer1->BaseValue(BaseValue());
 			m_Transformer1->Impedance(z1);
 			m_Transformer1->Admittance(y1);
 			m_Transformer1->TapRatio(m_TapRatio1);
-			m_Transformer2->BaseValue(BaseValue());
 			m_Transformer2->Impedance(z2);
 			m_Transformer2->Admittance(0);
 			m_Transformer2->TapRatio(1.0 / m_TapRatio2);
-			m_Transformer3->BaseValue(BaseValue());
 			m_Transformer3->Impedance(z3);
 			m_Transformer3->Admittance(0);
 			m_Transformer3->TapRatio(1.0 / m_TapRatio3);

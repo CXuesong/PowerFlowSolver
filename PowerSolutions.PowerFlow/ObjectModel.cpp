@@ -21,11 +21,6 @@ namespace PowerSolutions
 
 		////////// 网络对象 //////////
 		NetworkObject::NetworkObject()
-			: NetworkObject(NullIndex)
-		{ }
-
-		NetworkObject::NetworkObject(int index)
-			: m_Index(index), m_BaseValue(1, 1)
 		{ }
 
 		NetworkObject::~NetworkObject()
@@ -52,13 +47,13 @@ namespace PowerSolutions
 			//约定：Clone不会复制指向父级的指针，
 			//且不在对应 caseInfo 中主动调用 Attach 以确定依存关系。
 			//但可以复制母线的引用（此处需要用到 caseInfo 参数）
-			newInstance->m_Index = m_Index;
+			//newInstance->m_Index = m_Index;
 		}
 
 		////////// 组件 //////////
 
 		Component::Component(int portCount)
-			: NetworkObject(NullIndex), m_Buses(portCount)
+			: m_Buses(portCount)
 		{ }
 
 		void Component::OnCloned(NetworkObject* newInstance, const NetworkCaseCloneContext& context) const
@@ -106,12 +101,8 @@ namespace PowerSolutions
 			: m_InitialVoltage(1, 0)
 		{ }
 
-		Bus::Bus(int index, complexd initialVoltage)
-			: NetworkObject(index), m_InitialVoltage(initialVoltage)
-		{ }
-
-		Bus::Bus(int index)
-			: Bus(index, 1)
+		Bus::Bus(complexd initialVoltage)
+			:  m_InitialVoltage(initialVoltage)
 		{ }
 
 		void Bus::Validate() const
@@ -124,7 +115,7 @@ namespace PowerSolutions
 
 		NetworkObject* Bus::CloneInstance() const
 		{
-			return new Bus(NullIndex, m_InitialVoltage);
+			return new Bus(m_InitialVoltage);
 		}
 
 		ComplexComponent::ComplexComponent(int portCount)

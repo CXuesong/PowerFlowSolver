@@ -22,12 +22,6 @@ namespace PowerSolutions {
 		class NetworkCaseCloneContext;
 		class Component;
 
-		//编号约定
-		// 非负数：元件索引
-		// -1：空白
-		// 其他负数：内部保留。例如自动生成的元件的索引。
-		const int NullIndex = -1;	//表示“空白”的母线编号
-
 		//用于表示一个π型等值参数。
 		struct PiEquivalencyParameters
 		{
@@ -70,18 +64,9 @@ namespace PowerSolutions {
 			friend class NetworkCase;
 			friend class ThreeWindingTransformer;
 		private:
-			//TODO 不进行唯一性检查，或者提供显式进行检查功能
-			int m_Index;
-			PerUnitBase m_BaseValue;
 		protected:	//internal
 			//当此对象的数据将要用于参与计算前，调用此方法。
 			virtual void OnExpand() {}
-		public:
-			//用于在案例中唯一地标识一个对象的索引。注意：不进行唯一性检查/显式进行检查。
-			int Index() const { return m_Index; }
-			void Index(int val) { m_Index = val; }
-			PerUnitBase BaseValue() const { return m_BaseValue; }
-			void BaseValue(PerUnitBase val) { m_BaseValue = val; }
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。
@@ -91,7 +76,6 @@ namespace PowerSolutions {
 			virtual NetworkObject* CloneInstance() const = 0;
 			//在抽象派生类中重写，用于向指定的副本中填充此类的数据。
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseCloneContext& context) const;
-			NetworkObject(int index);
 			NetworkObject();
 			virtual ~NetworkObject();
 		private:
@@ -123,8 +107,7 @@ namespace PowerSolutions {
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			Bus();
-			Bus(int index);
-			Bus(int index, complexd initialVoltage);
+			Bus(complexd initialVoltage);
 		};
 
 		//表示与一个或多个母线相连接的元件。

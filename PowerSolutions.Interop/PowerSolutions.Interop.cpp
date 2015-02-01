@@ -1,51 +1,158 @@
 // 这是主 DLL 文件。
 #include "stdafx.h"
 #include "PowerSolutions.Interop.h"
-#include "PowerSolutions/PowerFlowObjectModel.h"
-#include "PowerSolutions/NetworkCase.h"
-#include "PowerSolutions/PowerFlowSolvers.h"
+#include "Utility.h"
+
+#include <PowerSolutions/PowerFlowObjectModel.h>
+#include <PowerSolutions/NetworkCase.h>
+#include <PowerSolutions/PowerFlowSolvers.h>
 
 using namespace PowerSolutions;
-using namespace PowerSolutions::ObjectModel;
-using namespace PowerSolutions::PowerFlow;
+using namespace PowerSolutions::Interop::ObjectModel;
+using namespace PowerSolutions::Interop::PowerFlow;
 
-void PowerSolutions::Interop::Class1::TestWorkflow()
+namespace PowerSolutions
 {
-	/*
-	Bus  1, 环网-终端, 1.00
-	Bus  2, 终端, 1.00
-	Bus  3, 环网-右侧, 1.05
-	Bus  4, 环网-左侧, 1.05
-	#Bus  5, Test1, 1
-	#Bus  6, Test2, 1
-	#L 5,6,	0.260331, 0.495868, 0.051728
-	T  1,2,	0, 0.1666666666666666666666, 0.886363636363636
-	PVG  3,	0.2, 1.05
-	SG  4,	1.05
-	PQL  2,	0.5, 0.3
-	PQL  4,	0.15, 0.1
-	SA  2,	0, 0.05
-	L  4,3,	0.260331, 0.495868, 0.051728
-	L  1,4,	0.173554, 0.330579, 0.034486
-	L  1,3,	0.130165, 0.247934, 0.025864
-	*/
-	NetworkCase network;
-	auto b1 = network.CreateBus(),
-		b2 = network.CreateBus(),
-		b3 = network.CreateBus(),
-		b4 = network.CreateBus(),
-		b5 = network.CreateBus();
-	Transformer::Create(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636);
-	PVGenerator::Create(b3, 0.2, 1.05);
-	SlackGenerator::Create(b4, 1.05);
-	PQLoad::Create(b2, complexd(0.5, 0.3));
-	PQLoad::Create(b4, complexd(0.15, 0.1));
-	ShuntAdmittance::Create(b2, complexd(0, 0.05));
-	Line::Create(b4, b3, complexd(0.260331, 0.495868), complexd(0, 0.051728));
-	Line::Create(b1, b4, complexd(0.173554, 0.330579), complexd(0, 0.034486));
-	Line::Create(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864));
-
-	auto solver = Solver::Create(SolverType::NewtonRaphson);
-	solver->Solve(&network);
-	delete solver;
+	const char TraceFilePath[] = "TraceFile.txt";
 }
+
+namespace PowerSolutions
+{
+	namespace Interop
+	{
+		_NATIVE_OM Bus* MarshalBus(IntPtr ptr)
+		{
+			auto obj = MarshalPointer<_NATIVE_OM NetworkObject>(ptr);
+			Diagnostics::Debug::Assert(dynamic_cast<_NATIVE_OM Bus*>(obj) != nullptr);
+			return static_cast<_NATIVE_OM Bus*>(obj);
+		}
+
+		namespace ObjectModel
+		{
+			NetworkCase::NetworkCase()
+				: nativeObject(new _NATIVE_OM NetworkCase)
+			{
+				nativeObject->AutoDeleteChildren(true);
+			}
+
+			NetworkCase::!NetworkCase()
+			{
+				delete nativeObject;
+			}
+
+			NetworkCase::~NetworkCase()
+			{
+				this->!NetworkCase();
+			}
+
+			void NetworkCase::AddObject(IntPtr obj)
+			{
+				nativeObject->AddObject(MarshalPointer<_NATIVE_OM NetworkObject>(obj));
+			}
+
+			IntPtr NetworkCase::AddBus(Complex initialVoltage)
+			{
+				return MarshalPointer(nativeObject->CreateBus(MarshalComplex(initialVoltage)));
+			}
+
+			IntPtr NetworkCase::AddLine(IntPtr bus1, IntPtr bus2, Complex impedance, Complex admittance)
+			{
+				auto newInst = new _NATIVE_OM Line(MarshalBus(bus1), MarshalBus(bus2), MarshalComplex(impedance), MarshalComplex(admittance));
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+
+			IntPtr NetworkCase::AddPVGenerator(IntPtr bus1, double activePower, double voltage)
+			{
+				auto newInst = new _NATIVE_OM PVGenerator(MarshalBus(bus1), activePower, voltage);
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+
+			IntPtr NetworkCase::AddSlackGenerator(IntPtr bus1, Complex voltage)
+			{
+				auto newInst = new _NATIVE_OM SlackGenerator(MarshalBus(bus1), MarshalComplex(voltage));
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+
+			IntPtr NetworkCase::AddPQLoad(IntPtr bus1, Complex power)
+			{
+				auto newInst = new _NATIVE_OM PQLoad(MarshalBus(bus1), MarshalComplex(power));
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+
+			IntPtr NetworkCase::AddShuntAdmittance(IntPtr bus1, Complex admittance)
+			{
+				auto newInst = new _NATIVE_OM ShuntAdmittance(MarshalBus(bus1), MarshalComplex(admittance));
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+
+			IntPtr NetworkCase::AddTransformer(IntPtr bus1, IntPtr bus2, Complex impedance, Complex admittance, Complex tapRatio)
+			{
+				auto newInst = new _NATIVE_OM Transformer(
+					MarshalBus(bus1), MarshalBus(bus2),
+					MarshalComplex(impedance), MarshalComplex(admittance),
+					MarshalComplex(tapRatio));
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+
+			IntPtr NetworkCase::AddThreeWindingTransformer(IntPtr bus1, IntPtr bus2, IntPtr bus3, Complex impedance12, Complex impedance13, Complex impedance23, Complex admittance, Complex tapRatio1, Complex tapRatio2, Complex tapRatio3)
+			{
+				auto newInst = new _NATIVE_OM ThreeWindingTransformer(
+					MarshalBus(bus1), MarshalBus(bus2), MarshalBus(bus3),
+					MarshalComplex(impedance12), MarshalComplex(impedance13),
+					MarshalComplex(impedance23), MarshalComplex(admittance),
+					MarshalComplex(tapRatio1), MarshalComplex(tapRatio2),
+					MarshalComplex(tapRatio3));
+				nativeObject->AddObject(newInst);
+				return MarshalPointer(newInst);
+			}
+		}
+
+		namespace PowerFlow
+		{
+			Solution::Solution(_NATIVE_PF Solution* native)
+				: nativeObject(native)
+			{
+
+			}
+
+			Solution::!Solution()
+			{
+				delete nativeObject;
+			}
+
+			Solution::~Solution()
+			{
+				this->!Solution();
+			}
+
+			Solver::Solver(SolverType type)
+				: nativeObject(_NATIVE_PF Solver::Create((_NATIVE_PF SolverType)type))
+			{
+				
+			}
+
+			Solver::!Solver()
+			{
+				delete nativeObject;
+			}
+
+			Solver::~Solver()
+			{
+				this->!Solver();
+			}
+
+			Solution^ Solver::Solve(NetworkCase^ network)
+			{
+				return gcnew Solution(nativeObject->Solve(network->nativeObject));
+			}
+		}
+	}
+}
+
+#undef _NATIVE_OM

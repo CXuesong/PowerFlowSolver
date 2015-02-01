@@ -56,7 +56,6 @@ namespace PowerSolutions {
 		private:
 			NetworkObjectCollection m_Objects;
 			bool m_AutoDeleteChildren;
-			int m_NewBusIndex;
 		private:	//internal
 		public:
 			//网络对象列表只读枚举器的起始位置。

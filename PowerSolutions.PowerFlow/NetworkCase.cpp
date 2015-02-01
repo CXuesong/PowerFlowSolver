@@ -13,7 +13,7 @@ namespace PowerSolutions {
 	namespace ObjectModel {
 		////////// °¸Àý //////////
 		NetworkCase::NetworkCase()
-			: m_AutoDeleteChildren(true), m_NewBusIndex(0)
+			: m_AutoDeleteChildren(true)
 		{ }
 
 		NetworkCase::~NetworkCase()
@@ -52,32 +52,9 @@ namespace PowerSolutions {
 			return true;
 		}
 
-		Bus* NetworkCase::Buses(int index) const
-		{
-			auto i = find_if(m_Objects.cbegin(), m_Objects.cend(),
-				[index](NetworkObject* const item)
-			{return item->Index() == index && IsKindOf<Bus>(item); });
-			if (i != m_Objects.cend())
-				return static_cast<Bus*>(*i);
-			else
-				return nullptr;
-		}
-
-		Component* NetworkCase::Components(int index) const
-		{
-			auto i = find_if(m_Objects.cbegin(), m_Objects.cend(),
-				[index](NetworkObject* const item)
-			{return item->Index() == index && IsKindOf<Component>(item); });
-			if (i != m_Objects.cend())
-				return static_cast<Component*>(*i);
-			else
-				return nullptr;
-		}
-
 		Bus* NetworkCase::CreateBus(complexd inititalVoltage)
 		{
-			auto newInst = new Bus(m_NewBusIndex, inititalVoltage);
-			m_NewBusIndex++;
+			auto newInst = new Bus(inititalVoltage);
 			AddObject(newInst);
 			return newInst;
 		}

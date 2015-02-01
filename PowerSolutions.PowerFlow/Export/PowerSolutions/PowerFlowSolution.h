@@ -84,7 +84,7 @@ namespace PowerSolutions
 			{ }
 		};
 		// 求解最终的结论
-		enum class SolutionStatus
+		enum class SolutionStatus : byte
 		{
 			Success = 0x00,					//求解成功结束。
 			MaxIteration = 0x10,			//已经达到最大允许的迭代次数。
@@ -96,13 +96,13 @@ namespace PowerSolutions
 		class Solution
 		{
 		public:
-			typedef std::unordered_map<int, NodeFlowSolution> NodeFlowCollection;
+			typedef std::unordered_map<ObjectModel::Bus*, NodeFlowSolution> NodeFlowCollection;
 			typedef NodeFlowCollection::const_iterator NodeFlowIterator;
-			typedef std::unordered_map<std::pair<int, int>, BranchFlowSolution,
-				Utility::UnorderedPairHasher<int>, 
-				Utility::UnorderedPairEqualityComparer<int>> BranchFlowCollection;
+			typedef std::unordered_map<std::pair<ObjectModel::Bus*, ObjectModel::Bus*>, BranchFlowSolution,
+				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
+				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>>BranchFlowCollection;
 			typedef BranchFlowCollection::const_iterator BranchFlowIterator;
-			typedef std::unordered_map<int, BranchFlowSolution> ComponentFlowCollection;
+			typedef std::unordered_map<ObjectModel::Component*, BranchFlowSolution> ComponentFlowCollection;
 			typedef ComponentFlowCollection::const_iterator ComponentFlowIterator;
 		private:
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。

@@ -175,9 +175,8 @@ namespace PowerSolutions {
 			//更新子级的参数。
 			void UpdateChildren();
 		public:
-			//此变压器使用的一次侧内部公共母线所使用的索引。
-			int CommonBusIndex() const { return m_CommonBus->Index(); }
-			void CommonBusIndex(int val) { m_CommonBus->Index(val); }
+			//此变压器使用的一次侧内部公共母线。
+			Bus* CommonBus() const { return m_CommonBus.get(); }
 			complexd Impedance12() const { return m_Impedance12; }
 			void Impedance12(complexd val) { m_Impedance12 = val; }
 			complexd Impedance13() const { return m_Impedance13; }
