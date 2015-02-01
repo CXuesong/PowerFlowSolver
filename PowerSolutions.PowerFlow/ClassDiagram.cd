@@ -1,0 +1,209 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="PowerSolutions::ObjectModel::NetworkCase" Collapsed="true">
+    <Position X="0.5" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\networkcase.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::NetworkObject" Collapsed="true">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\objectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::PrimitiveNetwork" Collapsed="true">
+    <Position X="0.5" Y="3.5" Width="1.75" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+      <Compartment Name="Methods" Collapsed="true" />
+    </Compartments>
+    <NestedTypes>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::NodeDictionary" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::BusCollection" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::NodePair" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Class Name="PowerSolutions::ObjectModel::PrimitiveNetwork::NodeInfo" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::BranchDictionary" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Class Name="PowerSolutions::ObjectModel::PrimitiveNetwork::BranchInfo" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Class>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::NodeCollection" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::ComponentCollection" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+      <Typedef Name="PowerSolutions::ObjectModel::PrimitiveNetwork::BranchCollection" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Export\PowerSolutions\PrimitiveNetwork.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Typedef>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>MIRkCEAASAAAAEBAAZMEAAIAABoQAIgAABAAAAJCgwA=</HashCode>
+      <FileName>Export\PowerSolutions\PrimitiveNetwork.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::Component" Collapsed="true">
+    <Position X="3" Y="1.5" Width="1.5" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::NetworkObject" FixedToPoint="true">
+      <Path>
+        <Point X="1.25" Y="1.048" />
+        <Point X="1.25" Y="1.812" />
+        <Point X="3" Y="1.812" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\objectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::Bus" Collapsed="true">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\objectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::SinglePortComponent" Collapsed="true">
+    <Position X="5.25" Y="1.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\objectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::DoublePortComponent" Collapsed="true">
+    <Position X="5.25" Y="5.5" Width="2" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::Component" FixedToPoint="true">
+      <Path>
+        <Point X="3.75" Y="2.177" />
+        <Point X="3.75" Y="5.812" />
+        <Point X="5.25" Y="5.812" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\objectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::TriPortComponent" Collapsed="true">
+    <Position X="5.25" Y="7.25" Width="2" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::Component" FixedToPoint="true">
+      <Path>
+        <Point X="3.75" Y="2.177" />
+        <Point X="3.75" Y="7.562" />
+        <Point X="5.25" Y="7.562" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\objectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::Line" Collapsed="true">
+    <Position X="7.75" Y="5.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::PVGenerator" Collapsed="true">
+    <Position X="7.75" Y="3" Width="1.75" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::SinglePortComponent" FixedToPoint="true">
+      <Path>
+        <Point X="6.25" Y="2.177" />
+        <Point X="6.25" Y="3.375" />
+        <Point X="7.75" Y="3.375" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::SlackGenerator" Collapsed="true">
+    <Position X="7.75" Y="3.75" Width="1.75" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::SinglePortComponent" FixedToPoint="true">
+      <Path>
+        <Point X="6.25" Y="2.177" />
+        <Point X="6.25" Y="4.125" />
+        <Point X="7.75" Y="4.125" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::PQLoad" Collapsed="true">
+    <Position X="7.75" Y="4.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::ShuntAdmittance" Collapsed="true">
+    <Position X="7.75" Y="2.25" Width="1.75" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::SinglePortComponent" FixedToPoint="true">
+      <Path>
+        <Point X="6.25" Y="2.177" />
+        <Point X="6.25" Y="2.562" />
+        <Point X="7.75" Y="2.562" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::Transformer" Collapsed="true">
+    <Position X="7.75" Y="6.25" Width="1.75" />
+    <InheritanceLine Type="PowerSolutions::ObjectModel::DoublePortComponent" FixedToPoint="true">
+      <Path>
+        <Point X="6.25" Y="6.177" />
+        <Point X="6.25" Y="6.625" />
+        <Point X="7.75" Y="6.625" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PowerSolutions::ObjectModel::ThreeWindingTransformer" Collapsed="true">
+    <Position X="8" Y="7.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>export\powersolutions\powerflowobjectmodel.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Microsoft YaHei UI" Size="9" />
+</ClassDiagram>
