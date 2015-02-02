@@ -1,30 +1,69 @@
-﻿Imports PowerSolutions.Interop.ObjectModel
-Imports PowerSolutions.Interop.PowerFlow
-Imports System.Numerics
-
+﻿
 Module Module1
 
-    Sub Main()
-        UI.Init()
-        Dim nc As New NetworkCase
-        Dim b1 = nc.AddBus(),
-        b2 = nc.AddBus(),
-        b3 = nc.AddBus(),
-        b4 = nc.AddBus()
-        nc.AddTransformer(b1, b2, New Complex(0, 0.16666666666666666), 0.886363636363636)
-        nc.AddPVGenerator(b3, 0.2, 1.05)
-        nc.AddSlackGenerator(b4, 1.05)
-        nc.AddPQLoad(b2, New Complex(0.5, 0.3))
-        nc.AddPQLoad(b4, New Complex(0.15, 0.1))
-        nc.AddShuntAdmittance(b2, New Complex(0, 0.05))
-        nc.AddLine(b4, b3, New Complex(0.260331, 0.495868), New Complex(0, 0.051728))
-        nc.AddLine(b1, b4, New Complex(0.173554, 0.330579), New Complex(0, 0.034486))
-        nc.AddLine(b1, b3, New Complex(0.130165, 0.247934), New Complex(0, 0.025864))
-        Dim solver As New Solver(SolverType.NewtonRaphson)
-        solver.MaxDeviationTolerance = 0.0000000001
-        MsgBox(solver.IntelliIterations)
-        Dim solution = solver.Solve(nc)
-        solution.Dispose()
-    End Sub
+    Public GlobalParameters As New ApplicationParameters
 
+    Function Main() As Integer
+        Const DefaultArgument = "/?"
+
+        Console.CursorVisible = False
+        Console.Title = My.Application.Info.ProductName
+        Console.WriteLine(My.Application.Info.ProductName)
+        Console.WriteLine(My.Application.Info.Description)
+        Console.WriteLine(My.Application.Info.Title)
+        Console.WriteLine(My.Application.Info.Version.ToString)
+        Console.WriteLine(My.Application.Info.Copyright)
+        If Environment.Is64BitProcess Then Console.WriteLine(Prompts.x64Process)
+        Console.WriteLine()
+        '处理命令行
+        Dim Args As IEnumerable(Of String) = {DefaultArgument}
+        If My.Application.CommandLineArgs.Count > 0 Then Args = My.Application.CommandLineArgs
+        For Each EachArg In Args
+            Dim Cmd As String, Arg As String, Locator As Integer
+            Locator = EachArg.IndexOf(":"c)     '-Cmd:Arg
+            If Locator > 0 Then
+                Cmd = EachArg.Substring(0, Locator).Trim
+                Arg = EachArg.Substring(Locator + 1).Trim(" "c, ControlChars.Tab, """"c)
+            Else
+                Cmd = EachArg
+                Arg = ""
+            End If
+            Select Case UCase(Cmd)
+                Case "-?", "--?", "/?", "-HELP", "--HELP", "/HELP"
+                    '显示帮助
+                    With My.Application.Info
+                        Console.WriteLine(My.Resources.CommandLineUsage)
+                    End With
+                Case "/CASE", "-CASE"
+                    GlobalParameters.CaseFile = Arg
+                Case "/REPORT", "-REPORT"
+                    GlobalParameters.ReportFile = Arg
+                Case "/ANSI", "-ANSI"
+                    GlobalParameters.ANSI = True
+                Case Else
+                    '无效的参数
+                    Console.Error.WriteLine(Prompts.InvalidArgument1, Command)
+                    Return 1
+            End Select
+        Next
+        Workflow()
+#If DEBUG Then
+        Console.ReadKey()
+#End If
+        Return 0
+    End Function
+
+
+    Private Sub Workflow()
+
+    End Sub
 End Module
+
+''' <summary>
+''' 保存了应用程序所使用到的参数。
+''' </summary>
+Public Class ApplicationParameters
+    Public Property ANSI As Boolean = False
+    Public Property CaseFile As String = Nothing
+    Public Property ReportFile As String = Nothing
+End Class

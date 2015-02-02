@@ -50,20 +50,15 @@ namespace PowerSolutions {
 		class NetworkCase
 		{
 			friend class NetworkObject;
-		public:
-			typedef std::list<NetworkObject*> NetworkObjectCollection;
-			typedef NetworkObjectCollection::const_iterator NetworkObjectIterator;
 		private:
-			NetworkObjectCollection m_Objects;
+			typedef std::list<NetworkObject*> m_NetworkObjectCollection;
+			m_NetworkObjectCollection m_Objects;
 			bool m_AutoDeleteChildren;
 		private:	//internal
 		public:
-			//网络对象列表只读枚举器的起始位置。
-			NetworkObjectIterator ObjectsBegin() const { return m_Objects.cbegin(); }
-			//网络对象列表只读枚举器的结束位置。
-			NetworkObjectIterator ObjectsEnd() const { return m_Objects.cend(); }
-			//网络对象列表的元素数量。
-			size_t ObjectsCount() const { return m_Objects.size(); }
+			typedef readonly_collection<m_NetworkObjectCollection> NetworkObjectCollection;
+		public:
+			NetworkObjectCollection Objects() { return NetworkObjectCollection(&m_Objects); }
 			//按照 Index 属性查找一个母线。
 			Bus* Buses(int index) const;
 			//向网络案例中加入一条母线。

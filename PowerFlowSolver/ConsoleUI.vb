@@ -7,17 +7,16 @@
 Imports System.IO
 Imports System.Text
 
-Partial Public Class Prompts
-    Public Const InvalidInput$ = "无效输入。"
-    Public Const NumberOverflow$ = "数值过大。"
-    Public Const Over$ = "结束"
-    Public Const x64Process$ = "64位进程"
-End Class
-
 ''' <summary>
 ''' 负责处理基本的用户界面操作。
 ''' </summary>
 Public Class UI
+    Private Class Prompts
+        Public Const InvalidInput$ = "无效输入。"
+        Public Const NumberOverflow$ = "数值过大。"
+        Public Const Over$ = "结束"
+        Public Const x64Process$ = "64位进程"
+    End Class
 
     Private Structure Point
         Public X As Integer

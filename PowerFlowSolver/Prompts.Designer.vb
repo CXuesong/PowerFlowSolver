@@ -24,22 +24,26 @@ Namespace My.Resources
     '''</summary>
     <Global.System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0"),  _
      Global.System.Diagnostics.DebuggerNonUserCodeAttribute(),  _
-     Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute(),  _
-     Global.Microsoft.VisualBasic.HideModuleNameAttribute()>  _
-    Friend Module Resources
+     Global.System.Runtime.CompilerServices.CompilerGeneratedAttribute()>  _
+    Friend Class Prompts
         
-        Private resourceMan As Global.System.Resources.ResourceManager
+        Private Shared resourceMan As Global.System.Resources.ResourceManager
         
-        Private resourceCulture As Global.System.Globalization.CultureInfo
+        Private Shared resourceCulture As Global.System.Globalization.CultureInfo
+        
+        <Global.System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")>  _
+        Friend Sub New()
+            MyBase.New
+        End Sub
         
         '''<summary>
         '''  返回此类使用的缓存的 ResourceManager 实例。
         '''</summary>
         <Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
-        Friend ReadOnly Property ResourceManager() As Global.System.Resources.ResourceManager
+        Friend Shared ReadOnly Property ResourceManager() As Global.System.Resources.ResourceManager
             Get
                 If Object.ReferenceEquals(resourceMan, Nothing) Then
-                    Dim temp As Global.System.Resources.ResourceManager = New Global.System.Resources.ResourceManager("PowerSolutions.Applications.PowerFlowSolver.Resources", GetType(Resources).Assembly)
+                    Dim temp As Global.System.Resources.ResourceManager = New Global.System.Resources.ResourceManager("PowerSolutions.Applications.PowerFlowSolver.Prompts", GetType(Prompts).Assembly)
                     resourceMan = temp
                 End If
                 Return resourceMan
@@ -51,7 +55,7 @@ Namespace My.Resources
         '''  重写当前线程的 CurrentUICulture 属性。
         '''</summary>
         <Global.System.ComponentModel.EditorBrowsableAttribute(Global.System.ComponentModel.EditorBrowsableState.Advanced)>  _
-        Friend Property Culture() As Global.System.Globalization.CultureInfo
+        Friend Shared Property Culture() As Global.System.Globalization.CultureInfo
             Get
                 Return resourceCulture
             End Get
@@ -61,27 +65,21 @@ Namespace My.Resources
         End Property
         
         '''<summary>
-        '''  查找类似 用法：
-        '''PowerFlowSolver [/Case:输入文件] [/Report:报告文件] [选项]
-        '''其中，
-        '''  输入文件  包含了带求解的网络案例信息，
-        '''            如果指定为 * 则表示从控制台读取输入。
-        '''  报告文件  指定了输出文本报告的路径，
-        '''            如果没有指定，会将报告输出至控制台。
-        '''“选项”包括
-        '''  /ANSI     指示输出文件应使用ANSI/多字节字符集
-        '''            编码系统。注意此操作在不同语言的操作
-        '''            系统中有可能引起乱码。在默认情况下，
-        '''            输出文件使用 Unicode 字符集。
-        '''           （隐含 /PlainReport）
-        '''
-        '''如果没有指定报告文件，会将报告输出至控制台。
-        ''' 的本地化字符串。
+        '''  查找类似 无效的参数：{0}。 的本地化字符串。
         '''</summary>
-        Friend ReadOnly Property CommandLineUsage() As String
+        Friend Shared ReadOnly Property InvalidArgument1() As String
             Get
-                Return ResourceManager.GetString("CommandLineUsage", resourceCulture)
+                Return ResourceManager.GetString("InvalidArgument1", resourceCulture)
             End Get
         End Property
-    End Module
+
+        '''<summary>
+        '''  查找类似 64位进程 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property x64Process() As String
+            Get
+                Return ResourceManager.GetString("x64Process", resourceCulture)
+            End Get
+        End Property
+    End Class
 End Namespace

@@ -110,6 +110,8 @@ namespace PowerSolutions {
 			Bus(complexd initialVoltage);
 		};
 
+		typedef std::pair<ObjectModel::Bus*, ObjectModel::Bus*> BusPair;
+
 		//表示与一个或多个母线相连接的元件。
 		class Component : public NetworkObject
 		{

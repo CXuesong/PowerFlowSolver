@@ -18,13 +18,22 @@
     <ClInclude Include="PowerSolutions.Interop.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Stdafx.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ObjectModel.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PowerFlow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="CollectionWrappers.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -36,6 +45,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ObjectModel.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="PowerFlow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

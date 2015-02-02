@@ -117,8 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="CommandLineUsage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\commandlineusage.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  <data name="InvalidArgument1" xml:space="preserve">
+    <value>无效的参数：{0}。</value>
+  </data>
+  <data name="x64Process" xml:space="preserve">
+    <value>64位进程</value>
   </data>
 </root>

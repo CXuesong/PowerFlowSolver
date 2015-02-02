@@ -95,19 +95,23 @@ namespace PowerSolutions
 		//包含了稳态潮流的分析报告。
 		class Solution
 		{
-		public:
-			typedef std::unordered_map<ObjectModel::Bus*, NodeFlowSolution> NodeFlowCollection;
-			typedef NodeFlowCollection::const_iterator NodeFlowIterator;
+		private:
+			typedef std::unordered_map<ObjectModel::Bus*, NodeFlowSolution> m_NodeFlowCollection;
+			typedef m_NodeFlowCollection::const_iterator NodeFlowIterator;
 			typedef std::unordered_map<std::pair<ObjectModel::Bus*, ObjectModel::Bus*>, BranchFlowSolution,
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
-				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>>BranchFlowCollection;
-			typedef BranchFlowCollection::const_iterator BranchFlowIterator;
-			typedef std::unordered_map<ObjectModel::Component*, BranchFlowSolution> ComponentFlowCollection;
-			typedef ComponentFlowCollection::const_iterator ComponentFlowIterator;
+				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>> m_BranchFlowCollection;
+			typedef m_BranchFlowCollection::const_iterator BranchFlowIterator;
+			typedef std::unordered_map<ObjectModel::Component*, BranchFlowSolution> m_ComponentFlowCollection;
+			typedef m_ComponentFlowCollection::const_iterator ComponentFlowIterator;
+		public:
+			typedef readonly_map<m_NodeFlowCollection> NodeFlowCollection;
+			typedef readonly_map<m_BranchFlowCollection> BranchFlowCollection;
+			typedef readonly_map<m_ComponentFlowCollection> ComponentFlowCollection;
 		private:
-			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
-			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
-			BranchFlowCollection m_BranchFlow;			//（节点编号对）支路潮流信息。
+			m_NodeFlowCollection m_NodeFlow;				//节点潮流信息。
+			m_ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
+			m_BranchFlowCollection m_BranchFlow;			//（节点编号对）支路潮流信息。
 			complexd m_TotalPowerGeneration;
 			complexd m_TotalPowerConsumption;
 			complexd m_TotalPowerLoss;
@@ -139,12 +143,30 @@ namespace PowerSolutions
 			NodeFlowIterator NodeFlowBegin() const { return m_NodeFlow.cbegin(); }
 			NodeFlowIterator NodeFlowEnd() const { return m_NodeFlow.cend(); }
 			std::size_t NodeFlowCount() const { return m_NodeFlow.size(); }
+			const NodeFlowSolution* NodeFlow(ObjectModel::Bus* node) const
+			{
+				auto i = m_NodeFlow.find(node);
+				if (i != m_NodeFlow.end()) return &(i->second);
+				return nullptr;
+			}
 			ComponentFlowIterator ComponentFlowBegin() const { return m_ComponentFlow.cbegin(); }
 			ComponentFlowIterator ComponentFlowEnd() const { return m_ComponentFlow.cend(); }
 			std::size_t ComponentFlowCount() const { return m_ComponentFlow.size(); }
+			const BranchFlowSolution* ComponentFlow(ObjectModel::Component* component) const
+			{
+				auto i = m_ComponentFlow.find(component);
+				if (i != m_ComponentFlow.end()) return &(i->second);
+				return nullptr;
+			}
 			BranchFlowIterator BranchFlowBegin() const { return m_BranchFlow.cbegin(); }
 			BranchFlowIterator BranchFlowEnd() const { return m_BranchFlow.cend(); }
 			std::size_t BranchFlowCount() const { return m_BranchFlow.size(); }
+			const BranchFlowSolution* BranchFlow(ObjectModel::BusPair branch) const
+			{
+				auto i = m_BranchFlow.find(branch);
+				if (i != m_BranchFlow.end()) return &(i->second);
+				return nullptr;
+			}
 		protected:	//internal
 			Solution();
 		};
