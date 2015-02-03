@@ -4,191 +4,228 @@ namespace PowerSolutions
 {
 	namespace Interop
 	{
-		template <class TKey, class TValue, class TIterator>
+		template <
+			class TStlMap,
+			class TWrappedKey = typename TStlMap::key_type,
+			class TWrappedValue = typename TStlMap::mapped_type
+		>
 		public ref class ReadOnlyDictionaryWrapper
-			: System::Collections::Generic::IDictionary < TKey, TValue >
-		{
-		internal:
-			_NATIVE_PF Solution* nativeObject;
-		public:
-			typedef System::Collections::Generic::KeyValuePair<TKey, TValue> myPair;
-			ref class Enumerator
-				: System::Collections::IDictionaryEnumerator,
-				System::Collections::Generic::IEnumerator < System::Collections::Generic::KeyValuePair<TKey, TValue> >
+		: System::Collections::Generic::IDictionary < typename TWrappedKey, typename TWrappedValue >
 			{
 			internal:
-				_NATIVE_PF Solution* nativeObject;
-				TIterator* iterator;
+				const TStlMap* nativeObject;
 			public:
-				virtual property System::Collections::Generic::KeyValuePair<TKey, TValue> Current
+				typedef typename TStlMap::key_type key_type;
+				typedef typename TStlMap::mapped_type value_type;
+				typedef typename TStlMap::const_iterator TIterator;
+				typedef System::Collections::Generic::KeyValuePair<TWrappedKey, TWrappedValue> myPair;
+				/// <summary>
+				/// 表示此字典的枚举数。
+				/// </summary>
+				ref class Enumerator
+					: System::Collections::IDictionaryEnumerator,
+					System::Collections::Generic::IEnumerator < myPair >
 				{
-					System::Collections::Generic::KeyValuePair<TKey, TValue> get() sealed
+					// 注意：此处使用 ref class 是由于 valuetype 不支持自定义 Dispose。
+				internal:
+					const TStlMap* nativeObject;
+					TIterator* iterator;
+				public:
+					virtual property myPair Current
 					{
-						return System::Collections::Generic::KeyValuePair<TKey, TValue>(TKey((*iterator)->first), TValue((*iterator)->second));
+						myPair get() sealed
+						{
+							return myPair(TWrappedKey((*iterator)->first), TWrappedValue((*iterator)->second));
+						}
+					}
+					virtual bool MoveNext()
+					{
+						if (iterator == nullptr)
+						{
+							iterator = new TIterator;
+							*iterator = nativeObject->begin();
+						} else {
+							iterator++;
+						}
+						bool test = *iterator != nativeObject->end();
+						return *iterator != nativeObject->end();
+					}
+					virtual void Reset()
+					{
+						if (iterator != nullptr)
+						{
+							delete iterator;
+							iterator = nullptr;
+						}
+					}
+				private:
+					virtual property Object^ Current1
+					{
+						Object^ get() sealed = System::Collections::IEnumerator::Current::get
+						{
+							return Current;
+						}
+					}
+					virtual property System::Collections::DictionaryEntry Entry
+					{
+						System::Collections::DictionaryEntry get() sealed = IDictionaryEnumerator::Entry::get
+						{
+							return System::Collections::DictionaryEntry(TWrappedKey((*iterator)->first), TWrappedValue((*iterator)->second));
+						}
+					}
+					virtual property Object^ Key
+					{
+						Object^ get() sealed = System::Collections::IDictionaryEnumerator::Key::get
+						{
+							return TWrappedKey((*iterator)->first);
+						}
+					}
+					virtual property Object^ Value
+					{
+						Object^ get() sealed = System::Collections::IDictionaryEnumerator::Value::get
+						{
+							return TWrappedValue((*iterator)->second);
+						}
+					}
+				internal:
+					Enumerator(const TStlMap* native)
+						: nativeObject(native), iterator(nullptr)
+					{
+						Reset();
+					}
+					!Enumerator()
+					{
+						Reset();
+					}
+					~Enumerator()
+					{
+						this->!Enumerator();
+					}
+				};
+
+				virtual property int Count
+				{
+					int get() sealed { return nativeObject->size(); }
+				}
+
+				virtual property bool IsReadOnly
+				{
+					bool get() sealed { return true; }
+				}
+
+				virtual property System::Collections::Generic::ICollection<TWrappedKey>^ Keys
+				{
+					System::Collections::Generic::ICollection<TWrappedKey>^ get() sealed
+					{
+						throw gcnew NotImplementedException();
 					}
 				}
-				virtual bool MoveNext()
+
+				virtual property System::Collections::Generic::ICollection<TWrappedValue>^ Values
 				{
-					if (*iterator == nativeObject->NodeFlowEnd()) return false;
-					iterator++;
-					return *iterator != nativeObject->NodeFlowEnd();
+					System::Collections::Generic::ICollection<TWrappedValue>^ get() sealed
+					{
+						throw gcnew NotImplementedException();
+					}
 				}
-				virtual void Reset()
+
+				virtual property TWrappedValue default[TWrappedKey]
 				{
-					*iterator = nativeObject->NodeFlowBegin();
+					TWrappedValue get(TWrappedKey key) sealed
+					{
+						auto obj = nativeObject->find(key);
+						if (obj != nativeObject->end())
+							return TWrappedValue(obj->second);
+						else
+							throw gcnew System::Collections::Generic::KeyNotFoundException;
+					}
+					void set(TWrappedKey key, TWrappedValue value)
+					{
+						throw gcnew System::NotSupportedException;
+					}
+				}
+
+					virtual bool ContainsKey(TWrappedKey key)
+				{
+					TIterator i = nativeObject->find((key_type)key);
+					return i != nativeObject->end();
+				}
+
+				virtual bool TryGetValue(TWrappedKey key, TWrappedValue% value)
+				{
+					TIterator i = nativeObject->find(key);
+					if (i != nativeObject->end())
+					{
+						value = TWrappedValue(i->second);
+						return true;
+					}
+					return false;
+				}
+
+				virtual System::Collections::Generic::IEnumerator<myPair>^ GetEnumerator() = System::Collections::Generic::IEnumerable<myPair>::GetEnumerator
+				{
+					return gcnew Enumerator(nativeObject);
+				}
+
+			protected:
+				ReadOnlyDictionaryWrapper(const TStlMap* native)
+				{
+					System::Diagnostics::Debug::Assert(native != nullptr);
+					nativeObject = native;
 				}
 			private:
-				virtual property Object^ Current1
+				virtual void Add(TWrappedKey key, TWrappedValue value) sealed
+					= System::Collections::Generic::IDictionary < TWrappedKey, TWrappedValue >::Add
 				{
-					Object^ get() sealed = System::Collections::IEnumerator::Current::get
-					{
-						return Current;
-					}
+					throw gcnew System::NotSupportedException();
 				}
-				virtual property System::Collections::DictionaryEntry Entry
+
+					virtual void Add(myPair item) sealed
+					= System::Collections::Generic::ICollection < myPair >::Add
 				{
-					System::Collections::DictionaryEntry get() sealed = IDictionaryEnumerator::Entry::get
-					{
-						return System::Collections::DictionaryEntry(TKey((*iterator)->first), TValue((*iterator)->second));
-					}
+					throw gcnew System::NotSupportedException();
 				}
-				virtual property Object^ Key
+
+					virtual bool Remove(TWrappedKey key) sealed
+					= System::Collections::Generic::IDictionary < TWrappedKey, TWrappedValue >::Remove
 				{
-					Object^ get() sealed = System::Collections::IDictionaryEnumerator::Key::get
-					{
-						return TKey((*iterator)->first);
-					}
+					throw gcnew System::NotSupportedException();
 				}
-				virtual property Object^ Value
+
+					virtual bool Remove(myPair item) sealed
+					= System::Collections::Generic::ICollection < myPair >::Remove
 				{
-					Object^ get() sealed = System::Collections::IDictionaryEnumerator::Value::get
-					{
-						return TValue((*iterator)->second);
-					}
+					throw gcnew System::NotSupportedException();
 				}
-			internal:
-				Enumerator(_NATIVE_PF Solution* native)
-					: nativeObject(native),
-					iterator(new TIterator)
+
+					virtual void Clear() sealed
+					= System::Collections::Generic::IDictionary < TWrappedKey, TWrappedValue >::Clear
 				{
-					Reset();
+					throw gcnew System::NotSupportedException();
 				}
-				!Enumerator()
+
+					virtual bool Contains(myPair item) sealed
+					= System::Collections::Generic::ICollection < myPair >::Contains
 				{
-					delete iterator;
+					TWrappedValue obj;
+					if (TryGetValue(item.Key, obj))
+						return Object::Equals(item.Value, obj);
+					else
+						return false;
 				}
-				~Enumerator()
+
+					virtual void CopyTo(array<myPair>^ array, int arrayIndex) sealed
+					= System::Collections::Generic::ICollection < myPair >::CopyTo
 				{
-					this->!Enumerator();
+					throw gcnew NotImplementedException();
+				}
+
+					virtual System::Collections::IEnumerator^ GetEnumerator1() sealed
+					= System::Collections::IEnumerable::GetEnumerator
+				{
+					return gcnew Enumerator(nativeObject);
 				}
 			};
 
-			virtual property int Count
-			{
-				int get() sealed { return nativeObject->NodeFlowCount(); }
-			}
-
-			virtual property bool IsReadOnly
-			{
-				bool get() sealed { return true; }
-			}
-
-			virtual property System::Collections::Generic::ICollection<TKey>^ Keys
-			{
-				System::Collections::Generic::ICollection<TKey>^ get() sealed
-				{
-					throw gcnew NotImplementedException();
-				}
-			}
-
-			virtual property System::Collections::Generic::ICollection<TValue>^ Values
-			{
-				System::Collections::Generic::ICollection<TValue>^ get() sealed
-				{
-					throw gcnew NotImplementedException();
-				}
-			}
-
-			virtual property TValue default[TKey]
-			{
-				TValue get(TKey key) sealed
-				{
-					auto obj = nativeObject->NodeFlow(key);
-					if (obj != nullptr)
-						return TValue(*obj);
-					else
-						throw gcnew System::Collections::Generic::KeyNotFoundException;
-				}
-				void set(TKey key, TValue value)
-				{
-					throw gcnew System::NotSupportedException;
-				}
-			}
-
-				virtual bool ContainsKey(TKey key)
-			{
-				return nativeObject->NodeFlow(key) != nullptr;
-			}
-
-			virtual void Add(TKey key, TValue value)
-			{
-				throw gcnew System::NotSupportedException();
-			}
-
-			virtual void Add(System::Collections::Generic::KeyValuePair<TKey, TValue> item)
-			{
-				throw gcnew System::NotSupportedException();
-			}
-
-			virtual bool Remove(TKey key)
-			{
-				throw gcnew System::NotSupportedException();
-			}
-
-			virtual bool Remove(System::Collections::Generic::KeyValuePair<TKey, TValue> item)
-			{
-				throw gcnew System::NotSupportedException();
-			}
-
-			virtual bool TryGetValue(TKey key, TValue% value)
-			{
-				auto obj = nativeObject->NodeFlow(key);
-				if (obj != nullptr)
-				{
-					value = TValue(*obj);
-					return true;
-				}
-				return false;
-			}
-
-			virtual void Clear()
-			{
-				throw gcnew System::NotSupportedException();
-			}
-
-			virtual bool Contains(System::Collections::Generic::KeyValuePair<TKey, TValue> item)
-			{
-				TValue obj;
-				if (TryGetValue(item.Key, obj))
-					return Object::Equals(item.Value, obj);
-				else
-					return false;
-			}
-
-			virtual void CopyTo(array<System::Collections::Generic::KeyValuePair<TKey, TValue>>^ array, int arrayIndex)
-			{
-				throw gcnew NotImplementedException();
-			}
-
-			virtual System::Collections::Generic::IEnumerator<System::Collections::Generic::KeyValuePair<TKey, TValue>>^ GetEnumerator() = System::Collections::Generic::IEnumerable<System::Collections::Generic::KeyValuePair<TKey, TValue>>::GetEnumerator
-			{
-				return gcnew Enumerator(nativeObject);
-			}
-
-			virtual System::Collections::IEnumerator^ GetEnumerator1() = System::Collections::IEnumerable::GetEnumerator
-			{
-				return gcnew Enumerator(nativeObject);
-			}
-		};
 	}
 }

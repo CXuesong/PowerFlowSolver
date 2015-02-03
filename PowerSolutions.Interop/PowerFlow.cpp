@@ -10,7 +10,10 @@ namespace PowerSolutions
 		namespace PowerFlow
 		{
 			Solution::Solution(_NATIVE_PF Solution* native)
-				: nativeObject(native)
+				: nativeObject(native),
+				m_NodeFlow(gcnew NodeFlowDictionary(&native->NodeFlow())),
+				m_BranchFlow(gcnew BranchFlowDictionary(&native->BranchFlow())),
+				m_ComponentFlow(gcnew ComponentFlowDictionary(&native->ComponentFlow()))
 			{ }
 
 			Solution::!Solution()

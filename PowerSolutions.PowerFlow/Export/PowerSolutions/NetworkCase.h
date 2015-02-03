@@ -50,15 +50,14 @@ namespace PowerSolutions {
 		class NetworkCase
 		{
 			friend class NetworkObject;
+		public:
+			typedef std::list<NetworkObject*> NetworkObjectCollection;
 		private:
-			typedef std::list<NetworkObject*> m_NetworkObjectCollection;
-			m_NetworkObjectCollection m_Objects;
+			NetworkObjectCollection m_Objects;
 			bool m_AutoDeleteChildren;
 		private:	//internal
 		public:
-			typedef readonly_collection<m_NetworkObjectCollection> NetworkObjectCollection;
-		public:
-			NetworkObjectCollection Objects() { return NetworkObjectCollection(&m_Objects); }
+			const NetworkObjectCollection& Objects() { return m_Objects; }
 			//按照 Index 属性查找一个母线。
 			Bus* Buses(int index) const;
 			//向网络案例中加入一条母线。

@@ -102,10 +102,17 @@ namespace PowerSolutions
 				: nativeObject(native)
 			{ }
 
+			bool Bus::Equals(Bus obj)
+			{
+				return this->nativeObject == obj.nativeObject;
+			}
+
 			bool Bus::Equals(Object^ obj)
 			{
-				auto other = dynamic_cast<Bus^>(obj);
-				if (other != nullptr) return this->nativeObject == other->nativeObject;
+				if (Bus::typeid->IsInstanceOfType(obj))
+				{
+					return this->Equals((Bus)obj);
+				}
 				return false;
 			}
 
@@ -118,10 +125,17 @@ namespace PowerSolutions
 				: nativeObject(native)
 			{ }
 
+			bool Component::Equals(Component obj)
+			{
+				return obj.nativeObject == this->nativeObject;
+			}
+
 			bool Component::Equals(Object^ obj)
 			{
-				auto other = dynamic_cast<Component^>(obj);
-				if (other != nullptr) return this->nativeObject == other->nativeObject;
+				if (Component::typeid->IsInstanceOfType(obj))
+				{
+					return this->Equals((Component)obj);
+				}
 				return false;
 			}
 
@@ -129,6 +143,41 @@ namespace PowerSolutions
 			{
 				return ((size_t)nativeObject).GetHashCode();
 			}
+
+			BusPair::BusPair(Bus bus1, Bus bus2)
+			{
+				Bus1 = bus1;
+				Bus2 = bus2;
+			}
+
+			BusPair::BusPair(_NATIVE_OM BusPair pair)
+			{
+				Bus1 = Bus(pair.first);
+				Bus2 = Bus(pair.second);
+			}
+
+
+			bool BusPair::Equals(BusPair obj)
+			{
+				return obj.Bus1 == Bus1 && obj.Bus2 == Bus2 ||
+					obj.Bus1 == Bus2 && obj.Bus2 == Bus1;
+			}
+
+
+			bool BusPair::Equals(Object^ obj)
+			{
+				if (Component::typeid->IsInstanceOfType(obj))
+				{
+					return this->Equals((BusPair)obj);
+				}
+				return false;
+			}
+
+			int BusPair::GetHashCode()
+			{
+				return Bus1.GetHashCode() ^ Bus2.GetHashCode();
+			}
+
 		}
 	}
 }

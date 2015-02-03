@@ -97,6 +97,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <Text Include="Changelog.txt" />
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>

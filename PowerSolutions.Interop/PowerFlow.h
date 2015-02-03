@@ -75,15 +75,40 @@ namespace PowerSolutions
 			};
 
 			public ref class NodeFlowDictionary 
-				: ReadOnlyDictionaryWrapper < Bus, NodeFlowSolution, _NATIVE_PF Solution::NodeFlowIterator >
+				: ReadOnlyDictionaryWrapper < _NATIVE_PF Solution::NodeFlowCollection, Bus, NodeFlowSolution >
 			{
+			internal:
+				NodeFlowDictionary(const _NATIVE_PF Solution::NodeFlowCollection *native)
+					: ReadOnlyDictionaryWrapper(native)
+				{ }
+			};
 
+			public ref class ComponentFlowDictionary
+				: ReadOnlyDictionaryWrapper < _NATIVE_PF Solution::ComponentFlowCollection, Component, BranchFlowSolution >
+			{
+			internal:
+				ComponentFlowDictionary(const _NATIVE_PF Solution::ComponentFlowCollection *native)
+					: ReadOnlyDictionaryWrapper(native)
+				{ }
+			};
+
+			public ref class BranchFlowDictionary
+				: ReadOnlyDictionaryWrapper < _NATIVE_PF Solution::BranchFlowCollection, BusPair, BranchFlowSolution >
+			{
+			internal:
+				BranchFlowDictionary(const _NATIVE_PF Solution::BranchFlowCollection *native)
+					: ReadOnlyDictionaryWrapper(native)
+				{ }
 			};
 
 			public ref class Solution
 			{
 			internal:
 				_NATIVE_PF Solution* nativeObject;
+			private:
+				NodeFlowDictionary^ m_NodeFlow;
+				ComponentFlowDictionary^ m_ComponentFlow;
+				BranchFlowDictionary^ m_BranchFlow;
 			public:
 				_WRAP_PROPERTY_READONLY(TotalPowerGeneration, Complex, MarshalComplex);
 				_WRAP_PROPERTY_READONLY(TotalPowerConsumption, Complex, MarshalComplex);
@@ -92,7 +117,18 @@ namespace PowerSolutions
 				_WRAP_PROPERTY_READONLY(IterationCount, int, );
 				_WRAP_PROPERTY_READONLY(MaxDeviation, double, );
 				_WRAP_PROPERTY_READONLY(Status, SolutionStatus, (SolutionStatus));
-				//NodeFlowSolution NodeFlow(IntPtr )
+				property NodeFlowDictionary^ NodeFlow
+				{
+					NodeFlowDictionary^ get(){ return m_NodeFlow; }
+				}
+				property ComponentFlowDictionary^ ComponentFlow
+				{
+					ComponentFlowDictionary^ get(){ return m_ComponentFlow; }
+				}
+				property BranchFlowDictionary^ BranchFlow
+				{
+					BranchFlowDictionary^ get(){ return m_BranchFlow; }
+				}
 			public:
 				Solution(_NATIVE_PF Solution* native);
 				!Solution();

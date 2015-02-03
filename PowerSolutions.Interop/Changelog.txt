@@ -1,0 +1,4 @@
+2015-2-3
+放弃自己编写 IDictionary 的封装。
+以后应当尽量使用系统自带的封装。
+归档备份中 ReadOnlyDictionaryWrapper::Enumerator 的 Dispose 仍然存在问题。

@@ -12,14 +12,15 @@ namespace PowerSolutions
 			/// 表示一个母线。
 			/// （<see cref="PowerSolutions::ObjectModel::Bus" />）
 			/// </summary>
-			public value struct Bus
+			public value struct Bus : IEquatable<Bus>
 			{
 			private:
 				_NATIVE_OM Bus* nativeObject;
 			public:
 				static bool operator== (const Bus x, const Bus y) { return x.nativeObject == y.nativeObject; }
 				static bool operator!= (const Bus x, const Bus y) { return x.nativeObject != y.nativeObject; }
-				bool Equals(Object^ obj) override;
+				virtual bool Equals(Bus obj);
+				virtual bool Equals(Object^ obj) override;
 				int GetHashCode() override;
 			internal:
 				operator _NATIVE_OM Bus*() { return nativeObject; }
@@ -27,17 +28,37 @@ namespace PowerSolutions
 			};
 
 			/// <summary>
+			/// 表示一个母线对。默认情况下，母线对的顺序是无关紧要的。
+			/// </summary>
+			public value struct BusPair : IEquatable<BusPair>
+			{
+			public:
+				property Bus Bus1;
+				property Bus Bus2;
+			public:
+				// 对母线对进行不区分顺序的比较。
+				virtual bool Equals(BusPair obj);
+				virtual bool Equals(Object^ obj) override;
+				int GetHashCode() override;
+			public:
+				operator _NATIVE_OM BusPair() { return _NATIVE_OM BusPair((_NATIVE_OM Bus*)Bus1, (_NATIVE_OM Bus*)Bus2); }
+				BusPair(Bus bus1, Bus bus2);
+				BusPair(_NATIVE_OM BusPair pair);
+			};
+
+			/// <summary>
 			/// 表示一个元件。
 			/// （<see cref="PowerSolutions::ObjectModel::Component" />）
 			/// </summary>
-			public value struct Component
+			public value struct Component : IEquatable<Component>
 			{
 			private:
 				_NATIVE_OM Component* nativeObject;
 			public:
 				static bool operator== (const Component x, const Component y) { return x.nativeObject == y.nativeObject; }
 				static bool operator!= (const Component x, const Component y) { return x.nativeObject != y.nativeObject; }
-				bool Equals(Object^ obj) override;
+				virtual bool Equals(Component obj);
+				virtual bool Equals(Object^ obj) override;
 				int GetHashCode() override;
 			internal:
 				operator _NATIVE_OM Component*() { return nativeObject; }

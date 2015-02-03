@@ -31,6 +31,9 @@ Imports System.Numerics
         solver.MaxDeviationTolerance = 0.0000000001
         Debug.WriteLine(solver.IntelliIterations)
         Dim solution = solver.Solve(nc)
+        For Each nf In solution.NodeFlow
+            Debug.WriteLine("Node:{0}" & vbTab & "Voltage:{1}∠{2}rad", nf.Key.GetHashCode, nf.Value.Voltage.Magnitude, nf.Value.Voltage.Phase)
+        Next
         solution.Dispose()
     End Sub
 

@@ -6,6 +6,7 @@
 using namespace System;
 using namespace System::Numerics;
 
+#define _NATIVE ::PowerSolutions::
 #define _NATIVE_OM ::PowerSolutions::ObjectModel::
 #define _NATIVE_PF ::PowerSolutions::PowerFlow::
 
