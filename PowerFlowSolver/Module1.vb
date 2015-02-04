@@ -53,9 +53,8 @@ Module Module1
         Return 0
     End Function
 
-
     Private Sub Workflow()
-
+        ApplicationTests.InteropBenchmark()
     End Sub
 End Module
 

@@ -13,7 +13,11 @@ using namespace System::Security::Permissions;
 //
 [assembly:AssemblyTitleAttribute(L"PowerSolutions.Interop")];
 [assembly:AssemblyDescriptionAttribute(L"")];
-[assembly:AssemblyConfigurationAttribute(L"")];
+#if _DEBUG
+[assembly:AssemblyConfigurationAttribute(L"Debug")];
+#else
+[assembly:AssemblyConfigurationAttribute(L"Release")];
+#endif
 [assembly:AssemblyCompanyAttribute(L"")];
 [assembly:AssemblyProductAttribute(L"PowerSolutions.Interop")];
 [assembly:AssemblyCopyrightAttribute(L"Copyright (c)  Chen [CXuesong.], 2015")];

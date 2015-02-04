@@ -51,11 +51,16 @@ namespace PowerSolutions
 
 		void SolverImpl::MapBuses()
 		{
+			//重置局部变量
+			BusMapping.clear();
+			Branches.clear();
+			Nodes.clear();
+			PQNodes.clear();
+			PVNodes.clear();
 			SlackNode = nullptr;
 			//在第一个 for 循环中提前粗略统计PQ/PV节点数目是为了后面 vector 提前预留内存使用。
 			NodeCount = PQNodeCount = (int)(CaseInfo.Buses().size());
 			PVNodeCount = 0;
-			BusMapping.clear();
 			BusMapping.reserve(NodeCount);
 			for(auto &obj : CaseInfo.Buses())
 			{
@@ -248,12 +253,17 @@ namespace PowerSolutions
 		Solution* SolverImpl::GenerateSolution(SolutionStatus status, int iterCount, double maxDev)
 		{
 			AfterIterations();	//收尾工作
+			//注意：下面的工作不能引发异常，否则会由s引发内存泄漏。
 			auto s = new Solution();
 			complexd totalPowerGeneration, totalPowerConsumption,
 				totalPowerLoss, totalPowerShunt;
 			s->Status(status);
 			s->IterationCount(iterCount);
 			s->MaxDeviation(maxDev);
+			s->NodeCount(NodeCount);
+			s->PQNodeCount(PQNodeCount);
+			s->PVNodeCount(PVNodeCount);
+			s->SlackNode(SlackNode->Bus);
 			//根据注入功率和负载情况计算节点出力信息。
 			for(auto& node : Nodes)
 			{
@@ -284,7 +294,7 @@ namespace PowerSolutions
 				totalPowerGeneration += PowerGeneration;
 				totalPowerConsumption += PowerConsumption;
 			}
-			//根据节点电压计算支路功率。			
+			//根据节点电压计算支路功率。
 			for (auto& c : CaseInfo.Components())
 			{
 				//仅适用于双端元件。

@@ -12,23 +12,14 @@ namespace PowerSolutions
 			/// 表示一个母线。
 			/// （<see cref="PowerSolutions::ObjectModel::Bus" />）
 			/// </summary>
-			public value struct Bus : IEquatable<Bus>
-			{
-			private:
-				_NATIVE_OM Bus* nativeObject;
-			public:
-				static bool operator== (const Bus x, const Bus y) { return x.nativeObject == y.nativeObject; }
-				static bool operator!= (const Bus x, const Bus y) { return x.nativeObject != y.nativeObject; }
-				virtual bool Equals(Bus obj);
-				virtual bool Equals(Object^ obj) override;
-				int GetHashCode() override;
-			internal:
-				operator _NATIVE_OM Bus*() { return nativeObject; }
-				Bus(_NATIVE_OM Bus* native);
-			};
+			_WRAP_BEGIN_OBJECT_MODEL(Bus, _NATIVE_OM Bus)
+				// 获取句柄的文本表现形式。
+				_WRAP_OBJECT_MODEL_TOSTRING(_NATIVE_OM Bus)
+				;
+			_WRAP_END_OBJECT_MODEL;
 
 			/// <summary>
-			/// 表示一个母线对。默认情况下，母线对的顺序是无关紧要的。
+			/// 表示一个母线对。
 			/// </summary>
 			public value struct BusPair : IEquatable<BusPair>
 			{
@@ -36,6 +27,8 @@ namespace PowerSolutions
 				property Bus Bus1;
 				property Bus Bus2;
 			public:
+				static bool operator== (BusPair x, BusPair y) { return x.Bus1 == y.Bus1 && x.Bus2 == y.Bus2; }
+				static bool operator!= (BusPair x, BusPair y) { return x.Bus1 != y.Bus1 || x.Bus2 != y.Bus2; }
 				// 对母线对进行不区分顺序的比较。
 				virtual bool Equals(BusPair obj);
 				virtual bool Equals(Object^ obj) override;
@@ -47,23 +40,55 @@ namespace PowerSolutions
 			};
 
 			/// <summary>
+			/// 用于对 <see cref="BusPair" /> 执行一个不区分顺序的比较。
+			/// </summary>
+			public ref class BusPairUnorderedComparer : EqualityComparer < BusPair >
+			{
+			public:
+				static BusPairUnorderedComparer^ m_Default = gcnew BusPairUnorderedComparer();
+			public:
+				static property BusPairUnorderedComparer^ Default
+				{
+					BusPairUnorderedComparer^ get() 
+					{
+						return m_Default;
+					}
+				}
+				virtual bool Equals(BusPair x, BusPair y) override
+				{
+					return x.Bus1 == y.Bus1 && x.Bus2 == y.Bus2 ||
+						x.Bus1 == y.Bus2 && x.Bus2 == y.Bus1;
+				}
+				virtual int GetHashCode(BusPair obj) override
+				{
+					return obj.GetHashCode();
+				}
+			};
+
+			/// <summary>
 			/// 表示一个元件。
 			/// （<see cref="PowerSolutions::ObjectModel::Component" />）
 			/// </summary>
-			public value struct Component : IEquatable<Component>
-			{
-			private:
-				_NATIVE_OM Component* nativeObject;
-			public:
-				static bool operator== (const Component x, const Component y) { return x.nativeObject == y.nativeObject; }
-				static bool operator!= (const Component x, const Component y) { return x.nativeObject != y.nativeObject; }
-				virtual bool Equals(Component obj);
-				virtual bool Equals(Object^ obj) override;
-				int GetHashCode() override;
-			internal:
-				operator _NATIVE_OM Component*() { return nativeObject; }
-				Component(_NATIVE_OM Component* native);
-			};
+			_WRAP_BEGIN_OBJECT_MODEL(Component, _NATIVE_OM Component)
+				// 获取句柄的文本表现形式。
+				_WRAP_OBJECT_MODEL_TOSTRING(_NATIVE_OM Component)
+				;
+			_WRAP_END_OBJECT_MODEL;
+
+			/// <summary>
+			/// 表示一个三绕组变压器。
+			/// （<see cref="PowerSolutions::ObjectModel::ThreeWindingTransformer" />）
+			/// </summary>
+			_WRAP_BEGIN_OBJECT_MODEL(ThreeWindingTransformer, _NATIVE_OM ThreeWindingTransformer)
+				_WRAP_OBJECT_MODEL_BASE(ThreeWindingTransformer, _NATIVE_OM ThreeWindingTransformer, Component)
+				/// <summary>
+				/// 参与计算时，三绕组变压器所使用的公共母线。
+				/// </summary>
+				_WRAP_PROPERTY_READONLY(CommonBus, Bus, Bus)
+				// 获取句柄的文本表现形式。
+				_WRAP_OBJECT_MODEL_TOSTRING(_NATIVE_OM ThreeWindingTransformer)
+				;
+			_WRAP_END_OBJECT_MODEL;
 
 			/// <summary>
 			/// 表示一个网络案例。
@@ -88,10 +113,10 @@ namespace PowerSolutions
 				{
 					return AddTransformer(bus1, bus2, impedance, 0, tapRatio);
 				}
-				Component AddThreeWindingTransformer(Bus bus1, Bus bus2, Bus bus3,
+				ThreeWindingTransformer AddThreeWindingTransformer(Bus bus1, Bus bus2, Bus bus3,
 					Complex impedance12, Complex impedance13, Complex impedance23,
 					Complex admittance, Complex tapRatio1, Complex tapRatio2, Complex tapRatio3);
-				Component AddThreeWindingTransformer(Bus bus1, Bus bus2, Bus bus3,
+				ThreeWindingTransformer AddThreeWindingTransformer(Bus bus1, Bus bus2, Bus bus3,
 					Complex impedance12, Complex impedance13, Complex impedance23,
 					Complex tapRatio1, Complex tapRatio2, Complex tapRatio3)
 				{

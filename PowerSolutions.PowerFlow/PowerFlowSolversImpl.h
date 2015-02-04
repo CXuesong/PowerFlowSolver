@@ -76,7 +76,7 @@ namespace PowerSolutions
 			NodeCollection PVNodes;			//参与计算的母线（PV节点）信息，按照矩阵索引排序。
 			//注意到在NR法中，PQ 节点和 PV 节点的顺序是可以交错的。
 			NodeCollection Nodes;			//参与计算的三种节点，按照矩阵索引连续排序，注意平衡节点放在最后。
-			std::shared_ptr<NodeInfo> SlackNode;					//平衡节点的信息。
+			std::shared_ptr<NodeInfo> SlackNode;	//平衡节点的信息。
 			NodeDictionary BusMapping;				//Bus --> 节点信息
 			BranchCollection Branches;				//记录节点连接（支路）(m,n)
 			int NodeCount;							//实际参与计算的节点数量。

@@ -28,5 +28,20 @@ namespace PowerSolutions
 		{
 			return IntPtr(ptr);
 		}
+
+		System::Exception^ TranslateException(const std::exception& ex);
+
+		/*template <class TFunc>
+		inline void CRTExceptionBoundary(TFunc&& action)
+		{
+			try
+			{
+				action();
+			}
+			catch (std::exception& ex)
+			{
+				throw TranslateException(ex);
+			}
+		}*/
 	}
 }

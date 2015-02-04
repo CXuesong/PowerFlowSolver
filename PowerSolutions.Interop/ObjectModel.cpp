@@ -43,6 +43,8 @@ namespace PowerSolutions
 
 			Component NetworkCase::AddLine(Bus bus1, Bus bus2, Complex impedance, Complex admittance)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
+				_CHECK_NON_NULLABLE_PARAM(bus2);
 				auto newInst = new _NATIVE_OM Line((bus1), (bus2), MarshalComplex(impedance), MarshalComplex(admittance));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
@@ -50,6 +52,7 @@ namespace PowerSolutions
 
 			Component NetworkCase::AddPVGenerator(Bus bus1, double activePower, double voltage)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
 				auto newInst = new _NATIVE_OM PVGenerator((bus1), activePower, voltage);
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
@@ -57,6 +60,7 @@ namespace PowerSolutions
 
 			Component NetworkCase::AddSlackGenerator(Bus bus1, Complex voltage)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
 				auto newInst = new _NATIVE_OM SlackGenerator((bus1), MarshalComplex(voltage));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
@@ -64,6 +68,7 @@ namespace PowerSolutions
 
 			Component NetworkCase::AddPQLoad(Bus bus1, Complex power)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
 				auto newInst = new _NATIVE_OM PQLoad((bus1), MarshalComplex(power));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
@@ -71,6 +76,7 @@ namespace PowerSolutions
 
 			Component NetworkCase::AddShuntAdmittance(Bus bus1, Complex admittance)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
 				auto newInst = new _NATIVE_OM ShuntAdmittance((bus1), MarshalComplex(admittance));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
@@ -78,6 +84,8 @@ namespace PowerSolutions
 
 			Component NetworkCase::AddTransformer(Bus bus1, Bus bus2, Complex impedance, Complex admittance, Complex tapRatio)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
+				_CHECK_NON_NULLABLE_PARAM(bus2);
 				auto newInst = new _NATIVE_OM Transformer(
 					(bus1), (bus2),
 					MarshalComplex(impedance), MarshalComplex(admittance),
@@ -86,8 +94,11 @@ namespace PowerSolutions
 				return Component(newInst);
 			}
 
-			Component NetworkCase::AddThreeWindingTransformer(Bus bus1, Bus bus2, Bus bus3, Complex impedance12, Complex impedance13, Complex impedance23, Complex admittance, Complex tapRatio1, Complex tapRatio2, Complex tapRatio3)
+			ThreeWindingTransformer NetworkCase::AddThreeWindingTransformer(Bus bus1, Bus bus2, Bus bus3, Complex impedance12, Complex impedance13, Complex impedance23, Complex admittance, Complex tapRatio1, Complex tapRatio2, Complex tapRatio3)
 			{
+				_CHECK_NON_NULLABLE_PARAM(bus1);
+				_CHECK_NON_NULLABLE_PARAM(bus2);
+				_CHECK_NON_NULLABLE_PARAM(bus3);
 				auto newInst = new _NATIVE_OM ThreeWindingTransformer(
 					(bus1), (bus2), (bus3),
 					MarshalComplex(impedance12), MarshalComplex(impedance13),
@@ -95,53 +106,7 @@ namespace PowerSolutions
 					MarshalComplex(tapRatio1), MarshalComplex(tapRatio2),
 					MarshalComplex(tapRatio3));
 				nativeObject->AddObject(newInst);
-				return Component(newInst);
-			}
-
-			Bus::Bus(_NATIVE_OM Bus* native)
-				: nativeObject(native)
-			{ }
-
-			bool Bus::Equals(Bus obj)
-			{
-				return this->nativeObject == obj.nativeObject;
-			}
-
-			bool Bus::Equals(Object^ obj)
-			{
-				if (Bus::typeid->IsInstanceOfType(obj))
-				{
-					return this->Equals((Bus)obj);
-				}
-				return false;
-			}
-
-			int Bus::GetHashCode()
-			{
-				return ((size_t)nativeObject).GetHashCode();
-			}
-
-			Component::Component(_NATIVE_OM Component* native)
-				: nativeObject(native)
-			{ }
-
-			bool Component::Equals(Component obj)
-			{
-				return obj.nativeObject == this->nativeObject;
-			}
-
-			bool Component::Equals(Object^ obj)
-			{
-				if (Component::typeid->IsInstanceOfType(obj))
-				{
-					return this->Equals((Component)obj);
-				}
-				return false;
-			}
-
-			int Component::GetHashCode()
-			{
-				return ((size_t)nativeObject).GetHashCode();
+				return ThreeWindingTransformer(newInst);
 			}
 
 			BusPair::BusPair(Bus bus1, Bus bus2)
@@ -156,13 +121,10 @@ namespace PowerSolutions
 				Bus2 = Bus(pair.second);
 			}
 
-
 			bool BusPair::Equals(BusPair obj)
 			{
-				return obj.Bus1 == Bus1 && obj.Bus2 == Bus2 ||
-					obj.Bus1 == Bus2 && obj.Bus2 == Bus1;
+				return obj.Bus1 == Bus1 && obj.Bus2 == Bus2;
 			}
-
 
 			bool BusPair::Equals(Object^ obj)
 			{

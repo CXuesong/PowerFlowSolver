@@ -24,7 +24,7 @@ namespace NativeUnitTest1
 	TEST_CLASS(UnitTest1)
 	{
 	public:
-		TEST_METHOD(TestMethod1)
+		TEST_METHOD(PowerFlowTestMethod1)
 		{
 			// TODO:  在此输入测试代码
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
@@ -51,6 +51,8 @@ namespace NativeUnitTest1
 			solver->MaxDeviationTolerance(1e-12);
 			solver->NodeReorder(false);
 			auto s = solver->Solve(&network);
+			delete s;
+			s = solver->Solve(&network);
 			delete s;
 		}
 	};

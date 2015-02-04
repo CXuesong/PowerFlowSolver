@@ -4,6 +4,7 @@
 
 #pragma once
 #include <memory>
+#include <exception>
 #include <PowerSolutions/PowerSolutions.h>
 #include <PowerSolutions/PowerFlowObjectModel.h>
 #include <PowerSolutions/NetworkCase.h>

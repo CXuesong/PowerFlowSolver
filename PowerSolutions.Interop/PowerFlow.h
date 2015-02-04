@@ -2,7 +2,6 @@
 
 #include "PowerSolutions.Interop.h"
 #include "ObjectModel.h"
-#include "CollectionWrappers.h"
 
 namespace PowerSolutions
 {
@@ -29,11 +28,11 @@ namespace PowerSolutions
 			{
 			public:
 				/// <summary>节点的电压相量。</summary>
-				property Complex Voltage;
+				_WRAP_PROPERTY_CACHE(Voltage, Complex);
 				/// <summary>节点的总出力。</summary>
-				property Complex PowerGeneration;
+				_WRAP_PROPERTY_CACHE(PowerGeneration, Complex);
 				// <summary>节点的总负载。</summary>
-				property Complex PowerConsumption;
+				_WRAP_PROPERTY_CACHE(PowerConsumption, Complex);
 			internal:
 				NodeFlowSolution(const _NATIVE_PF NodeFlowSolution& native);
 			};
@@ -42,13 +41,13 @@ namespace PowerSolutions
 			{
 			public:
 				/// <summary>从节点1注入的功率。</summary>
-				property Complex Power1;
+				_WRAP_PROPERTY_CACHE(Power1, Complex);
 				/// <summary>从节点2注入的功率。</summary>
-				property Complex Power2;
+				_WRAP_PROPERTY_CACHE(Power2, Complex);
 				/// <summary>从节点1注入接地支路的功率。</summary>
-				property Complex ShuntPower1;
+				_WRAP_PROPERTY_CACHE(ShuntPower1, Complex);
 				/// <summary>从节点2注入接地支路的功率。</summary>
-				property Complex ShuntPower2;
+				_WRAP_PROPERTY_CACHE(ShuntPower2, Complex);
 			public:
 				//指示功率的实际传输方向是否与约定的方向（Bus1->Bus2）相反。
 				bool ReversedDirection()
@@ -74,65 +73,46 @@ namespace PowerSolutions
 				BranchFlowSolution(const _NATIVE_PF BranchFlowSolution& native);
 			};
 
-			public ref class NodeFlowDictionary 
-				: ReadOnlyDictionaryWrapper < _NATIVE_PF Solution::NodeFlowCollection, Bus, NodeFlowSolution >
-			{
-			internal:
-				NodeFlowDictionary(const _NATIVE_PF Solution::NodeFlowCollection *native)
-					: ReadOnlyDictionaryWrapper(native)
-				{ }
-			};
-
-			public ref class ComponentFlowDictionary
-				: ReadOnlyDictionaryWrapper < _NATIVE_PF Solution::ComponentFlowCollection, Component, BranchFlowSolution >
-			{
-			internal:
-				ComponentFlowDictionary(const _NATIVE_PF Solution::ComponentFlowCollection *native)
-					: ReadOnlyDictionaryWrapper(native)
-				{ }
-			};
-
-			public ref class BranchFlowDictionary
-				: ReadOnlyDictionaryWrapper < _NATIVE_PF Solution::BranchFlowCollection, BusPair, BranchFlowSolution >
-			{
-			internal:
-				BranchFlowDictionary(const _NATIVE_PF Solution::BranchFlowCollection *native)
-					: ReadOnlyDictionaryWrapper(native)
-				{ }
-			};
-
+			/// <summary>
+			/// 稳态潮流的求解结果。
+			/// （<see cref="PowerSolutions::PowerFlow::Solution" />的缓存结果。）
+			/// </summary>
 			public ref class Solution
 			{
-			internal:
-				_NATIVE_PF Solution* nativeObject;
 			private:
-				NodeFlowDictionary^ m_NodeFlow;
-				ComponentFlowDictionary^ m_ComponentFlow;
-				BranchFlowDictionary^ m_BranchFlow;
+				Dictionary<Bus, NodeFlowSolution>^ m_NodeFlow;
+				ReadOnlyDictionary<Bus, NodeFlowSolution>^ m_s_NodeFlow;
+				Dictionary<Component, BranchFlowSolution>^ m_ComponentFlow;
+				ReadOnlyDictionary<Component, BranchFlowSolution>^ m_s_ComponentFlow;
+				Dictionary<BusPair, BranchFlowSolution>^ m_BranchFlow;
+				ReadOnlyDictionary<BusPair, BranchFlowSolution>^ m_s_BranchFlow;
 			public:
-				_WRAP_PROPERTY_READONLY(TotalPowerGeneration, Complex, MarshalComplex);
-				_WRAP_PROPERTY_READONLY(TotalPowerConsumption, Complex, MarshalComplex);
-				_WRAP_PROPERTY_READONLY(TotalPowerLoss, Complex, MarshalComplex);
-				_WRAP_PROPERTY_READONLY(TotalPowerShunt, Complex, MarshalComplex);
-				_WRAP_PROPERTY_READONLY(IterationCount, int, );
-				_WRAP_PROPERTY_READONLY(MaxDeviation, double, );
-				_WRAP_PROPERTY_READONLY(Status, SolutionStatus, (SolutionStatus));
-				property NodeFlowDictionary^ NodeFlow
+				_WRAP_PROPERTY_CACHE(TotalPowerGeneration, Complex);
+				_WRAP_PROPERTY_CACHE(TotalPowerConsumption, Complex);
+				_WRAP_PROPERTY_CACHE(TotalPowerLoss, Complex);
+				_WRAP_PROPERTY_CACHE(TotalPowerShunt, Complex);
+				_WRAP_PROPERTY_CACHE(IterationCount, int);
+				_WRAP_PROPERTY_CACHE(MaxDeviation, double);
+				_WRAP_PROPERTY_CACHE(Status, SolutionStatus);
+				_WRAP_PROPERTY_CACHE(NodeCount, int);
+				_WRAP_PROPERTY_CACHE(PQNodeCount, int);
+				_WRAP_PROPERTY_CACHE(PVNodeCount, int);
+				_WRAP_PROPERTY_CACHE(SlackNode, Bus);
+
+				property IDictionary<Bus, NodeFlowSolution>^ NodeFlow
 				{
-					NodeFlowDictionary^ get(){ return m_NodeFlow; }
+					IDictionary<Bus, NodeFlowSolution>^ get(){ return m_s_NodeFlow; }
 				}
-				property ComponentFlowDictionary^ ComponentFlow
+				property IDictionary<Component, BranchFlowSolution>^ ComponentFlow
 				{
-					ComponentFlowDictionary^ get(){ return m_ComponentFlow; }
+					IDictionary<Component, BranchFlowSolution>^ get(){ return m_s_ComponentFlow; }
 				}
-				property BranchFlowDictionary^ BranchFlow
+				property IDictionary<BusPair, BranchFlowSolution>^ BranchFlow
 				{
-					BranchFlowDictionary^ get(){ return m_BranchFlow; }
+					IDictionary<BusPair, BranchFlowSolution>^ get(){ return m_s_BranchFlow; }
 				}
 			public:
-				Solution(_NATIVE_PF Solution* native);
-				!Solution();
-				~Solution();
+				Solution(const _NATIVE_PF Solution& native);
 			};
 
 			/// <summary>

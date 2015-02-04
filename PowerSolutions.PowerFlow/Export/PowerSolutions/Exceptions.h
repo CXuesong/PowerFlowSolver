@@ -7,6 +7,7 @@ namespace PowerSolutions {
 	enum class ExceptionCode : unsigned int
 	{
 		None = 0x00000000,
+		ExceptionClassMask = 0xFFFF0000,
 		InvalidArgument = 0x00010000,
 		ArgumentNull = InvalidArgument + 1,
 		ArgumentOutOfRange = InvalidArgument + 2,

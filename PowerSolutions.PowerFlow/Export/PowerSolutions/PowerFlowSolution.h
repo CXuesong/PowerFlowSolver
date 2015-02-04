@@ -105,6 +105,10 @@ namespace PowerSolutions
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
 			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
 			BranchFlowCollection m_BranchFlow;			//（节点编号对）支路潮流信息。
+			size_t m_NodeCount;
+			size_t m_PQNodeCount;
+			size_t m_PVNodeCount;
+			ObjectModel::Bus* m_SlackNode;
 			complexd m_TotalPowerGeneration;
 			complexd m_TotalPowerConsumption;
 			complexd m_TotalPowerLoss;
@@ -114,6 +118,10 @@ namespace PowerSolutions
 			double m_MaxDeviation;
 		private:	//Internal
 			friend class SolverImpl;
+			void NodeCount(size_t val) { m_NodeCount = val; }
+			void PQNodeCount(size_t val) { m_PQNodeCount = val; }
+			void PVNodeCount(size_t val) { m_PVNodeCount = val; }
+			void SlackNode(ObjectModel::Bus* val) { m_SlackNode = val; }
 			void TotalPowerGeneration(complexd val) { m_TotalPowerGeneration = val; }
 			void TotalPowerConsumption(complexd val) { m_TotalPowerConsumption = val; }
 			void TotalPowerLoss(complexd val) { m_TotalPowerLoss = val; }
@@ -125,6 +133,10 @@ namespace PowerSolutions
 			void AddComponentFlow(ObjectModel::Component* c, const BranchFlowSolution& solution);
 			void AddBranchFlow(ObjectModel::Bus* node1, ObjectModel::Bus* node2, const BranchFlowSolution& solution);
 		public:
+			size_t NodeCount() const { return m_NodeCount; }
+			size_t PQNodeCount() const { return m_PQNodeCount; }
+			size_t PVNodeCount() const { return m_PVNodeCount; }
+			ObjectModel::Bus* SlackNode() const { return m_SlackNode; }
 			complexd TotalPowerGeneration() const { return m_TotalPowerGeneration; }
 			complexd TotalPowerConsumption() const { return m_TotalPowerConsumption; }
 			complexd TotalPowerLoss() const { return m_TotalPowerLoss; }
