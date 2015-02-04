@@ -33,6 +33,10 @@ namespace PowerSolutions
 			{
 				_PS_TRACE("迭代次数：" << i);
 				double dev = abs(EvalDeviation());
+				assert(IterationInfo.size() == i);
+				IterationInfoMutex.lock();
+				IterationInfo.push_back(PowerFlow::IterationInfo(dev));
+				IterationInfoMutex.unlock();
 				if (dev < MaxDeviationTolerance())
 					return GenerateSolution(SolutionStatus::Success, i, dev);
 				if (!OnIteration())
@@ -159,6 +163,11 @@ namespace PowerSolutions
 			Nodes.resize(NodeCount);
 			transform(BusMapping.cbegin(), BusMapping.cend(), Nodes.begin(),
 				[](const NodeDictionary::value_type &item){return item.second.get(); });
+			_PS_TRACE("Bus\tNodeType");
+			for (auto& node : Nodes)
+			{
+				_PS_TRACE((size_t)node << "\t" << (int)node->Type << endl);
+			}
 			//采用静态节点优化编号,即将节点的出线数从小到大依次排列
 			//对Nodes列表进行排序。
 			if (NodeReorder())
@@ -264,6 +273,8 @@ namespace PowerSolutions
 			s->PQNodeCount(PQNodeCount);
 			s->PVNodeCount(PVNodeCount);
 			s->SlackNode(SlackNode->Bus);
+			for (auto& info : IterationInfo)
+				s->AddIterationInfo(info);
 			//根据注入功率和负载情况计算节点出力信息。
 			for(auto& node : Nodes)
 			{
@@ -290,7 +301,7 @@ namespace PowerSolutions
 					}
 				});
 				s->AddNodeFlow(node->Bus,
-					NodeFlowSolution(node->VoltagePhasor(), PowerGeneration, PowerConsumption));
+					NodeFlowSolution(node->VoltagePhasor(), PowerGeneration, PowerConsumption, node->Degree));
 				totalPowerGeneration += PowerGeneration;
 				totalPowerConsumption += PowerConsumption;
 			}
@@ -339,7 +350,24 @@ namespace PowerSolutions
 			s->TotalPowerConsumption(totalPowerConsumption);
 			s->TotalPowerLoss(totalPowerLoss);
 			s->TotalPowerShunt(totalPowerShunt);
+			IterationInfoMutex.lock();
+			IterationInfo.clear();
+			IterationInfoMutex.unlock();
 			return s;
+		}
+
+		SolverStatus SolverImpl::GetStatus()
+		{
+			IterationInfoMutex.lock();
+			if (IterationInfo.size() > 0)
+			{
+				SolverStatus status(IterationInfo.size(), IterationInfo.back());
+				IterationInfoMutex.unlock();
+				return status;
+			} else {
+				IterationInfoMutex.unlock();
+				return SolverStatus();
+			}
 		}
 
 		inline void SolverImpl::NodeInfo::AddPQ(complexd power)
@@ -350,11 +378,15 @@ namespace PowerSolutions
 
 		inline bool SolverImpl::NodeInfo::AddPV(double activePower, double voltage)
 		{
+			//false 表示这种情况是不可以的，需要引发异常。
 			if (Type != NodeType::PQNode && std::abs(Voltage - voltage) > 1e-10)
 				return false;
-			Voltage = voltage;
-			ActivePowerInjection += activePower;
-			Type = NodeType::PVNode;
+			if (Type != NodeType::SlackNode)
+			{
+				Voltage = voltage;
+				ActivePowerInjection += activePower;
+				Type = NodeType::PVNode;
+			}
 			return true;
 		}
 

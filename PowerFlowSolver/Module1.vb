@@ -32,7 +32,8 @@ Module Module1
                 Case "-?", "--?", "/?", "-HELP", "--HELP", "/HELP"
                     '显示帮助
                     With My.Application.Info
-                        Console.WriteLine(My.Resources.CommandLineUsage)
+                        Console.WriteLine(Prompts.CommandLineUsage)
+                        Return 0
                     End With
                 Case "/CASE", "-CASE"
                     GlobalParameters.CaseFile = Arg
@@ -46,15 +47,32 @@ Module Module1
                     Return 1
             End Select
         Next
+        '校验参数
+        If GlobalParameters.CaseFile = Nothing Then
+            Console.Error.WriteLine(Prompts.CaseFileMissing)
+            Return 2
+        End If
         Workflow()
 #If DEBUG Then
+        Console.WriteLine("--- END ---")
         Console.ReadKey()
 #End If
         Return 0
     End Function
 
     Private Sub Workflow()
-        ApplicationTests.InteropBenchmark()
+        'ApplicationTests.InteropBenchmark()
+        Using manager As New CaseManager
+            manager.Load(GlobalParameters.CaseFile)
+            Console.WriteLine(Prompts.SolvingPowerFlow)
+            If manager.Solve Then
+                If GlobalParameters.ReportFile = Nothing Then
+                    manager.SaveReport(Console.Out)
+                Else
+                    manager.SaveReport(GlobalParameters.ReportFile)
+                End If
+            End If
+        End Using
     End Sub
 End Module
 

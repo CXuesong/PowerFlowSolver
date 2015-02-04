@@ -14,6 +14,7 @@ by  Chen [CXuesong.], 2015
 #include <unordered_set>
 #include <vector>
 #include <memory>
+#include <mutex>
 #include <Eigen/Sparse>
 
 namespace PowerSolutions
@@ -71,6 +72,8 @@ namespace PowerSolutions
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>, Utility::UnorderedPairEqualityComparer<ObjectModel::Bus* >>
 				BranchCollection;
 
+			std::mutex IterationInfoMutex;
+			std::list<IterationInfo> IterationInfo;
 			ObjectModel::ExpandedNetworkCase CaseInfo;
 			NodeCollection PQNodes;			//参与计算的母线（PQ节点）信息，按照矩阵索引排序。
 			NodeCollection PVNodes;			//参与计算的母线（PV节点）信息，按照矩阵索引排序。
@@ -94,7 +97,8 @@ namespace PowerSolutions
 			virtual void AfterIterations() = 0;
 			Solution* GenerateSolution(SolutionStatus status, int iterCount, double maxDev);
 		public:
-			Solution* Solve(ObjectModel::NetworkCase* caseInfo);									// 求解网络的功率潮流分布。返回值表示是否成功收敛。
+			virtual Solution* Solve(ObjectModel::NetworkCase* caseInfo) override;		// 求解网络的功率潮流分布。返回值表示是否成功收敛。
+			virtual SolverStatus GetStatus() override;
 			SolverImpl();
 			virtual ~SolverImpl();
 		};

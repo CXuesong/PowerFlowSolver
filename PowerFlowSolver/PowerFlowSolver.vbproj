@@ -70,6 +70,7 @@
   <ItemGroup>
     <Compile Include="ApplicationTests.vb" />
     <Compile Include="CaseManager.vb" />
+    <Compile Include="CaseManagerInstructions.vb" />
     <Compile Include="Module1.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
@@ -125,6 +126,15 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="CommandLineUsage.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="RTS24.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="测试案例_FULL.txt" />
+    <Content Include="TestCase.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

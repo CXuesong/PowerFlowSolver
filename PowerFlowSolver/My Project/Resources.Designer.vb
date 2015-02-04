@@ -59,29 +59,5 @@ Namespace My.Resources
                 resourceCulture = value
             End Set
         End Property
-        
-        '''<summary>
-        '''  查找类似 用法：
-        '''PowerFlowSolver [/Case:输入文件] [/Report:报告文件] [选项]
-        '''其中，
-        '''  输入文件  包含了带求解的网络案例信息，
-        '''            如果指定为 * 则表示从控制台读取输入。
-        '''  报告文件  指定了输出文本报告的路径，
-        '''            如果没有指定，会将报告输出至控制台。
-        '''“选项”包括
-        '''  /ANSI     指示输出文件应使用ANSI/多字节字符集
-        '''            编码系统。注意此操作在不同语言的操作
-        '''            系统中有可能引起乱码。在默认情况下，
-        '''            输出文件使用 Unicode 字符集。
-        '''           （隐含 /PlainReport）
-        '''
-        '''如果没有指定报告文件，会将报告输出至控制台。
-        ''' 的本地化字符串。
-        '''</summary>
-        Friend ReadOnly Property CommandLineUsage() As String
-            Get
-                Return ResourceManager.GetString("CommandLineUsage", resourceCulture)
-            End Get
-        End Property
     End Module
 End Namespace

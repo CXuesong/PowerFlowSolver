@@ -33,6 +33,8 @@ namespace PowerSolutions
 				_WRAP_PROPERTY_CACHE(PowerGeneration, Complex);
 				// <summary>节点的总负载。</summary>
 				_WRAP_PROPERTY_CACHE(PowerConsumption, Complex);
+				// <summary>节点的度。</summary>
+				_WRAP_PROPERTY_CACHE(Degree, int);
 			internal:
 				NodeFlowSolution(const _NATIVE_PF NodeFlowSolution& native);
 			};
@@ -73,6 +75,35 @@ namespace PowerSolutions
 				BranchFlowSolution(const _NATIVE_PF BranchFlowSolution& native);
 			};
 
+			public value struct IterationInfo
+			{
+			public:
+				/// <summary>此次迭代结束后的最大功率误差绝对值。</summary>
+				_WRAP_PROPERTY_CACHE(MaxDeviation, double);
+				// 获取此迭代信息的字符串表现形式。
+				String^ ToString() override { return String::Format(L"ΔP={0}", MaxDeviation); }
+			public:
+				IterationInfo(const _NATIVE_PF IterationInfo& native);
+			};
+
+			public value struct SolverStatus
+			{
+			public:
+				/// <summary>
+				/// 获取一个值，指示了当前是否正在进行迭代。
+				/// 注意：如果此时正在进行迭代前或迭代后操作，则也会返回 false。
+				/// </summary>
+				_WRAP_PROPERTY_CACHE(IsIterating, bool);
+				/// <summary>获取已经完成的迭代次数。</summary>
+				_WRAP_PROPERTY_CACHE(LastIterationCount, int);
+				/// <summary>获取上一次迭代的最大功率误差。</summary>
+				_WRAP_PROPERTY_CACHE(LastIterationInfo, IterationInfo);
+				// 获取此信息的字符串表现形式。
+				String^ ToString() override;
+			public:
+				SolverStatus(const _NATIVE_PF SolverStatus& native);
+			};
+
 			/// <summary>
 			/// 稳态潮流的求解结果。
 			/// （<see cref="PowerSolutions::PowerFlow::Solution" />的缓存结果。）
@@ -86,6 +117,8 @@ namespace PowerSolutions
 				ReadOnlyDictionary<Component, BranchFlowSolution>^ m_s_ComponentFlow;
 				Dictionary<BusPair, BranchFlowSolution>^ m_BranchFlow;
 				ReadOnlyDictionary<BusPair, BranchFlowSolution>^ m_s_BranchFlow;
+				List<IterationInfo>^ m_IterationInfo;
+				IList<IterationInfo>^ m_s_IterationInfo;
 			public:
 				_WRAP_PROPERTY_CACHE(TotalPowerGeneration, Complex);
 				_WRAP_PROPERTY_CACHE(TotalPowerConsumption, Complex);
@@ -111,6 +144,12 @@ namespace PowerSolutions
 				{
 					IDictionary<BusPair, BranchFlowSolution>^ get(){ return m_s_BranchFlow; }
 				}
+				property IList<PowerFlow::IterationInfo>^ IterationInfo
+				{
+					IList<PowerFlow::IterationInfo>^ get() { return m_s_IterationInfo; }
+				}
+			public:
+				String^ ToString() override;
 			public:
 				Solution(const _NATIVE_PF Solution& native);
 			};
@@ -123,12 +162,28 @@ namespace PowerSolutions
 			{
 			private:
 				_NATIVE_PF Solver* nativeObject;
+				SolverType m_Type;
 			public:
+				_WRAP_PROPERTY(NodeReorder, bool, );
 				_WRAP_PROPERTY(MaxIterations, int, );
 				_WRAP_PROPERTY(MaxDeviationTolerance, double, );
 				_WRAP_PROPERTY(IntelliIterations, bool, );
+				property SolverType Type
+				{
+					SolverType get() { return m_Type; }
+				}
+				property String^ FriendlyName
+				{
+					String^ get();
+				}
 			public:
+				// 求解网络的功率潮流分布，并生成一个潮流分析报告。
 				Solution^ Solve(ObjectModel::NetworkCase^ network);
+				/// <summary>
+				/// 获取当前的求解状态。
+				/// 在求解过程中，可以使用另一个线程调用此函数以查询状态。
+				/// </summary>
+				SolverStatus GetStatus();
 			public:
 				Solver(SolverType type);
 				!Solver();

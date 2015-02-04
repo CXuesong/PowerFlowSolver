@@ -1,0 +1,12 @@
+2015-2-4
+=== Lib
+不要再考虑在 PowerSolutions.PowerFlow 中实现复杂的对象模型逻辑了。
+反正都要 Expand 展开的。
+=== Interop
+逻辑够用就可以了。
+
+2015-2-3
+=== Interop
+放弃自己编写 IDictionary 的封装。
+以后应当尽量使用系统自带的封装。
+归档备份中 ReadOnlyDictionaryWrapper::Enumerator 的 Dispose 仍然存在问题。

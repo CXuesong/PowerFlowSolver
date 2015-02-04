@@ -117,10 +117,72 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="BusKeyNotFound" xml:space="preserve">
+    <value>在已经定义的案例中找不到母线标识“{0}”。</value>
+  </data>
+  <data name="CaseFileMissing" xml:space="preserve">
+    <value>未指定案例文件。请使用 /? 参数以查看帮助。</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="CommandLineUsage" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>commandlineusage.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="DuplicateSolverInstruction" xml:space="preserve">
+    <value>在此处重新指定求解方式将导致求解器特性被重置。</value>
+  </data>
+  <data name="FileParseError" xml:space="preserve">
+    <value>解析行{0}时发生错误：{1}</value>
+  </data>
+  <data name="FileParseWarning" xml:space="preserve">
+    <value>行{0}：{1}</value>
+  </data>
   <data name="InvalidArgument1" xml:space="preserve">
     <value>无效的参数：{0}。</value>
   </data>
+  <data name="InvalidInstruction1" xml:space="preserve">
+    <value>无效的指令”{0}“。</value>
+  </data>
+  <data name="InvalidSolver" xml:space="preserve">
+    <value>无效的求解方式“{0}”。</value>
+  </data>
+  <data name="ParameterCountMismatch3" xml:space="preserve">
+    <value>{0}：参数数量不匹配。期望参数数量为{1}；实际参数数量为{2}。</value>
+  </data>
+  <data name="PFReportMessage1" xml:space="preserve">
+    <value>电力网络稳态潮流分析报告
+案例：{0}
+
+报告生成于 {1}</value>
+  </data>
+  <data name="PFReportMessage2" xml:space="preserve">
+    <value>
+网络统计信息 ==========
+母线{0}条。运算总节点{1}个，
+其中PQ节点{2}个，PV节点{3}个。
+平衡节点：{4}。共计{5}条支路。</value>
+  </data>
+  <data name="PFReportMessage3" xml:space="preserve">
+    <value>
+求解信息 ==========
+使用{0}迭代{1}次，最大功率误差：{2:0.0000E0}p.u.。
+迭代次数    最大功率误差</value>
+  </data>
+  <data name="PFReportMessage3A" xml:space="preserve">
+    <value>{0,-8}    {1,-12:0.0000E00}</value>
+  </data>
+  <data name="PFReportMessage4" xml:space="preserve">
+    <value>
+节点潮流============
+        母线            电压       相位     有功出力   无功出力   有功负载   无功负载  支路数
+                       [p.u.]     [ °]      [p.u.]     [p.u.]     [p.u.]     [p.u.]</value>
+  </data>
+  <data name="SolvingPowerFlow" xml:space="preserve">
+    <value>求解稳态潮流……</value>
+  </data>
   <data name="x64Process" xml:space="preserve">
     <value>64位进程</value>
+  </data>
+  <data name="PFReportMessage4A" xml:space="preserve">
+    <value>{0,-10} {1,-10:G} {2,-10:G} {3,-10:G} {4,-10:G} {5,-10:G} {6,-10:G} {7,-10}</value>
   </data>
 </root>

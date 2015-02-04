@@ -53,6 +53,10 @@ namespace NativeUnitTest1
 			auto s = solver->Solve(&network);
 			delete s;
 			s = solver->Solve(&network);
+			for (auto& item : s->NodeFlow())
+			{
+				cout << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
+			}
 			delete s;
 		}
 	};

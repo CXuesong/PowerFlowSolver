@@ -123,10 +123,16 @@
   <data name="ExceptionCode.VoltageMismatch" xml:space="preserve">
     <value>连接到同一节点的两个元件的电压约束不匹配。</value>
   </data>
+  <data name="NotIterating" xml:space="preserve">
+    <value>未在迭代</value>
+  </data>
   <data name="PowerSolutionCRTException" xml:space="preserve">
     <value>在PowerSolution内部引发了一个CRT异常{0}。{1}</value>
   </data>
   <data name="PowerSolutionException" xml:space="preserve">
     <value>在PowerSolution内部引发了一个{0}异常，错误代码为0x{0:x}。</value>
+  </data>
+  <data name="SolverType.NewtonRaphson" xml:space="preserve">
+    <value>牛顿-拉夫逊法</value>
   </data>
 </root>

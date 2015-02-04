@@ -25,8 +25,12 @@ namespace PowerSolutions
 			{
 				String^ get() { return ResourceManager->GetString("PowerSolutionCRTException"); }
 			}
+			static property String^ NotIterating
+			{
+				String^ get() { return ResourceManager->GetString("NotIterating"); }
+			}
 		private:
-			Prompts() {}
+			Prompts() {};
 		};
 	}
 }

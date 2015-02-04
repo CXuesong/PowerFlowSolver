@@ -17,6 +17,7 @@ namespace PowerSolutions
 			complexd m_Voltage;
 			complexd m_PowerGeneration;
 			complexd m_PowerConsumption;
+			int m_Degree;
 		public:
 			PowerSolutions::complexd Voltage() const { return m_Voltage; }
 			void Voltage(PowerSolutions::complexd val) { m_Voltage = val; }
@@ -24,9 +25,12 @@ namespace PowerSolutions
 			void PowerGeneration(PowerSolutions::complexd val) { m_PowerGeneration = val; }
 			PowerSolutions::complexd PowerConsumption() const { return m_PowerConsumption; }
 			void PowerConsumption(PowerSolutions::complexd val) { m_PowerConsumption = val; }
+			int Degree() const { return m_Degree; }
+			void Degree(int val) { m_Degree = val; }
 		public:
-			NodeFlowSolution(complexd voltage, complexd powerGeneration, complexd powerConsumption)
-				: m_Voltage(voltage), m_PowerGeneration(powerGeneration), m_PowerConsumption(powerConsumption)
+			NodeFlowSolution(complexd voltage, complexd powerGeneration, complexd powerConsumption, int degree)
+				: m_Voltage(voltage), m_PowerGeneration(powerGeneration), m_PowerConsumption(powerConsumption),
+				m_Degree(degree)
 			{ }
 		};
 		struct BranchFlowSolution		//（每元件或节点编号对）支路潮流结果
@@ -83,6 +87,21 @@ namespace PowerSolutions
 				: m_Power1(power1), m_Power2(power2), m_ShuntPower1(shuntPower1), m_ShuntPower2(shuntPower2)
 			{ }
 		};
+
+		struct IterationInfo
+		{
+		private:
+			double m_MaxDeviation;
+		public:
+			// 此次迭代结束时最大功率误差的绝对值。
+			double MaxDeviation() const { return m_MaxDeviation; }
+			void MaxDeviation(double val) { m_MaxDeviation = val; }
+		public:
+			IterationInfo(double maxDeviation)
+				: m_MaxDeviation(maxDeviation)
+			{ }
+		};
+
 		// 求解最终的结论
 		enum class SolutionStatus : byte
 		{
@@ -101,10 +120,12 @@ namespace PowerSolutions
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
 				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>> BranchFlowCollection;
 			typedef std::unordered_map<ObjectModel::Component*, BranchFlowSolution> ComponentFlowCollection;
+			typedef std::vector<IterationInfo> IterationInfoCollection;
 		private:
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
 			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
 			BranchFlowCollection m_BranchFlow;			//（节点编号对）支路潮流信息。
+			IterationInfoCollection m_IterationInfo;	//每一次迭代时的信息。
 			size_t m_NodeCount;
 			size_t m_PQNodeCount;
 			size_t m_PVNodeCount;
@@ -127,11 +148,12 @@ namespace PowerSolutions
 			void TotalPowerLoss(complexd val) { m_TotalPowerLoss = val; }
 			void TotalPowerShunt(complexd val) { m_TotalPowerShunt = val; }
 			void Status(SolutionStatus val) { m_Status = val; }
-			void IterationCount(int val) { m_IterationCount = val; }
+			void IterationCount(int val);
 			void MaxDeviation(double val) { m_MaxDeviation = val; }
 			void AddNodeFlow(ObjectModel::Bus* node, const NodeFlowSolution& solution);
 			void AddComponentFlow(ObjectModel::Component* c, const BranchFlowSolution& solution);
 			void AddBranchFlow(ObjectModel::Bus* node1, ObjectModel::Bus* node2, const BranchFlowSolution& solution);
+			void AddIterationInfo(PowerFlow::IterationInfo& info);
 		public:
 			size_t NodeCount() const { return m_NodeCount; }
 			size_t PQNodeCount() const { return m_PQNodeCount; }
@@ -148,6 +170,7 @@ namespace PowerSolutions
 			const NodeFlowCollection& NodeFlow() const { return m_NodeFlow; }
 			const ComponentFlowCollection& ComponentFlow() const { return m_ComponentFlow; }
 			const BranchFlowCollection& BranchFlow() const { return m_BranchFlow; }
+			const IterationInfoCollection& IterationInfo() const { return m_IterationInfo; }
 		protected:	//internal
 			Solution();
 		};

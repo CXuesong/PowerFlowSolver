@@ -15,6 +15,32 @@ namespace PowerSolutions
 			NewtonRaphson = 0,
 			FastDecoupled = 1
 		};
+
+		// 包含了求解器此时的状态信息。
+		struct SolverStatus
+		{
+		private:
+			bool m_IsIterating;
+			int m_LastIterationCount;
+			IterationInfo m_LastIterationInfo;
+		public:
+			// 获取一个值，指示了当前是否正在进行迭代。注意：如果此时正在进行迭代前或迭代后操作，则也会返回 false。
+			bool IsIterating() const { return m_IsIterating; }
+			// 获取已经完成的迭代次数。
+			int LastIterationCount() const { return m_LastIterationCount; }
+			// 获取上一次迭代的最大功率误差。
+			const IterationInfo& LastIterationInfo() const { return m_LastIterationInfo; }
+		public:
+			// 初始化一个表示当前未在进行求解的 SolverStatus。
+			SolverStatus()
+				: m_IsIterating(false), m_LastIterationCount(0), m_LastIterationInfo(0)
+			{ }
+			// 初始化一个表示当前正在进行求解的 SolverStatus。
+			SolverStatus(int lastIterationCount, const IterationInfo& lastIterationInfo)
+				: m_IsIterating(true), m_LastIterationCount(lastIterationCount), m_LastIterationInfo(lastIterationInfo)
+			{ }
+		};
+
 		// 抽象用于完成稳态潮流的解决过程。
 		class Solver
 		{
@@ -35,6 +61,9 @@ namespace PowerSolutions
 		public:
 			// 求解网络的功率潮流分布，并生成一个潮流分析报告。
 			virtual Solution* Solve(ObjectModel::NetworkCase* CaseInfo) = 0;
+			// 获取当前的求解状态。
+			// 在求解过程中，可以使用另一个线程调用此函数以查询状态。
+			virtual SolverStatus GetStatus() = 0;
 			Solver();
 			virtual ~Solver();
 		public:

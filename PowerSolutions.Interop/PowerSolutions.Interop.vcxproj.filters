@@ -62,7 +62,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="ReadMe.txt" />
-    <Text Include="Changelog.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="app.rc">
