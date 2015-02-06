@@ -21,8 +21,10 @@ namespace PowerSolutions {
 	{
 	private:
 		ExceptionCode m_Code;
+		char m_What[64];
 	public:
 		ExceptionCode Code() const { return m_Code; }
+		virtual const char* what() const override { return m_What; }
 	public:
 		Exception();
 		Exception(ExceptionCode code);

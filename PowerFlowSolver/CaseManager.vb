@@ -15,6 +15,7 @@ Partial Public Class CaseManager
     Private m_BusMapping As New Dictionary(Of Bus, BusInfo)
     Private m_CaseName As String
     Private m_Solution As Solution
+    Private m_IterationHistory As New List(Of Double)
     '解析状态
     Private LineNumber As Integer
 
@@ -58,6 +59,7 @@ Partial Public Class CaseManager
             Using reader As New StreamReader(path, Encoding.Default, True)
                 Load(reader)
             End Using
+            Console.WriteLine(Prompts.FileParseComplete)
         Catch ex As Exception
             Console.Error.WriteLine(ex.Message)
         End Try
@@ -85,36 +87,80 @@ Partial Public Class CaseManager
     End Sub
 
     Public Function Solve() As Boolean
-        Using MonitorTimer As New Timers.Timer(1000)
-            Try
-                AddHandler MonitorTimer.Elapsed,
-                    Sub()
-                        Dim status = m_Solver.GetStatus
-                        If status.IsIterating Then
-                            Console.WriteLine(status.ToString)
-                        End If
-                    End Sub
-                MonitorTimer.Enabled = True
-                m_Solution = m_Solver.Solve(m_CaseInfo)
-                Return True
-            Catch ex As Exception
-                Console.Error.WriteLine(ex.Message)
-                Return False
-            End Try
-        End Using
+        '准备工作
+        EnsureSolver()
+        m_IterationHistory.Clear()
+        '每隔1s向控制台输出目前的进度
+        Dim maxDev = m_Solver.MaxDeviationTolerance
+        Dim maxIter = m_Solver.MaxIterations
+        'Using MonitorTimer As New Timers.Timer(1000)
+        Dim watch As New Stopwatch
+        Dim OnIteration As IterationEventHandler =
+        Sub(sender, e)
+                Debug.Assert(e.IterationCount = m_IterationHistory.Count)
+                m_IterationHistory.Add(e.MaxDeviation)
+                Console.WriteLine(Prompts.IterationProgressA, watch.Elapsed, e.IterationCount, e.MaxDeviation)
+            End Sub
+        Try
+            'AddHandler MonitorTimer.Elapsed,
+            '    Sub()
+            '        'Dim status = m_Solver.GetStatus
+            '        'If status.IsIterating Then
+            '        '    Console.Write(Prompts.SolutionProgress, watch.Elapsed,
+            '        '                      status.LastIterationCount, status.LastIterationInfo.MaxDeviation,
+            '        '                      maxDev)
+            '        '    '初期可能估计不准确
+            '        '    If status.LastIterationCount > 1 Then
+            '        '        Console.Write(Prompts.TimeRemainingEstimation,
+            '        '                      TimeSpan.FromTicks(CLng(watch.ElapsedTicks * (maxIter / status.LastIterationCount - 1))))
+            '        '    End If
+            '        '    Console.CursorLeft = 0
+            '        'End If
+            '    End Sub
+            AddHandler m_Solver.Iteration, OnIteration
+            Console.WriteLine()
+            Console.WriteLine(Prompts.IterationProgress)
+            'MonitorTimer.Enabled = True
+            watch.Start()
+            '开始求解
+            m_Solution = m_Solver.Solve(m_CaseInfo)
+            watch.Stop()
+            Console.WriteLine()
+            Console.WriteLine(Prompts.SolutionComplete, m_Solution.IterationCount, watch.Elapsed,
+                              Prompts.ResourceManager.GetString("SolutionStatus_" & m_Solution.Status.ToString))
+            Return True
+        Catch ex As Exception
+            Console.Error.WriteLine(ex.Message)
+            Return False
+        Finally
+            RemoveHandler m_Solver.Iteration, OnIteration
+        End Try
+        'End Using
     End Function
 
+    ''' <summary>
+    ''' 向控制台输出报告。
+    ''' </summary>
+    Public Sub SaveReport()
+        Console.WriteLine(Prompts.PFReport)
+        SaveReport(Console.Out)
+    End Sub
+
+    ''' <summary>
+    ''' 向文件输出报告。
+    ''' </summary>
     Public Sub SaveReport(path As String)
         Try
             Using writer As New StreamWriter(path, False, If(GlobalParameters.ANSI, Encoding.Default, Encoding.UTF8))
                 SaveReport(writer)
             End Using
+            Console.WriteLine(Prompts.FileSaveComplete, IO.Path.GetFullPath(path))
         Catch ex As Exception
             Console.Error.WriteLine(ex.Message)
         End Try
     End Sub
 
-    Public Sub SaveReport(dest As TextWriter)
+    Private Sub SaveReport(dest As TextWriter)
         dest.WriteLine(My.Application.Info.ProductName)
         dest.WriteLine(My.Application.Info.Description)
         dest.WriteLine(My.Application.Info.Title)
@@ -125,21 +171,70 @@ Partial Public Class CaseManager
         With m_Solution
             dest.WriteLine(Prompts.PFReportMessage2, m_BusMapping.Count, .NodeCount, .PQNodeCount, .PVNodeCount,
                            m_BusMapping(.SlackNode).Name, .BranchFlow.Count)
-            dest.WriteLine(Prompts.PFReportMessage3, m_Solver.FriendlyName, .IterationCount, .MaxDeviation)
-            For I = 0 To .IterationInfo.Count - 1
-                dest.WriteLine(Prompts.PFReportMessage3A, I, .IterationInfo(I).MaxDeviation)
+            '求解信息
+            dest.WriteLine(Prompts.PFReportMessage3,
+                           Prompts.ResourceManager.GetString("SolutionStatus_" & .Status.ToString),
+                           m_Solver.FriendlyName, .IterationCount, .MaxDeviation)
+            For I = 0 To m_IterationHistory.Count - 1
+                dest.WriteLine(Prompts.PFReportMessage3A, I, m_IterationHistory(I))
             Next
+            '节点潮流
             dest.WriteLine(Prompts.PFReportMessage4)
             Dim Rad2Deg = Function(rad As Double) rad / Math.PI * 180
-            Dim DblProc = Function(value As Double) Math.Round(value, 4)
-            For Each node In .NodeFlow
-                '        母线            电压       相位     有功出力   无功出力   有功负载   无功负载  支路数
-                dest.WriteLine(Prompts.PFReportMessage4A, m_BusMapping(node.Key).Name,
-                               DblProc(node.Value.Voltage.Magnitude), DblProc(Rad2Deg(node.Value.Voltage.Phase)),
-                               DblProc(node.Value.PowerGeneration.Real), DblProc(node.Value.PowerGeneration.Imaginary),
-                               DblProc(node.Value.PowerConsumption.Real), DblProc(node.Value.PowerConsumption.Imaginary),
-                               node.Value.Degree)
+            For Each node In (From n In m_BusMapping.Values Order By n.Name Ascending)
+                Dim nodeFlow As NodeFlowSolution
+                If .NodeFlow.TryGetValue(node.Bus, nodeFlow) Then
+                    With nodeFlow
+                        '        母线            电压       相位     有功出力   无功出力   有功负载   无功负载  支路数
+                        dest.WriteLine(Prompts.PFReportMessage4A, PadRight(node.Name, 20),
+                                       .Voltage.Magnitude, Rad2Deg(.Voltage.Phase),
+                                       .PowerGeneration.Real, .PowerGeneration.Imaginary,
+                                       .PowerConsumption.Real, .PowerConsumption.Imaginary,
+                                       .Degree)
+                    End With
+                Else
+                    dest.WriteLine(Prompts.PFReportMessage4B, PadRight(node.Name, 20))
+                End If
             Next
+            '支路潮流
+            dest.WriteLine(Prompts.PFReportMessage5)
+            Dim BranchEx =
+                Iterator Function()
+                    For Each b In .BranchFlow
+                        Dim bus1 As BusInfo = Nothing, bus2 As BusInfo = Nothing
+                        Dim flow = b.Value
+                        If m_BusMapping.TryGetValue(b.Key.Bus1, bus1) AndAlso
+                            m_BusMapping.TryGetValue(b.Key.Bus2, bus2) Then
+                            If b.Value.ReversedDirection Then
+                                Dim temp = bus1
+                                bus1 = bus2
+                                bus2 = temp
+                                flow = flow.Reverse
+                            End If
+                            Yield New With {.Bus1 = m_BusMapping(b.Key.Bus1),
+                                            .Bus2 = m_BusMapping(b.Key.Bus2),
+                                            .Flow = b.Value}
+                        End If
+                    Next
+                End Function
+            For Each branch In (From b In BranchEx()
+                                Order By b.Bus1.Name, b.Bus2.Name Ascending)
+                With branch
+                    Dim loss = .Flow.PowerLoss, shunt = .Flow.PowerShunt
+                    dest.WriteLine(Prompts.PFReportMessage5A, PadRight(.Bus1.Name, 14),
+                                   PadRight(.Bus2.Name, 14),
+                                   .Flow.Power1.Real, .Flow.Power1.Imaginary,
+                                   .Flow.Power2.Real, .Flow.Power2.Imaginary,
+                                   loss.Real, loss.Imaginary,
+                                   shunt.Real, shunt.Imaginary)
+                End With
+            Next
+            '总计
+            dest.WriteLine(Prompts.PFReportMessage6,
+                           .TotalPowerGeneration.Real, .TotalPowerGeneration.Imaginary,
+                           .TotalPowerConsumption.Real, .TotalPowerConsumption.Imaginary,
+                           .TotalPowerLoss.Real, .TotalPowerLoss.Imaginary,
+                           .TotalPowerShunt.Real, .TotalPowerShunt.Imaginary)
         End With
     End Sub
 

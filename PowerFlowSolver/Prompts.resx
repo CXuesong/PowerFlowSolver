@@ -164,25 +164,88 @@
   <data name="PFReportMessage3" xml:space="preserve">
     <value>
 求解信息 ==========
-使用{0}迭代{1}次，最大功率误差：{2:0.0000E0}p.u.。
-迭代次数    最大功率误差</value>
+{0}
+使用{1}迭代{2}次，最大功率误差：{3:E4} p.u.。
+迭代次数  最大功率误差</value>
   </data>
   <data name="PFReportMessage3A" xml:space="preserve">
-    <value>{0,-8}    {1,-12:0.0000E00}</value>
+    <value>{0,6}    {1,-12:E4}</value>
   </data>
   <data name="PFReportMessage4" xml:space="preserve">
     <value>
 节点潮流============
-        母线            电压       相位     有功出力   无功出力   有功负载   无功负载  支路数
-                       [p.u.]     [ °]      [p.u.]     [p.u.]     [p.u.]     [p.u.]</value>
+        母线              电压         相位       有功出力     无功出力     有功负载     无功负载   支路数
+                         [p.u.]       [ °]        [p.u.]       [p.u.]       [p.u.]      [p.u.]</value>
   </data>
-  <data name="SolvingPowerFlow" xml:space="preserve">
+  <data name="SolutionInProgress" xml:space="preserve">
     <value>求解稳态潮流……</value>
   </data>
   <data name="x64Process" xml:space="preserve">
     <value>64位进程</value>
   </data>
   <data name="PFReportMessage4A" xml:space="preserve">
-    <value>{0,-10} {1,-10:G} {2,-10:G} {3,-10:G} {4,-10:G} {5,-10:G} {6,-10:G} {7,-10}</value>
+    <value>{0} {1,12:G6} {2,12:G6} {3,12:G6} {4,12:G6} {5,12:G6} {6,12:G6} {7,6}</value>
+  </data>
+  <data name="FileSaveComplete" xml:space="preserve">
+    <value>已保存：{0}。</value>
+  </data>
+  <data name="PFReport" xml:space="preserve">
+    <value>
+======== 分析报告 ========
+</value>
+  </data>
+  <data name="PFReportMessage4B" xml:space="preserve">
+    <value>{0} 孤立母线。</value>
+  </data>
+  <data name="PFReportMessage5" xml:space="preserve">
+    <value>
+支路潮流============
+母线1    --&gt;   母线2            有功(1)    无功(1)    有功(2)    无功(2)   有功损耗   无功损耗   接地有功   接地无功
+                                [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]</value>
+  </data>
+  <data name="PFReportMessage5A" xml:space="preserve">
+    <value>{0} {1} {2,10:G4} {3,10:G4} {4,10:G4} {5,10:G4} {6,10:G4} {7,10:G4} {8,10:G4} {9,10:G4}</value>
+  </data>
+  <data name="PFReportMessage6" xml:space="preserve">
+    <value>
+总计================
+总出力：有功 {0:G6} p.u.，无功 {1:G6} p.u.。
+总负载：有功 {2:G6} p.u.，无功 {3:G6} p.u.。
+总网损：有功 {4:G6} p.u.，无功 {5:G6} p.u.。
+接地支路损耗：有功 {6:G6} p.u.，无功 {7:G6} p.u.。</value>
+  </data>
+  <data name="SolutionStatus_IntelliIterationAbort" xml:space="preserve">
+    <value>（智能迭代）检测到迭代过程不收敛而中断。</value>
+  </data>
+  <data name="SolutionStatus_IterationFailed" xml:space="preserve">
+    <value>迭代过程出现问题，可能是由于方程不可解造成的。</value>
+  </data>
+  <data name="SolutionStatus_MaxIteration" xml:space="preserve">
+    <value>已经达到最大允许的迭代次数。</value>
+  </data>
+  <data name="SolutionStatus_Success" xml:space="preserve">
+    <value>迭代过程收敛，求解成功结束。</value>
+  </data>
+  <data name="SolutionComplete" xml:space="preserve">
+    <value>迭代{0}次，全程用时{1}。
+{2}</value>
+  </data>
+  <data name="SolutionProgress" xml:space="preserve">
+    <value>[{0}]已迭代{1}次，当前误差：{2:G6}，目标误差{3:G6}。</value>
+  </data>
+  <data name="ObsoleteInstruction" xml:space="preserve">
+    <value>过时的指令。已忽略。</value>
+  </data>
+  <data name="FileParseComplete" xml:space="preserve">
+    <value>文件分析完毕。</value>
+  </data>
+  <data name="TimeRemainingEstimation" xml:space="preserve">
+    <value>剩余时间：少于{0}。</value>
+  </data>
+  <data name="IterationProgress" xml:space="preserve">
+    <value>        累计用时       迭代次数   最大功率误差</value>
+  </data>
+  <data name="IterationProgressA" xml:space="preserve">
+    <value>{0,20}   {1,8}   {2,-12:E4}</value>
   </data>
 </root>

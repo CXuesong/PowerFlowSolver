@@ -84,10 +84,9 @@ Namespace My.Resources
         
         '''<summary>
         '''  查找类似 用法：
-        '''PowerFlowSolver [/Case:输入文件] [/Report:报告文件] [选项]
+        '''PowerFlowSolver /Case:输入文件 [/Report:报告文件] [选项]
         '''其中，
-        '''  输入文件  包含了带求解的网络案例信息，
-        '''            如果指定为 * 则表示从控制台读取输入。
+        '''  输入文件  包含了带求解的网络案例信息的输入文件。
         '''  报告文件  指定了输出文本报告的路径，
         '''            如果没有指定，会将报告输出至控制台。
         '''“选项”包括
@@ -116,6 +115,15 @@ Namespace My.Resources
         End Property
         
         '''<summary>
+        '''  查找类似 文件分析完毕。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property FileParseComplete() As String
+            Get
+                Return ResourceManager.GetString("FileParseComplete", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
         '''  查找类似 解析行{0}时发生错误：{1} 的本地化字符串。
         '''</summary>
         Friend Shared ReadOnly Property FileParseError() As String
@@ -130,6 +138,15 @@ Namespace My.Resources
         Friend Shared ReadOnly Property FileParseWarning() As String
             Get
                 Return ResourceManager.GetString("FileParseWarning", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 已保存：{0}。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property FileSaveComplete() As String
+            Get
+                Return ResourceManager.GetString("FileSaveComplete", resourceCulture)
             End Get
         End Property
         
@@ -161,11 +178,49 @@ Namespace My.Resources
         End Property
         
         '''<summary>
+        '''  查找类似         累计用时       迭代次数   最大功率误差 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property IterationProgress() As String
+            Get
+                Return ResourceManager.GetString("IterationProgress", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 {0,20}   {1,8}   {2,-12:E4} 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property IterationProgressA() As String
+            Get
+                Return ResourceManager.GetString("IterationProgressA", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 过时的指令。已忽略。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property ObsoleteInstruction() As String
+            Get
+                Return ResourceManager.GetString("ObsoleteInstruction", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
         '''  查找类似 {0}：参数数量不匹配。期望参数数量为{1}；实际参数数量为{2}。 的本地化字符串。
         '''</summary>
         Friend Shared ReadOnly Property ParameterCountMismatch3() As String
             Get
                 Return ResourceManager.GetString("ParameterCountMismatch3", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 
+        '''======== 分析报告 ========
+        ''' 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property PFReport() As String
+            Get
+                Return ResourceManager.GetString("PFReport", resourceCulture)
             End Get
         End Property
         
@@ -193,55 +248,164 @@ Namespace My.Resources
                 Return ResourceManager.GetString("PFReportMessage2", resourceCulture)
             End Get
         End Property
-
+        
         '''<summary>
         '''  查找类似 
         '''求解信息 ==========
-        '''使用{0}迭代{1}次，最大功率误差：{2:0.0000E0}p.u.。
-        '''迭代次数    最大功率误差 的本地化字符串。
+        '''{0}
+        '''使用{1}迭代{2}次，最大功率误差：{3:E4} p.u.。
+        '''迭代次数  最大功率误差 的本地化字符串。
         '''</summary>
         Friend Shared ReadOnly Property PFReportMessage3() As String
             Get
                 Return ResourceManager.GetString("PFReportMessage3", resourceCulture)
             End Get
         End Property
-
+        
         '''<summary>
-        '''  查找类似 {0,-8}    {1,-12:0.0000E00} 的本地化字符串。
+        '''  查找类似 {0,6}    {1,-12:E4} 的本地化字符串。
         '''</summary>
         Friend Shared ReadOnly Property PFReportMessage3A() As String
             Get
                 Return ResourceManager.GetString("PFReportMessage3A", resourceCulture)
             End Get
         End Property
-
+        
         '''<summary>
         '''  查找类似 
         '''节点潮流============
-        '''        母线            电压       相位     有功出力   无功出力   有功负载   无功负载  支路数
-        '''                       [p.u.]     [ °]      [p.u.]     [p.u.]     [p.u.]     [p.u.] 的本地化字符串。
+        '''        母线              电压         相位       有功出力     无功出力     有功负载     无功负载   支路数
+        '''                         [p.u.]       [ °]        [p.u.]       [p.u.]       [p.u.]      [p.u.] 的本地化字符串。
         '''</summary>
         Friend Shared ReadOnly Property PFReportMessage4() As String
             Get
                 Return ResourceManager.GetString("PFReportMessage4", resourceCulture)
             End Get
         End Property
-
+        
         '''<summary>
-        '''  查找类似 {0,-10} {1,-10:G} {2,-10:G} {3,-10:G} {4,-10:G} {5,-10:G} {6,-10:G} {7,-10} 的本地化字符串。
+        '''  查找类似 {0} {1,12:G6} {2,12:G6} {3,12:G6} {4,12:G6} {5,12:G6} {6,12:G6} {7,6} 的本地化字符串。
         '''</summary>
         Friend Shared ReadOnly Property PFReportMessage4A() As String
             Get
                 Return ResourceManager.GetString("PFReportMessage4A", resourceCulture)
             End Get
         End Property
-
+        
+        '''<summary>
+        '''  查找类似 {0} 孤立母线。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property PFReportMessage4B() As String
+            Get
+                Return ResourceManager.GetString("PFReportMessage4B", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 
+        '''支路潮流============
+        '''母线1    --&gt;   母线2            有功(1)    无功(1)    有功(2)    无功(2)   有功损耗   无功损耗   接地有功   接地无功
+        '''                                [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.]     [p.u.] 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property PFReportMessage5() As String
+            Get
+                Return ResourceManager.GetString("PFReportMessage5", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 {0} {1} {2,10:G4} {3,10:G4} {4,10:G4} {5,10:G4} {6,10:G4} {7,10:G4} {8,10:G4} {9,10:G4} 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property PFReportMessage5A() As String
+            Get
+                Return ResourceManager.GetString("PFReportMessage5A", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 
+        '''总计================
+        '''总出力：有功 {0:G6} p.u.，无功 {1:G6} p.u.。
+        '''总负载：有功 {2:G6} p.u.，无功 {3:G6} p.u.。
+        '''总网损：有功 {4:G6} p.u.，无功 {5:G6} p.u.。
+        '''接地支路损耗：有功 {6:G6} p.u.，无功 {7:G6} p.u.。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property PFReportMessage6() As String
+            Get
+                Return ResourceManager.GetString("PFReportMessage6", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 迭代{0}次，全程用时{1}。
+        '''{2} 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property SolutionComplete() As String
+            Get
+                Return ResourceManager.GetString("SolutionComplete", resourceCulture)
+            End Get
+        End Property
+        
         '''<summary>
         '''  查找类似 求解稳态潮流…… 的本地化字符串。
         '''</summary>
-        Friend Shared ReadOnly Property SolvingPowerFlow() As String
+        Friend Shared ReadOnly Property SolutionInProgress() As String
             Get
-                Return ResourceManager.GetString("SolvingPowerFlow", resourceCulture)
+                Return ResourceManager.GetString("SolutionInProgress", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 [{0}]已迭代{1}次，当前误差：{2:G6}，目标误差{3:G6}。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property SolutionProgress() As String
+            Get
+                Return ResourceManager.GetString("SolutionProgress", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 （智能迭代）检测到迭代过程不收敛而中断。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property SolutionStatus_IntelliIterationAbort() As String
+            Get
+                Return ResourceManager.GetString("SolutionStatus_IntelliIterationAbort", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 迭代过程出现问题，可能是由于方程不可解造成的。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property SolutionStatus_IterationFailed() As String
+            Get
+                Return ResourceManager.GetString("SolutionStatus_IterationFailed", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 已经达到最大允许的迭代次数。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property SolutionStatus_MaxIteration() As String
+            Get
+                Return ResourceManager.GetString("SolutionStatus_MaxIteration", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 迭代过程收敛，求解成功结束。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property SolutionStatus_Success() As String
+            Get
+                Return ResourceManager.GetString("SolutionStatus_Success", resourceCulture)
+            End Get
+        End Property
+        
+        '''<summary>
+        '''  查找类似 剩余时间：少于{0}。 的本地化字符串。
+        '''</summary>
+        Friend Shared ReadOnly Property TimeRemainingEstimation() As String
+            Get
+                Return ResourceManager.GetString("TimeRemainingEstimation", resourceCulture)
             End Get
         End Property
         

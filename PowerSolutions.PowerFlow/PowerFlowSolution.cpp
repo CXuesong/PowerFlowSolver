@@ -40,15 +40,9 @@ namespace PowerSolutions
 			}
 		}
 
-		void Solution::AddIterationInfo(PowerFlow::IterationInfo& info)
-		{
-			m_IterationInfo.push_back(info);
-		}
-
 		void Solution::IterationCount(int val)
 		{
 			m_IterationCount = val;
-			m_IterationInfo.reserve(val);
 		}
 
 	}

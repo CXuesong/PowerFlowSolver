@@ -59,19 +59,23 @@ namespace PowerSolutions {
 			return newInst;
 		}
 
-		NetworkCase* NetworkCase::Clone()
+		NetworkCase* NetworkCase::Clone(NetworkCaseTrackingInfo*& trackingInfo)
 		{
+			//注意内存问题：此处分配了内存，但没有释放
+			// delete 运算符要求内存的分配方和释放方必须是同一个堆
+			// 即必须是同一个 Dll 中。
 			//复制自身
 			auto nc = new NetworkCase();
-			NetworkCaseCloneContext context(m_Objects.size());
+			auto context = new NetworkCaseTrackingInfo(m_Objects.size());
 			//复制母线和元件
 			//注意此处假定所有的元件均遵从向前引用的原则
 			for (auto& obj : m_Objects)
 			{
-				auto newObj = obj->Clone(context);
-				context.MapObject(obj, newObj);
+				auto newObj = obj->Clone(*context);
+				context->MapObject(obj, newObj);
 				nc->AddObject(newObj);
 			}
+			trackingInfo = context;
 			return nc;
 		}
 
@@ -132,17 +136,28 @@ namespace PowerSolutions {
 		ExpandedNetworkCase::~ExpandedNetworkCase()
 		{ }
 
-		void NetworkCaseCloneContext::MapObject(NetworkObject* oldObj, NetworkObject* newObj)
+		void NetworkCaseTrackingInfo::MapObject(NetworkObject* oldObj, NetworkObject* newObj)
 		{
 			assert(typeid(&oldObj) == typeid(&newObj));
-			objectMapping.emplace(oldObj, newObj);
+			objectMapping.emplace(oldObj, MappingInfo(true, newObj));
+			objectMapping.emplace(newObj, MappingInfo(true, oldObj));
 		}
 
-		NetworkObject* NetworkCaseCloneContext::GetNewObject(NetworkObject* oldObj) const
+		NetworkObject* NetworkCaseTrackingInfo::CloneOf(NetworkObject* prototypeObj) const
 		{
-			auto i = objectMapping.find(oldObj);
-			assert(i != objectMapping.end());
-			return i == objectMapping.end() ? nullptr : i->second;
+			auto i = objectMapping.find(prototypeObj);
+			if (i == objectMapping.end()) throw Exception(ExceptionCode::InvalidArgument);
+			//如果传入的已经是副本了，可以考虑是否不引发异常，而直接返回当前参数指定的那个副本。
+			if (!i->second.isPrototype) throw Exception(ExceptionCode::InvalidOperation);
+			return i->second.anotherObject;
+		}
+
+		NetworkObject* NetworkCaseTrackingInfo::PrototypeOf(NetworkObject* cloneObj) const
+		{
+			auto i = objectMapping.find(cloneObj);
+			if (i == objectMapping.end()) throw Exception(ExceptionCode::InvalidArgument);
+			if (!i->second.isPrototype) throw Exception(ExceptionCode::InvalidOperation);
+			return i->second.anotherObject;
 		}
 	}
 }

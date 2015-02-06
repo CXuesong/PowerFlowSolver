@@ -31,25 +31,34 @@ namespace PowerSolutions
 			BeforeIterations();
 			for (int i = 0; i <= MaxIterations(); i++)
 			{
+				//也就是说，i 就是“已经完成”的迭代次数
+				//即实际循环次数比“迭代次数”多1
 				_PS_TRACE("迭代次数：" << i);
 				double dev = abs(EvalDeviation());
-				assert(IterationInfo.size() == i);
-				IterationInfoMutex.lock();
-				IterationInfo.push_back(PowerFlow::IterationInfo(dev));
-				IterationInfoMutex.unlock();
+				//回调函数
+				if (IterationEvent() != nullptr)
+				{
+					IterationEventArgs e(i, dev);
+					IterationEvent()(this, &e);
+				}
 				if (dev < MaxDeviationTolerance())
 					return GenerateSolution(SolutionStatus::Success, i, dev);
-				if (!OnIteration())
-					return GenerateSolution(SolutionStatus::IterationFailed, i, dev);
-				if (IntelliIterations())
+				//最后一次（多出来的一次）循环仅仅计算一下功率偏差。
+				if (i < MaxIterations())
 				{
-					//TODO 根据二次收敛特性进行判断
-					//也就是说需要在派生类中判断
-					if (i > 3 && dev > 1E10)
-						return GenerateSolution(SolutionStatus::IntelliIterationAbort, i, dev);
+					if (!OnIteration())
+						return GenerateSolution(SolutionStatus::IterationFailed, i, dev);
+					if (IntelliIterations())
+					{
+						//TODO 根据二次收敛特性进行判断
+						//也就是说需要在派生类中判断
+						//此处只是作出一个粗略的判断而已
+						if (i > 3 && dev > 1E10)
+							return GenerateSolution(SolutionStatus::IntelliIterationAbort, i, dev);
+					}
 				}
 			}
-			//达到最大迭代次数，不论是否收敛，均可停止。
+			//达到最大迭代次数，且未收敛。
 			return GenerateSolution(SolutionStatus::MaxIteration, MaxIterations(), EvalDeviation());
 		}
 
@@ -273,8 +282,6 @@ namespace PowerSolutions
 			s->PQNodeCount(PQNodeCount);
 			s->PVNodeCount(PVNodeCount);
 			s->SlackNode(SlackNode->Bus);
-			for (auto& info : IterationInfo)
-				s->AddIterationInfo(info);
 			//根据注入功率和负载情况计算节点出力信息。
 			for(auto& node : Nodes)
 			{
@@ -350,24 +357,7 @@ namespace PowerSolutions
 			s->TotalPowerConsumption(totalPowerConsumption);
 			s->TotalPowerLoss(totalPowerLoss);
 			s->TotalPowerShunt(totalPowerShunt);
-			IterationInfoMutex.lock();
-			IterationInfo.clear();
-			IterationInfoMutex.unlock();
 			return s;
-		}
-
-		SolverStatus SolverImpl::GetStatus()
-		{
-			IterationInfoMutex.lock();
-			if (IterationInfo.size() > 0)
-			{
-				SolverStatus status(IterationInfo.size(), IterationInfo.back());
-				IterationInfoMutex.unlock();
-				return status;
-			} else {
-				IterationInfoMutex.unlock();
-				return SolverStatus();
-			}
 		}
 
 		inline void SolverImpl::NodeInfo::AddPQ(complexd power)

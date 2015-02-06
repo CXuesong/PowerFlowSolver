@@ -17,6 +17,9 @@ EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PowerFlowSolver", "PowerFlowSolver\PowerFlowSolver.vbproj", "{C79AB260-5777-4CBE-A335-6F97B804AE85}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeUnitTest1", "NativeUnitTest1\NativeUnitTest1.vcxproj", "{FE468CDF-BCD4-4583-AEED-41E4396464E0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB} = {F0A27E64-DFB4-4A02-94D7-04C6E66534EB}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerSolutions.Interop", "PowerSolutions.Interop\PowerSolutions.Interop.vcxproj", "{3F461A67-845B-4B5B-B941-2CAB22E2494C}"
 	ProjectSection(ProjectDependencies) = postProject

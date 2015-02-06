@@ -5,7 +5,6 @@ Module Module1
 
     Function Main() As Integer
         Const DefaultArgument = "/?"
-
         Console.CursorVisible = False
         Console.Title = My.Application.Info.ProductName
         Console.WriteLine(My.Application.Info.ProductName)
@@ -41,6 +40,9 @@ Module Module1
                     GlobalParameters.ReportFile = Arg
                 Case "/ANSI", "-ANSI"
                     GlobalParameters.ANSI = True
+                Case "/BUILDTESTCASE"
+                    My.Computer.FileSystem.WriteAllText("PerfTestCase_" & CInt(Arg) & ".txt", ApplicationTests.BuildTestCase(CInt(Arg)), False)
+                    Return 0
                 Case Else
                     '无效的参数
                     Console.Error.WriteLine(Prompts.InvalidArgument1, Command)
@@ -64,10 +66,10 @@ Module Module1
         'ApplicationTests.InteropBenchmark()
         Using manager As New CaseManager
             manager.Load(GlobalParameters.CaseFile)
-            Console.WriteLine(Prompts.SolvingPowerFlow)
+            Console.WriteLine(Prompts.SolutionInProgress)
             If manager.Solve Then
                 If GlobalParameters.ReportFile = Nothing Then
-                    manager.SaveReport(Console.Out)
+                    manager.SaveReport()
                 Else
                     manager.SaveReport(GlobalParameters.ReportFile)
                 End If

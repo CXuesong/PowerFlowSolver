@@ -3,6 +3,7 @@ Imports System.Runtime.CompilerServices
 Imports System.Numerics
 Imports PowerSolutions.Interop.ObjectModel
 Imports PowerSolutions.Interop.PowerFlow
+Imports System.Text
 
 <Discardable>
 Friend Class ApplicationTests
@@ -47,5 +48,66 @@ Friend Class ApplicationTests
             End Using
         End Using
     End Sub
+
+    ''' <summary>
+    ''' 构造一个文本文档，包含了n节点的性能测试样例。
+    ''' </summary>
+    ''' <param name="buses"></param>
+    Shared Function BuildTestCase(buses As Integer) As String
+        Dim r As New Random()
+        Dim builder As New StringBuilder
+        With builder
+            .AppendLine("Attribute.Locale zh-CN")
+            .AppendLine("Attribute.Version 1.1")
+            .AppendLine("Attribute.Name 性能测试样例")
+            .AppendLine("Attribute.Annotation Test Case")
+            .AppendLine("Attribute.Solver NR")
+            .AppendLine("Attribute.NodeReorder True")
+            .AppendLine("Attribute.MaxDeviation 1E-6")
+            Const LargeScaleBuses = 20
+            For I = 1 To buses
+                .AppendFormat("Bus {0}, Bus{0}, 1", I)
+                .AppendLine()
+            Next
+            .AppendLine("SG 1, 1.05")
+            '连接相邻的节点
+            For I = 1 To buses - 1
+                If I Mod LargeScaleBuses > 0 Then
+                    .AppendFormat("LINE {0}, {1}, {2}, {3}, {4}", I, I + 1,
+                               0.0026 + r.NextDouble * 0.001,
+                               0.0139 + r.NextDouble * 0.001,
+                               0.4611 + (r.NextDouble - 0.5) * 0.1)
+                    .AppendLine()
+                End If
+            Next
+            '--------+------+-----
+            '        |      |
+            '        \------/
+            For I = 1 To buses - LargeScaleBuses - 1 Step LargeScaleBuses
+                .AppendLine("#" & I)
+                .AppendFormat("LINE {0}, {1}, {2}, {3}, {4}",
+                           I + LargeScaleBuses \ 2, I + LargeScaleBuses + LargeScaleBuses \ 2, 0.0026, 0.0139, 0.4611)
+                .AppendLine()
+                .AppendFormat("LINE {0}, {1}, {2}, {3}, {4}",
+                           I + LargeScaleBuses \ 4, I + LargeScaleBuses + LargeScaleBuses \ 3,
+                           0.0026, 0.0139, 0.4611)
+                .AppendLine()
+            Next
+            'PV发电机在最前面和最后面的节点上
+            For I = 1 To buses - 1 Step LargeScaleBuses
+                Dim Power1 = r.NextDouble
+                .AppendFormat("PVGenerator {0}, {1}, 1.05", I, Power1)
+                .AppendLine()
+                .AppendFormat("PVGenerator {0}, {1}, 1.05", I + LargeScaleBuses - 1, 1 - Power1)
+                .AppendLine()
+            Next
+            'PQ负载
+            For I = 1 To buses
+                .AppendFormat("PQLoad {0}, {1}, {2}", I, 1.0 / LargeScaleBuses, r.NextDouble)
+                .AppendLine()
+            Next
+        End With
+        Return builder.ToString
+    End Function
 End Class
 

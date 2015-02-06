@@ -3,6 +3,7 @@
 #include "ObjectModel.h"
 #include "Prompts.h"
 
+using namespace System::Runtime::InteropServices;
 using namespace PowerSolutions::Interop::ObjectModel;
 
 namespace PowerSolutions
@@ -15,11 +16,9 @@ namespace PowerSolutions
 				: m_NodeFlow(gcnew Dictionary<Bus, NodeFlowSolution>(native.NodeFlow().size())),
 				m_ComponentFlow(gcnew Dictionary<Component, BranchFlowSolution>(native.BranchFlow().size())),
 				m_BranchFlow(gcnew Dictionary<BusPair, BranchFlowSolution>(native.ComponentFlow().size(), BusPairUnorderedComparer::Default)),
-				m_IterationInfo(gcnew List<PowerFlow::IterationInfo>(native.IterationInfo().size())),
 				m_s_NodeFlow(gcnew ReadOnlyDictionary<Bus, NodeFlowSolution>(m_NodeFlow)),
 				m_s_ComponentFlow(gcnew ReadOnlyDictionary<Component, BranchFlowSolution>(m_ComponentFlow)),
-				m_s_BranchFlow(gcnew ReadOnlyDictionary<BusPair, BranchFlowSolution>(m_BranchFlow)),
-				m_s_IterationInfo(m_IterationInfo->AsReadOnly())
+				m_s_BranchFlow(gcnew ReadOnlyDictionary<BusPair, BranchFlowSolution>(m_BranchFlow))
 			{
 				//将解缓存至此实例中。
 				_INIT_PROPERTY_CACHE(TotalPowerGeneration, MarshalComplex);
@@ -39,13 +38,11 @@ namespace PowerSolutions
 					m_ComponentFlow->Add(Component(item.first), BranchFlowSolution(item.second));
 				for (auto& item : native.BranchFlow())
 					m_BranchFlow->Add(BusPair(item.first), BranchFlowSolution(item.second));
-				for (auto& item : native.IterationInfo())
-					m_IterationInfo->Add(PowerFlow::IterationInfo(item));
 			}
 
 			String^ Solution::ToString()
 			{
-				return m_IterationInfo[m_IterationInfo->Count - 1].ToString();
+				return Object::ToString();
 			}
 
 			Solver::Solver(SolverType type)
@@ -93,9 +90,33 @@ namespace PowerSolutions
 				return solution;
 			}
 
-			SolverStatus Solver::GetStatus()
+			void Solver::Iteration::add(IterationEventHandler^ name)
 			{
-				return SolverStatus(nativeObject->GetStatus());
+				if (m_IterationEvent == nullptr)
+				{
+					if (NativeIterationEventProcAddress == IntPtr::Zero)
+					{
+						//将 delegate 声明在类中仅为了保持其生存期。
+						NativeIterationEventDelegate = gcnew NativeIterationEventHandler(this, &Solver::NativeIterationEventProc);
+						NativeIterationEventProcAddress = Marshal::GetFunctionPointerForDelegate(NativeIterationEventDelegate);
+					}
+					nativeObject->IterationEvent((_NATIVE_PF IterationEventHandler)(void*)NativeIterationEventProcAddress);
+				}
+				m_IterationEvent += name;
+			}
+
+			void Solver::Iteration::remove(IterationEventHandler^ name)
+			{
+				m_IterationEvent -= name;
+				//在无事件监听时，撤销对底层对象的事件监听，以节省资源。
+				if (m_IterationEvent == nullptr)
+					nativeObject->IterationEvent(nullptr);
+			}
+
+			void Solver::NativeIterationEventProc(_NATIVE_PF Solver* sender, _NATIVE_PF IterationEventArgs* e)
+			{
+				Diagnostics::Debug::Assert(sender == nativeObject);
+				Iteration(this, gcnew IterationEventArgs(*e));
 			}
 
 			NodeFlowSolution::NodeFlowSolution(const _NATIVE_PF NodeFlowSolution& native)
@@ -114,24 +135,18 @@ namespace PowerSolutions
 				_INIT_PROPERTY_CACHE(ShuntPower2, MarshalComplex);
 			}
 
-
-			IterationInfo::IterationInfo(const _NATIVE_PF IterationInfo& native)
+			BranchFlowSolution::BranchFlowSolution(Complex power1, Complex power2, Complex shuntPower1, Complex shuntPower2)
 			{
+				Power1 = power1;
+				Power2 = power2;
+				ShuntPower1 = shuntPower1;
+				ShuntPower2 = shuntPower2;
+			}
+
+			IterationEventArgs::IterationEventArgs(const _NATIVE_PF IterationEventArgs& native)
+			{
+				_INIT_PROPERTY_CACHE(IterationCount, );
 				_INIT_PROPERTY_CACHE(MaxDeviation, );
-			}
-
-
-			SolverStatus::SolverStatus(const _NATIVE_PF SolverStatus& native)
-			{
-				_INIT_PROPERTY_CACHE(IsIterating, );
-				_INIT_PROPERTY_CACHE(LastIterationCount, );
-				_INIT_PROPERTY_CACHE(LastIterationInfo, IterationInfo);
-			}
-
-			String^ SolverStatus::ToString()
-			{
-				if (IsIterating == false) return Prompts::NotIterating;
-				return String::Format(L"n={0}, {1}", LastIterationCount, LastIterationInfo);
 			}
 
 		}

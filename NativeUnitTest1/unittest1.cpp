@@ -24,7 +24,7 @@ namespace NativeUnitTest1
 	TEST_CLASS(UnitTest1)
 	{
 	public:
-		TEST_METHOD(PowerFlowTestMethod1)
+		TEST_METHOD(NativePowerFlowTestMethod1)
 		{
 			// TODO:  在此输入测试代码
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
@@ -58,6 +58,42 @@ namespace NativeUnitTest1
 				cout << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
 			}
 			delete s;
+		}
+
+		TEST_METHOD(NativeNetworkCaseTest1)
+		{
+			//Clone Test
+			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+			NetworkCase network;
+			stringstream ss;
+			auto b1 = network.CreateBus(),
+				b2 = network.CreateBus(),
+				b3 = network.CreateBus(),
+				b4 = network.CreateBus();
+			network.AddObject({
+				new Transformer(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636),
+				new PVGenerator(b3, 0.2, 1.05),
+				new SlackGenerator(b4, 1.05),
+				new PQLoad(b2, complexd(0.5, 0.3)),
+				new PQLoad(b4, complexd(0.15, 0.1)),
+				new ShuntAdmittance(b2, complexd(0, 0.05)),
+				new Line(b4, b3, complexd(0.260331, 0.495868), complexd(0, 0.051728)),
+				new Line(b1, b4, complexd(0.173554, 0.330579), complexd(0, 0.034486)),
+				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
+				new ThreeWindingTransformer(b1, b2, b3, 1, 2, 3, 5, 1, 0.5, 0.3)
+			});
+			NetworkCaseTrackingInfo *info;
+			auto network2 = network.Clone(info);
+			for (auto& c : network.Objects())
+			{
+				ss << "Proto : " << typeid(*c).name() << ", " << c << "-->" << info->CloneOf(c) << endl;
+			}
+			for (auto& c : network2->Objects())
+			{
+				ss << "Clone : " << typeid(*c).name() << ", " << c << "-->" << info->PrototypeOf(c) << endl;
+			}
+			Logger::WriteMessage(ss.str().c_str());
+			delete info;
 		}
 	};
 }

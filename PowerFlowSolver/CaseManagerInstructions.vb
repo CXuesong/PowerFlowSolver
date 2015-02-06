@@ -110,9 +110,10 @@ Partial Public Class CaseManager
     End Function
 
     Shared Sub New()
-        Dim obsoleteAction As InstructionAction = Sub(sender, p)
-
-                                                  End Sub
+        Dim obsoleteAction As InstructionAction =
+            Sub(s, p)
+                s.ParserPrintWarning(Prompts.ObsoleteInstruction)
+            End Sub
         RegisterInstruction("Attribute.Version", 1,
                             Sub(sender, p)
                                 Dim v As New Version(p(0))
@@ -156,6 +157,7 @@ Partial Public Class CaseManager
                                 sender.EnsureSolver()
                                 sender.m_Solver.IntelliIterations = CBool(p(0))
                             End Sub)
+        RegisterInstruction("NextIndex", 1, obsoleteAction)
         RegisterInstruction("Bus", "B", {1, 2, 3},
                             Sub(sender, p)
                                 'Bus Key

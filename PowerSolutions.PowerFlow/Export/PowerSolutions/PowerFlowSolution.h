@@ -88,20 +88,6 @@ namespace PowerSolutions
 			{ }
 		};
 
-		struct IterationInfo
-		{
-		private:
-			double m_MaxDeviation;
-		public:
-			// 此次迭代结束时最大功率误差的绝对值。
-			double MaxDeviation() const { return m_MaxDeviation; }
-			void MaxDeviation(double val) { m_MaxDeviation = val; }
-		public:
-			IterationInfo(double maxDeviation)
-				: m_MaxDeviation(maxDeviation)
-			{ }
-		};
-
 		// 求解最终的结论
 		enum class SolutionStatus : byte
 		{
@@ -120,12 +106,10 @@ namespace PowerSolutions
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
 				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>> BranchFlowCollection;
 			typedef std::unordered_map<ObjectModel::Component*, BranchFlowSolution> ComponentFlowCollection;
-			typedef std::vector<IterationInfo> IterationInfoCollection;
 		private:
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
 			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
 			BranchFlowCollection m_BranchFlow;			//（节点编号对）支路潮流信息。
-			IterationInfoCollection m_IterationInfo;	//每一次迭代时的信息。
 			size_t m_NodeCount;
 			size_t m_PQNodeCount;
 			size_t m_PVNodeCount;
@@ -153,7 +137,6 @@ namespace PowerSolutions
 			void AddNodeFlow(ObjectModel::Bus* node, const NodeFlowSolution& solution);
 			void AddComponentFlow(ObjectModel::Component* c, const BranchFlowSolution& solution);
 			void AddBranchFlow(ObjectModel::Bus* node1, ObjectModel::Bus* node2, const BranchFlowSolution& solution);
-			void AddIterationInfo(PowerFlow::IterationInfo& info);
 		public:
 			size_t NodeCount() const { return m_NodeCount; }
 			size_t PQNodeCount() const { return m_PQNodeCount; }
@@ -170,7 +153,6 @@ namespace PowerSolutions
 			const NodeFlowCollection& NodeFlow() const { return m_NodeFlow; }
 			const ComponentFlowCollection& ComponentFlow() const { return m_ComponentFlow; }
 			const BranchFlowCollection& BranchFlow() const { return m_BranchFlow; }
-			const IterationInfoCollection& IterationInfo() const { return m_IterationInfo; }
 		protected:	//internal
 			Solution();
 		};
