@@ -1,7 +1,7 @@
 /*
 PowerSolutions
 公共对象模型
-by  Chen [CXuesong.], 2015
+by Chen [CXuesong.], 2015
 */
 
 //约定：如果使用 Attach 将元件绑定到 NetworkCase，则 NetworkCase 将拥有对此元件的资源占有权。

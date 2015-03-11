@@ -2,7 +2,7 @@
 电力系统潮流求解实用程序
 Power Flow Solver
 1.0.5514.31321
-Copyright ?  Chen [CXuesong.] 2015
+Copyright ? Chen [CXuesong.] 2015
 
 行1：过时的指令。已忽略。
 行4：过时的指令。已忽略。
@@ -28,7 +28,7 @@ Power Solutions
 电力系统潮流求解实用程序
 Power Flow Solver
 1.0.5514.31321
-Copyright ©  Chen [CXuesong.] 2015
+Copyright © Chen [CXuesong.] 2015
 
 电力网络稳态潮流分析报告
 案例：性能测试样例

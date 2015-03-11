@@ -12,7 +12,7 @@ Imports System.Runtime.InteropServices
 <Assembly: AssemblyDescription("电力系统潮流求解实用程序")> 
 <Assembly: AssemblyCompany("Xjtu")> 
 <Assembly: AssemblyProduct("Power Solutions")> 
-<Assembly: AssemblyCopyright("Copyright ©  Chen [CXuesong.] 2015")> 
+<Assembly: AssemblyCopyright("Copyright © Chen [CXuesong.] 2015")> 
 <Assembly: AssemblyTrademark("")> 
 
 <Assembly: ComVisible(False)>

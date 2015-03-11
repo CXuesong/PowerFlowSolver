@@ -1,7 +1,7 @@
 /*
 PowerSolutions
 稳态潮流求解实现部分（NR法）。
-by  Chen [CXuesong.], 2015
+by Chen [CXuesong.], 2015
 */
 
 #pragma once

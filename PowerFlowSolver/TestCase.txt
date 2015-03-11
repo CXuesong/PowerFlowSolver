@@ -1,5 +1,5 @@
 #《电力系统分析》例4-3（P104）所使用的4节点系统
-# 适用于PFS实用工具的案例编写由  Chen [CXuesong.] 完成。
+# 适用于PFS实用工具的案例编写由 Chen [CXuesong.] 完成。
 Attribute.Name  测试案例 Eg. 4-3
 Attribute.Solver  NR
 Attribute.NodeReorder  True

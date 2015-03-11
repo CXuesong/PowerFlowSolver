@@ -1,6 +1,6 @@
 电力系统潮流分析实用程序 PowerFlowSolver
 Ver. 0.3.14.1212 BETA
-by  Chen [CXuesong.], 2014 @ Xjtu
+by Chen [CXuesong.], 2014 @ Xjtu
 编译时间：Feb  1 2015，配置：Debug。
 
 加载文件：E:\My Files\Visual Studio 2013\Projects\PowerFlowSolver\Old_20150102\Debug\TestCase.txt……
@@ -18,7 +18,7 @@ by  Chen [CXuesong.], 2014 @ Xjtu
  电力稳态潮流报告
  电力系统潮流分析实用程序 PowerFlowSolver
  Ver. 0.3.14.1212 BETA
- by  Chen [CXuesong.], 2014 @ Xjtu
+ by Chen [CXuesong.], 2014 @ Xjtu
  案例名称：测试案例 Eg. 4-3
  报告生成于 2015年2月4日 17:30:46 中国标准时间
  

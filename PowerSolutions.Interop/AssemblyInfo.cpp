@@ -20,7 +20,7 @@ using namespace System::Security::Permissions;
 #endif
 [assembly:AssemblyCompanyAttribute(L"")];
 [assembly:AssemblyProductAttribute(L"PowerSolutions.Interop")];
-[assembly:AssemblyCopyrightAttribute(L"Copyright (c)  Chen [CXuesong.], 2015")];
+[assembly:AssemblyCopyrightAttribute(L"Copyright (c) Chen [CXuesong.], 2015")];
 [assembly:AssemblyTrademarkAttribute(L"")];
 [assembly:AssemblyCultureAttribute(L"")];
 

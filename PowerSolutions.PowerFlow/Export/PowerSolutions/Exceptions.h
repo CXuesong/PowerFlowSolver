@@ -7,7 +7,7 @@ namespace PowerSolutions {
 	enum class ExceptionCode : unsigned int
 	{
 		None = 0x00000000,
-		ExceptionClassMask = 0xFFFF0000,
+		ExceptionClassMask = 0xFFFF0000,			//用于与异常代码使用按位“与”操作符来检查异常的大分类。
 		InvalidArgument = 0x00010000,
 		ArgumentNull = InvalidArgument + 1,
 		ArgumentOutOfRange = InvalidArgument + 2,

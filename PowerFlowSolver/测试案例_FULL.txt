@@ -13,7 +13,7 @@ Attribute.Locale  zh-CN
 Attribute.Name  测试案例 Eg. 4-3
 # 案例的注解，会在计算前显示。
 Attribute.Annotation  《电力系统分析》例4-3（P104）所使用的4节点系统
-Attribute.Annotation  适用于PFS实用工具的案例编写由  Chen [CXuesong.] 完成。
+Attribute.Annotation  适用于PFS实用工具的案例编写由 Chen [CXuesong.] 完成。
 # 下面指定了求解方法、是否允许节点重排，以及收敛条件。如果不写，则表示使用默认值。
 Attribute.Solver  NR
 Attribute.NodeReorder  False
