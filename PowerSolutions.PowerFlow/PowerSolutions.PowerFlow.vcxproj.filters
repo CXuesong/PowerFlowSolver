@@ -42,6 +42,9 @@
     <ClCompile Include="PowerSolutions.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="PrimitiveNetworkImpl.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Export\PowerSolutions\Exceptions.h">
@@ -78,6 +81,9 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="NRSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="PrimitiveNetworkImpl.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

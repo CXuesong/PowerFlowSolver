@@ -49,6 +49,11 @@ namespace PowerSolutions
 			return new Line(m_Impedance, m_Admittance);
 		}
 
+		void Line::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const
+		{
+			pNetwork->AddPi(Bus1(), Bus2(), this->PiEquivalency());
+		}
+
 		////////// PV·¢µç»ú //////////
 		PVGenerator::PVGenerator()
 			: PVGenerator(nullptr, 0, 1)

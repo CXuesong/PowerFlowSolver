@@ -32,6 +32,7 @@ namespace PowerSolutions {
 			virtual void Validate() const;
 			virtual PiEquivalencyParameters PiEquivalency() const;	//获取此元件π型等值电路参数。
 		protected:
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一条传输线。

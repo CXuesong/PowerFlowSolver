@@ -19,6 +19,7 @@ namespace PowerSolutions {
 	namespace ObjectModel
 	{
 		class NetworkCase;
+		class PrimitiveNetwork;
 		class NetworkCaseTrackingInfo;
 		class Component;
 
@@ -63,12 +64,15 @@ namespace PowerSolutions {
 		class NetworkObject
 		{
 			friend class NetworkCase;
+			friend class PrimitiveNetworkImpl;
 			friend class ThreeWindingTransformer;
 		private:
 		protected:	//internal
 			//当此对象的数据将要用于参与计算前，调用此方法。
 			virtual void OnExpand() {}
 		public:
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const {}
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const {}
 			virtual void Validate() const;
 			//获取此对象的一个副本。
 			NetworkObject* Clone(const NetworkCaseTrackingInfo& context) const;
