@@ -15,6 +15,24 @@ namespace PowerSolutions
 			: m_Impedance(z), m_Admittance1(y1), m_Admittance2(y2)
 		{ }
 
+		vector<complexd> PiEquivalencyParameters::EvalPowerInjection(complexd voltage1, complexd voltage2) const
+		{
+			vector<complexd> power(3);
+			complexd power1, power2, shunt1, shunt2;
+			//以下宏定义了注入线路的功率，以及从线路流到地的功率。
+#define _EvalPower(v1, a1, v2, a2, y10, z12) \
+			conj((v1)*(v1)*(y10) + (v1)*((v1) - polar((v2), (a2)-(a1)))/(z12))	//以 v1 作为参考相量
+#define _EvalShuntPower(v, y10) (v) * (v) * conj(y10)
+			power[1] = -_EvalPower(abs(voltage1), arg(voltage1),
+				abs(voltage2), arg(voltage2), m_Admittance1, m_Impedance);
+			power[2] = -_EvalPower(abs(voltage2), arg(voltage2),
+				abs(voltage1), arg(voltage1), m_Admittance2, m_Impedance);
+			power[0] = _EvalShuntPower(abs(voltage1), m_Admittance1) + _EvalShuntPower(abs(voltage2), m_Admittance2);
+#undef _EvalPower
+#undef _EvalShuntPower
+			return power;
+		}
+
 		PerUnitBase::PerUnitBase(double voltage, double power)
 			: m_Voltage(voltage), m_Power(power)
 		{ }
@@ -68,25 +86,37 @@ namespace PowerSolutions
 			}
 		}
 
-		//complexd Component::EvalPowerInjection(int busIndex, std::vector<complexd>& busVoltage)
-		//{
-		//	throw Exception(ExceptionCode::NotSupported);
-		//}
-
-		//complexd Component::EvalPowerShunt(int busIndex, std::vector<complexd>& busVoltage)
-		//{
-		//	throw Exception(ExceptionCode::NotSupported);
-		//}
-
 		SinglePortComponent::SinglePortComponent(Bus* bus1) : Component(1)
 		{
 			Buses(0, bus1);
+		}
+
+		void SinglePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			pNetwork->ClaimParent(this->Bus1(), this);
 		}
 
 		DoublePortComponent::DoublePortComponent(Bus* bus1, Bus* bus2) : Component(2)
 		{
 			Buses(0, bus1);
 			Buses(1, bus2);
+		}
+
+		void DoublePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			pNetwork->ClaimBranch(Bus1(), Bus2());
+		}
+
+		vector<complexd> DoublePortComponent::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			return this->PiEquivalency().EvalPowerInjection(
+				pNetwork->BusMapping[Bus1()]->VoltagePhasor(),
+				pNetwork->BusMapping[Bus2()]->VoltagePhasor());
+		}
+
+		void DoublePortComponent::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
+		{
+			pNetwork->AddPi(Bus1(), Bus2(), this->PiEquivalency());
 		}
 
 		TriPortComponent::TriPortComponent(Bus* bus1, Bus* bus2, Bus* bus3) : ComplexComponent(3)

@@ -83,6 +83,7 @@ namespace NativeUnitTest1
 				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
 				new ThreeWindingTransformer(b1, b2, b3, 1, 2, 3, 5, 1, 0.5, 0.3)
 			});
+			//¿ËÂ¡²âÊÔ
 			NetworkCaseTrackingInfo *info;
 			auto network2 = network.Clone(info);
 			for (auto& c : network.Objects())

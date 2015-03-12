@@ -6,6 +6,7 @@
 #include "ObjectModel.h"
 #include "Utility.h"
 #include <unordered_map>
+#include <vector>
 
 namespace PowerSolutions
 {
@@ -33,6 +34,7 @@ namespace PowerSolutions
 				m_Degree(degree)
 			{ }
 		};
+
 		struct BranchFlowSolution		//（每元件或节点编号对）支路潮流结果
 		{
 			//建议：支路编号	I侧节点名称	J侧节点名称		I侧注入有功	I侧注入无功	J侧注入有功	J侧注入无功	支路有功损耗	支路无功损耗
@@ -44,17 +46,14 @@ namespace PowerSolutions
 		private:
 			complexd m_Power1;		//从节点1注入的功率
 			complexd m_Power2;		//从节点2注入的功率
-			complexd m_ShuntPower1;	//从节点1注入接地支路的功率
-			complexd m_ShuntPower2;	//从节点2注入接地支路的功率
+			complexd m_PowerShunt;	//从注入接地支路的功率之和
 		public:
 			PowerSolutions::complexd Power1() const { return m_Power1; }
 			void Power1(PowerSolutions::complexd val) { m_Power1 = val; }
 			PowerSolutions::complexd Power2() const { return m_Power2; }
 			void Power2(PowerSolutions::complexd val) { m_Power2 = val; }
-			PowerSolutions::complexd ShuntPower1() const { return m_ShuntPower1; }
-			void ShuntPower1(PowerSolutions::complexd val) { m_ShuntPower1 = val; }
-			PowerSolutions::complexd ShuntPower2() const { return m_ShuntPower2; }
-			void ShuntPower2(PowerSolutions::complexd val) { m_ShuntPower2 = val; }
+			PowerSolutions::complexd PowerShunt() const { return m_PowerShunt; }
+			void PowerShunt(PowerSolutions::complexd val) { m_PowerShunt = val; }
 			bool ReversedDirection() const	//指示功率的实际传输方向是否与约定的方向（Bus1->Bus2）相反。
 			{
 				return m_Power1.real() < 0;
@@ -71,23 +70,36 @@ namespace PowerSolutions
 			{
 				return m_Power1 + m_Power2;
 			}
-			complexd PowerShunt() const		//在两节点的接地支路中损失的总功率。
-			{
-				return m_ShuntPower1 + m_ShuntPower2;
-			}
 			BranchFlowSolution& operator+=(const BranchFlowSolution& y)
 			{
 				m_Power1 += y.m_Power1;
 				m_Power2 += y.m_Power2;
-				m_ShuntPower1 += y.m_ShuntPower1;
-				m_ShuntPower2 += y.m_ShuntPower2;
+				m_PowerShunt += y.m_PowerShunt;
 				return *this;
 			}
-			BranchFlowSolution(complexd power1, complexd power2, complexd shuntPower1, complexd shuntPower2)
-				: m_Power1(power1), m_Power2(power2), m_ShuntPower1(shuntPower1), m_ShuntPower2(shuntPower2)
+			BranchFlowSolution(complexd power1, complexd power2, complexd powerShunt)
+				: m_Power1(power1), m_Power2(power2), m_PowerShunt(powerShunt)
 			{ }
 		};
 
+		struct ComponentFlowSolution		//每元件潮流结果
+		{
+			// Power1          Power2
+			// --->--------------<----
+			//       |       |
+			// S.P.1 |       | S.P.2
+			//       |       |
+		private:
+			std::vector<complexd> m_Power;
+		public:
+			std::vector<complexd> Power() const	//从指定节点注入母线的功率。请参阅：Component::EvalPowerInjection
+			{
+				return m_Power;
+			}
+			ComponentFlowSolution(std::vector<complexd>& power)
+				: m_Power(power)
+			{ }
+		};
 		// 求解最终的结论
 		enum class SolutionStatus : byte
 		{
@@ -105,7 +117,7 @@ namespace PowerSolutions
 			typedef std::unordered_map<std::pair<ObjectModel::Bus*, ObjectModel::Bus*>, BranchFlowSolution,
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
 				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>> BranchFlowCollection;
-			typedef std::unordered_map<ObjectModel::Component*, BranchFlowSolution> ComponentFlowCollection;
+			typedef std::unordered_map<ObjectModel::Component*, ComponentFlowSolution> ComponentFlowCollection;
 		private:
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
 			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
@@ -135,7 +147,7 @@ namespace PowerSolutions
 			void IterationCount(int val);
 			void MaxDeviation(double val) { m_MaxDeviation = val; }
 			void AddNodeFlow(ObjectModel::Bus* node, const NodeFlowSolution& solution);
-			void AddComponentFlow(ObjectModel::Component* c, const BranchFlowSolution& solution);
+			void AddComponentFlow(ObjectModel::Component* c, const ComponentFlowSolution& solution);
 			void AddBranchFlow(ObjectModel::Bus* node1, ObjectModel::Bus* node2, const BranchFlowSolution& solution);
 		public:
 			size_t NodeCount() const { return m_NodeCount; }

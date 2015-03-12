@@ -49,11 +49,6 @@ namespace PowerSolutions
 			return new Line(m_Impedance, m_Admittance);
 		}
 
-		void Line::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const
-		{
-			pNetwork->AddPi(Bus1(), Bus2(), this->PiEquivalency());
-		}
-
 		////////// PV发电机 //////////
 		PVGenerator::PVGenerator()
 			: PVGenerator(nullptr, 0, 1)
@@ -82,6 +77,18 @@ namespace PowerSolutions
 		NetworkObject* PVGenerator::CloneInstance() const
 		{
 			return new PVGenerator(m_ActivePower, m_Voltage);
+		}
+
+		void PVGenerator::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			SinglePortComponent::BuildNodeInfo(pNetwork);
+			pNetwork->AddPV(Bus1(), m_ActivePower, m_Voltage);
+		}
+
+		vector<complexd> PVGenerator::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			//PV发电机无法确定自身发出的无功功率到底是多少，尤其是当一个节点上链接了不止一台发电机时。
+			return{ };
 		}
 
 		////////// 平衡节点发电机 //////////
@@ -114,6 +121,18 @@ namespace PowerSolutions
 			return new SlackGenerator(m_Voltage);
 		}
 
+		void SlackGenerator::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			SinglePortComponent::BuildNodeInfo(pNetwork);
+			pNetwork->AddSlack(Bus1(), m_Voltage);
+		}
+
+		vector<complexd> SlackGenerator::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			//仅凭一台平衡机自身无法确定出力。
+			return{};
+		}
+
 		////////// PQ负载 //////////
 		PQLoad::PQLoad()
 			: PQLoad(nullptr, 0)
@@ -144,6 +163,17 @@ namespace PowerSolutions
 			return new PQLoad(m_Power);
 		}
 
+		void PQLoad::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			SinglePortComponent::BuildNodeInfo(pNetwork);
+			pNetwork->AddPQ(Bus1(), -m_Power);
+		}
+
+		vector<complexd> PQLoad::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			return { 0, -m_Power };
+		}
+
 		////////// 接地导纳 //////////
 		ShuntAdmittance::ShuntAdmittance()
 			: ShuntAdmittance(0)
@@ -172,6 +202,25 @@ namespace PowerSolutions
 		NetworkObject* ShuntAdmittance::CloneInstance() const
 		{
 			return new ShuntAdmittance(m_Admittance);
+		}
+
+		vector<complexd> ShuntAdmittance::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			//  |   从 Bus 抽出 功率 [1]
+			//  |
+			//  |
+			//  |   注入 GND [0]
+			//注意此部分功率不应累加至出力功率
+			// S = U^2 * conj(Y)
+			//BUG FIXED:电压没有取平方
+			auto v = pNetwork->BusMapping[Bus1()]->Voltage;
+			auto p = v  * v * conj(m_Admittance);
+			return{ p, -p };
+		}
+
+		void ShuntAdmittance::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
+		{
+			pNetwork->AddShunt(this->Bus1(), m_Admittance);
 		}
 
 		////////// 变压器 //////////
@@ -323,10 +372,34 @@ namespace PowerSolutions
 		{
 		}
 
-		void ThreeWindingTransformer::OnExpand()
+		void ThreeWindingTransformer::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			pNetwork->ClaimBranch(Bus1(), m_CommonBus.get());
+			pNetwork->ClaimBranch(Bus2(), m_CommonBus.get());
+			pNetwork->ClaimBranch(Bus3(), m_CommonBus.get());
+		}
+
+		void ThreeWindingTransformer::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
 		{
 			//在参与计算前，重新计算子级参数。
+			//未来重构趋势：将 ComplexComponent 展平，作为普通 Component 处理。
 			UpdateChildren();
+			m_Transformer1->BuildAdmittanceInfo(pNetwork);
+			m_Transformer2->BuildAdmittanceInfo(pNetwork);
+			m_Transformer3->BuildAdmittanceInfo(pNetwork);
 		}
+
+		vector<complexd> ThreeWindingTransformer::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			//参阅 ThreeWindingTransformer::UpdateChildren 中的三绕组变压器模型。
+			auto power1 = m_Transformer1->EvalPowerInjection(pNetwork);
+			auto power2 = m_Transformer2->EvalPowerInjection(pNetwork);
+			auto power3 = m_Transformer3->EvalPowerInjection(pNetwork);
+			//接地功率应该主要是由变压器1产生。
+			assert(abs(power2[0]) / abs(power1[0]) < 1e-5);
+			assert(abs(power3[0]) / abs(power1[0]) < 1e-5);
+			return{ power1[0], power1[1], power2[1], power3[1] };
+		}
+
 	}
 }

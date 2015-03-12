@@ -38,6 +38,8 @@ namespace PowerSolutions {
 			complexd Admittance2() const { return m_Admittance2; }	//节点2接地导纳。
 			void Admittance2(complexd val) { m_Admittance2 = val; }
 		public:
+			std::vector<complexd> EvalPowerInjection(complexd voltage1, complexd voltage2) const;
+		public:
 			PiEquivalencyParameters(complexd z, complexd y1, complexd y2);
 		};
 
@@ -65,14 +67,8 @@ namespace PowerSolutions {
 		{
 			friend class NetworkCase;
 			friend class PrimitiveNetworkImpl;
-			friend class ThreeWindingTransformer;
 		private:
-		protected:	//internal
-			//当此对象的数据将要用于参与计算前，调用此方法。
-			virtual void OnExpand() {}
 		public:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const {}
-			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const {}
 			virtual void Validate() const;
 			//获取此对象的一个副本。
 			NetworkObject* Clone(const NetworkCaseTrackingInfo& context) const;
@@ -135,16 +131,18 @@ namespace PowerSolutions {
 			{
 				return static_cast<Component*>(NetworkObject::Clone(context));
 			}
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) {}
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) {}
 			/*
 			功率流向
 			Component -----> [node]   PowerInjection
 			            |
-						|   PowerShunt
+						|   PowerShunt [0]
 			*/
 			//根据节点电压获取此元件注入指定母线节点的功率。
-			//virtual complexd EvalPowerInjection(int busIndex, std::vector<complexd>& busVoltage);
-			//根据节点电压获取此元件在指定端口处注入地的功率。
-			//virtual complexd EvalPowerShunt(int busIndex, std::vector<complexd>& busVoltage);
+			//index = 0 : 接地功率
+			//index > 0 : 某端口的注入母线的功率
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const = 0;
 		protected:
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const override;
 		protected:
@@ -156,6 +154,8 @@ namespace PowerSolutions {
 		public:
 			Bus* Bus1() const { return Buses(0); }	//此元件连接到的母线。
 			void Bus1(Bus* val) { Buses(0, val); }
+		public:
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
 		protected:
@@ -171,6 +171,9 @@ namespace PowerSolutions {
 			void Bus2(Bus* val) { Buses(1, val); }
 		public:
 			virtual PiEquivalencyParameters PiEquivalency() const = 0;//获取此元件π型等值电路参数。
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
 		protected:

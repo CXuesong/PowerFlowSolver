@@ -1,5 +1,5 @@
 #pragma once
-
+//TODO 包装 ComponentFlow
 #include "PowerSolutions.Interop.h"
 #include "ObjectModel.h"
 
@@ -46,10 +46,8 @@ namespace PowerSolutions
 				_WRAP_PROPERTY_CACHE(Power1, Complex);
 				/// <summary>从节点2注入的功率。</summary>
 				_WRAP_PROPERTY_CACHE(Power2, Complex);
-				/// <summary>从节点1注入接地支路的功率。</summary>
-				_WRAP_PROPERTY_CACHE(ShuntPower1, Complex);
-				/// <summary>从节点2注入接地支路的功率。</summary>
-				_WRAP_PROPERTY_CACHE(ShuntPower2, Complex);
+				/// <summary>从注入接地支路的功率。</summary>
+				_WRAP_PROPERTY_CACHE(PowerShunt, Complex);
 			public:
 				//指示功率的实际传输方向是否与约定的方向（Bus1->Bus2）相反。
 				bool ReversedDirection()
@@ -66,17 +64,12 @@ namespace PowerSolutions
 				{
 					return Power1 + Power2;
 				}
-				//在两节点的接地支路中损失的总功率。
-				Complex PowerShunt()
-				{
-					return ShuntPower1 + ShuntPower2;
-				}
 				BranchFlowSolution Reverse()
 				{
-					return BranchFlowSolution(Power2, Power1, ShuntPower2, ShuntPower1);
+					return BranchFlowSolution(Power2, Power1, PowerShunt);
 				}
 			internal:
-				BranchFlowSolution(Complex power1, Complex power2, Complex shuntPower1, Complex shuntPower2);
+				BranchFlowSolution(Complex power1, Complex power2, Complex powerShunt);
 				BranchFlowSolution(const _NATIVE_PF BranchFlowSolution& native);
 			};
 

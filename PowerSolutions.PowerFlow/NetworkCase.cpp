@@ -79,62 +79,62 @@ namespace PowerSolutions {
 			return nc;
 		}
 
-		ExpandedNetworkCase NetworkCase::Expand() const
-		{
-			ExpandedNetworkCase ec;
-			for (auto& obj : m_Objects)
-			{
-				ExpandCore(ec, obj);
-			}
-			return ec;
-		}
+		//PrimitiveNetwork* NetworkCase::Expand() const
+		//{
+		//	PrimitiveNetwork ec;
+		//	for (auto& obj : m_Objects)
+		//	{
+		//		ExpandCore(ec, obj);
+		//	}
+		//	return ec;
+		//}
 
-		void NetworkCase::ExpandCore(ExpandedNetworkCase& enc, NetworkObject* obj)
-		{
-			assert(obj);
-			obj->OnExpand();
-			auto cc = dynamic_cast<ComplexComponent*>(obj);
-			if (cc == nullptr)
-			{
-				enc.AddObject(obj);
-			} else {
-				//需要展开子级
-				int count = cc->ChildrenCount();
-				for (int i = 0; i < count; i++)
-					ExpandCore(enc, cc->ChildAt(i));
-			}
-			return;
-		}
+		//void NetworkCase::ExpandCore(PrimitiveNetwork* enc, NetworkObject* obj)
+		//{
+		//	assert(obj);
+		//	obj->OnExpand();
+		//	auto cc = dynamic_cast<ComplexComponent*>(obj);
+		//	if (cc == nullptr)
+		//	{
+		//		enc.AddObject(obj);
+		//	} else {
+		//		//需要展开子级
+		//		int count = cc->ChildrenCount();
+		//		for (int i = 0; i < count; i++)
+		//			ExpandCore(enc, cc->ChildAt(i));
+		//	}
+		//	return;
+		//}
 
-		void ExpandedNetworkCase::AddObject(NetworkObject* obj)
-		{
-			//仅负责向合适的列表中加入项目，不进行 ComplexComponent 的展开。
-			assert(obj);
-			auto b = dynamic_cast<Bus*>(obj);
-			if (b != nullptr)
-			{
-				m_Buses->push_back(b);
-				return;
-			}
-			auto c = dynamic_cast<Component*>(obj);
-			if (c != nullptr)
-			{
-				assert(IsKindOf<ComplexComponent>(obj) == false);
-				m_Components->push_back(c);
-				//TODO 考虑检查 Buses(i) 是否为 null。
-				for (int i = 0; i < c->PortCount(); i++)
-					m_BusComponents->emplace(c->Buses(i), c);
-			}
-		}
+		//void ExpandedNetworkCase::AddObject(NetworkObject* obj)
+		//{
+		//	//仅负责向合适的列表中加入项目，不进行 ComplexComponent 的展开。
+		//	assert(obj);
+		//	auto b = dynamic_cast<Bus*>(obj);
+		//	if (b != nullptr)
+		//	{
+		//		m_Buses->push_back(b);
+		//		return;
+		//	}
+		//	auto c = dynamic_cast<Component*>(obj);
+		//	if (c != nullptr)
+		//	{
+		//		assert(IsKindOf<ComplexComponent>(obj) == false);
+		//		m_Components->push_back(c);
+		//		//TODO 考虑检查 Buses(i) 是否为 null。
+		//		for (int i = 0; i < c->PortCount(); i++)
+		//			m_BusComponents->emplace(c->Buses(i), c);
+		//	}
+		//}
 
-		ExpandedNetworkCase::ExpandedNetworkCase()
-			: m_Buses(new BusCollection),
-			m_Components(new ComponentCollection),
-			m_BusComponents(new BusComponentCollection)
-		{ }
+		//ExpandedNetworkCase::ExpandedNetworkCase()
+		//	: m_Buses(new BusCollection),
+		//	m_Components(new ComponentCollection),
+		//	m_BusComponents(new BusComponentCollection)
+		//{ }
 
-		ExpandedNetworkCase::~ExpandedNetworkCase()
-		{ }
+		//ExpandedNetworkCase::~ExpandedNetworkCase()
+		//{ }
 
 		void NetworkCaseTrackingInfo::MapObject(NetworkObject* oldObj, NetworkObject* newObj)
 		{

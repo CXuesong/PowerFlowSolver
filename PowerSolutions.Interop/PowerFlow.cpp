@@ -34,8 +34,8 @@ namespace PowerSolutions
 				_INIT_PROPERTY_CACHE(SlackNode, Bus);
 				for (auto& item : native.NodeFlow())
 					m_NodeFlow->Add(Bus(item.first), NodeFlowSolution(item.second));
-				for (auto& item : native.ComponentFlow())
-					m_ComponentFlow->Add(Component(item.first), BranchFlowSolution(item.second));
+				//for (auto& item : native.ComponentFlow())
+				//	m_ComponentFlow->Add(Component(item.first), BranchFlowSolution(item.second));
 				for (auto& item : native.BranchFlow())
 					m_BranchFlow->Add(BusPair(item.first), BranchFlowSolution(item.second));
 			}
@@ -131,16 +131,14 @@ namespace PowerSolutions
 			{
 				_INIT_PROPERTY_CACHE(Power1, MarshalComplex);
 				_INIT_PROPERTY_CACHE(Power2, MarshalComplex);
-				_INIT_PROPERTY_CACHE(ShuntPower1, MarshalComplex);
-				_INIT_PROPERTY_CACHE(ShuntPower2, MarshalComplex);
+				_INIT_PROPERTY_CACHE(PowerShunt, MarshalComplex);
 			}
 
-			BranchFlowSolution::BranchFlowSolution(Complex power1, Complex power2, Complex shuntPower1, Complex shuntPower2)
+			BranchFlowSolution::BranchFlowSolution(Complex power1, Complex power2, Complex powerShunt)
 			{
 				Power1 = power1;
 				Power2 = power2;
-				ShuntPower1 = shuntPower1;
-				ShuntPower2 = shuntPower2;
+				PowerShunt = powerShunt;
 			}
 
 			IterationEventArgs::IterationEventArgs(const _NATIVE_PF IterationEventArgs& native)

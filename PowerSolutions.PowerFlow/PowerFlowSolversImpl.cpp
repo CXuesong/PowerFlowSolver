@@ -2,12 +2,14 @@
 #include "PowerFlowSolversImpl.h"
 #include "PowerFlowSolution.h"
 #include "Exceptions.h"
+#include "Utility.h"
 #include <algorithm>
 #include <complex>
 #include <cmath>
 
 using namespace std;
 using namespace PowerSolutions::ObjectModel;
+using namespace PowerSolutions::Utility;
 
 namespace PowerSolutions
 {
@@ -25,7 +27,7 @@ namespace PowerSolutions
 		{
 			assert(caseInfo);
 			assert(MaxDeviationTolerance() >= 0);
-			PNetwork = new PrimitiveNetworkImpl(*caseInfo);
+			PNetwork = make_shared<PrimitiveNetworkImpl>(caseInfo, this->NodeReorder());
 			PQNodeCount = PNetwork->PQNodes.size();
 			PVNodeCount = PNetwork->PVNodes.size();
 			NodeCount = PNetwork->Nodes.size();
@@ -73,79 +75,62 @@ namespace PowerSolutions
 			s->Status(status);
 			s->IterationCount(iterCount);
 			s->MaxDeviation(maxDev);
-			s->NodeCount(PNetwork->NodeCount);
-			s->PQNodeCount(PNetwork->PQNodeCount);
-			s->PVNodeCount(PNetwork->PVNodeCount);
+			s->NodeCount(PNetwork->Nodes.size());
+			s->PQNodeCount(PNetwork->PQNodes.size());
+			s->PVNodeCount(PNetwork->PVNodes.size());
 			s->SlackNode(PNetwork->SlackNode->Bus);
 			//根据注入功率和负载情况计算节点出力信息。
 			for (auto& node : PNetwork->Nodes)
 			{
 				complexd PowerGeneration(node->ActivePowerInjection, node->ReactivePowerInjection);
 				complexd PowerConsumption;
-				auto range = PNetwork->BusComponents().equal_range(node->Bus);
-				for_each(range.first, range.second,
-					[&](pair<const Bus*, Component*> p){
-					//对于PQ负载
-					PQLoad *pqload = dynamic_cast<PQLoad*>(p.second);
-					if (pqload != nullptr)
+				for (auto& c : PNetwork->BusMapping[node->Bus]->Components)
+				{
+					auto powerInjection = c->EvalPowerInjection(PNetwork.get());
+					//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
+					if (powerInjection.size() > 0)
 					{
-						PowerGeneration += pqload->Power();
-						PowerConsumption += pqload->Power();
+						assert(powerInjection.size() == 2);
+						//PQ负载相当于注入（抽出）功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
+						//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
+						PowerGeneration -= powerInjection[0] + powerInjection[1];
+						PowerConsumption -= powerInjection[1];
 					}
-					//对于接地导纳
-					ShuntAdmittance *sa = dynamic_cast<ShuntAdmittance*>(p.second);
-					if (sa != nullptr)
-					{
-						//注意此部分功率不应累加至出力功率
-						// S = U^2 * conj(Y)
-						//BUG FIXED:电压没有取平方
-						PowerConsumption += node->Voltage * node->Voltage * conj(sa->Admittance());
-					}
-				});
+				}
 				s->AddNodeFlow(node->Bus,
 					NodeFlowSolution(node->VoltagePhasor(), PowerGeneration, PowerConsumption, node->Degree));
 				totalPowerGeneration += PowerGeneration;
 				totalPowerConsumption += PowerConsumption;
 			}
 			//根据节点电压计算支路功率。
-			for (auto& c : PNetwork->Components())
+			for (auto& obj : PNetwork->SourceNetwork()->Objects())
 			{
-				//仅适用于双端元件。
-				DoublePortComponent *dpc = dynamic_cast<DoublePortComponent*>(c);
-				if (dpc != NULL)
+				auto c = dynamic_cast<Component*>(obj);
+				if (c != nullptr)
 				{
-					auto node1 = PNetwork->BusMapping[dpc->Bus1()],
-						node2 = PNetwork->BusMapping[dpc->Bus2()];
-					complexd power1, power2, shunt1, shunt2;
-					auto pieqv = dpc->PiEquivalency();
-#define _EvalPower(v1, a1, v2, a2, y10, z12) \
-			conj((v1)*(v1)*(y10) + (v1)*((v1) - polar((v2), (a2)-(a1)))/(z12))	//以 v1 作为参考相量
-#define _EvalShuntPower(v, y10) (v) * (v) * conj(y10)
-					power1 = _EvalPower(node1->Voltage, node1->Angle,
-						node2->Voltage, node2->Angle, pieqv.Admittance1(), pieqv.Impedance());
-					power2 = _EvalPower(node2->Voltage, node2->Angle,
-						node1->Voltage, node1->Angle, pieqv.Admittance2(), pieqv.Impedance());
-					//注意，计算支路功率时
-					//对于变压器，不能将π型等值电路两侧的接地导纳拆开计算。
-					//只能按照Γ型等值电路进行计算。
-					auto tf = dynamic_cast<Transformer*>(c);
-					if (tf != nullptr)
+					vector<complexd> powerInjection = c->EvalPowerInjection(PNetwork.get());
+					if (powerInjection.size() > 0)
 					{
-						shunt1 = _EvalShuntPower(node1->Voltage, tf->Admittance());
-						shunt2 = 0;
-					} else {
-						shunt1 = _EvalShuntPower(node1->Voltage, pieqv.Admittance1());
-						shunt2 = _EvalShuntPower(node2->Voltage, pieqv.Admittance2());
+						s->AddComponentFlow(c, ComponentFlowSolution(powerInjection));
+						//仅适用于双端元件。
+						DoublePortComponent *dpc = dynamic_cast<DoublePortComponent*>(c);
+						if (dpc != nullptr)
+						{
+							//追加元件潮流项
+							BranchFlowSolution branchFlow(-powerInjection[1], -powerInjection[2], powerInjection[0]);
+							//增加/追加支路潮流
+							s->AddBranchFlow(dpc->Bus1(), dpc->Bus2(), branchFlow);
+						}
+						if (c->PortCount() > 1)
+						{
+							assert(powerInjection.size() > 2);
+							totalPowerShunt += powerInjection[0];
+							//对于多端口元件，注入功率之和就是串联损耗。
+							//注意功率的参考方向是流入母线的。
+							for (auto i = powerInjection.size() - 1; i > 0; i--)
+								totalPowerLoss -= powerInjection[i];
+						}
 					}
-#undef _EvalPower
-#undef _EvalShuntPower
-					//追加元件潮流项
-					BranchFlowSolution branchFlow(power1, power2, shunt1, shunt2);
-					s->AddComponentFlow(c, branchFlow);
-					//增加/追加支路潮流
-					s->AddBranchFlow(dpc->Bus1(), dpc->Bus2(), branchFlow);
-					totalPowerLoss += branchFlow.PowerLoss();
-					totalPowerShunt += branchFlow.PowerShunt();
 				}
 			}
 			s->TotalPowerGeneration(totalPowerGeneration);

@@ -32,7 +32,6 @@ namespace PowerSolutions {
 			virtual void Validate() const;
 			virtual PiEquivalencyParameters PiEquivalency() const;	//获取此元件π型等值电路参数。
 		protected:
-			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一条传输线。
@@ -56,7 +55,9 @@ namespace PowerSolutions {
 			void Voltage(double val) { m_Voltage = val; }
 		public:
 			virtual void Validate() const;
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		protected:
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一台PV发电机。
@@ -77,7 +78,9 @@ namespace PowerSolutions {
 			void Voltage(complexd val) { m_Voltage = val; }
 		public:
 			virtual void Validate() const;
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		protected:
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一台平衡发电机。
@@ -98,7 +101,9 @@ namespace PowerSolutions {
 			void Power(complexd val) { m_Power = val; }
 		public:
 			virtual void Validate() const;
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		protected:
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一个PQ负载。
@@ -119,6 +124,8 @@ namespace PowerSolutions {
 			void Admittance(complexd val) { m_Admittance = val; }
 		public:
 			virtual void Validate() const;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
@@ -197,12 +204,14 @@ namespace PowerSolutions {
 			complexd Impedance3() const { return (m_Impedance13 + m_Impedance23 - m_Impedance12) / 2.0; }
 		public:
 			virtual void Validate() const;
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		private:	//基础结构。
 			virtual int ChildrenCount() const override;
 			virtual NetworkObject* ChildAt(int index) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
-			virtual void OnExpand();
 		public:
 			//创建一个三绕组变压器。
 			static ThreeWindingTransformer* Create(Bus *bus1, Bus *bus2, Bus *bus3,

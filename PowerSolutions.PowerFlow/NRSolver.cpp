@@ -24,7 +24,7 @@ namespace PowerSolutions
 
 		void NRSolver::BeforeIterations()
 		{
-			assert(Block1EquationCount() == PNetwork->PQNodeCount + PVNodeCount);
+			assert(Block1EquationCount() == PQNodeCount + PVNodeCount);
 			assert(EquationCount() == PQNodeCount * 2 + PVNodeCount);
 			//PQ节点：[dP dQ] = J * [V theta]
 			//PV节点：[dP] = J * [theta]
@@ -163,8 +163,8 @@ namespace PowerSolutions
 				}
 			}
 			_PS_TRACE("平衡节点 ======");
-			_PS_TRACE("有功注入：" << SlackNode->ActivePowerInjection);
-			_PS_TRACE("无功注入：" << SlackNode->ReactivePowerInjection);
+			_PS_TRACE("有功注入：" << PNetwork->SlackNode->ActivePowerInjection);
+			_PS_TRACE("无功注入：" << PNetwork->SlackNode->ReactivePowerInjection);
 			_PS_TRACE("偏差 deltaY ==========");
 			_PS_TRACE(PowerInjectionDeviation);
 		}

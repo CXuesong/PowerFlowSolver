@@ -19,7 +19,7 @@ namespace PowerSolutions
 			assert(result.second);
 		}
 
-		void Solution::AddComponentFlow(Component* c, const BranchFlowSolution& solution)
+		void Solution::AddComponentFlow(ObjectModel::Component* c, const ComponentFlowSolution& solution)
 		{
 			auto result = m_ComponentFlow.emplace(c, solution);
 			assert(result.second);
