@@ -2,16 +2,18 @@
 #include "PowerFlowSolvers.h"
 #include "NRSolver.h"
 #include "Exceptions.h"
+#include <PrimitiveNetwork.h>
 
 using namespace std;
+using namespace PowerSolutions::ObjectModel;
 
 namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
 		Solver::Solver()
-			: m_MaxIterations(10), m_MaxDeviationTolerance(0.01), 
-			m_NodeReorder(true), m_IntelliIterations(true), m_IterationEvent(nullptr)
+			: m_MaxIterations(10), m_MaxDeviationTolerance(0.01),
+			m_IntelliIterations(true), m_IterationEvent(nullptr)
 		{ }
 
 		Solver::~Solver()
@@ -29,5 +31,12 @@ namespace PowerSolutions
 			assert(false);
 			return nullptr;
 		}
+
+		Solution* Solver::Solve(ObjectModel::NetworkCase& network)
+		{
+			PrimitiveNetwork pn(network, true);
+			return this->Solve(pn);
+		}
+
 	}
 }

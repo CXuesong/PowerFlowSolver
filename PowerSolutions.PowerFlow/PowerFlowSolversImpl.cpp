@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PowerFlowSolversImpl.h"
 #include "PowerFlowSolution.h"
+#include "PrimitiveNetwork.h"
 #include "Exceptions.h"
 #include "Utility.h"
 #include <algorithm>
@@ -23,11 +24,10 @@ namespace PowerSolutions
 		{
 		}
 
-		Solution* SolverImpl::Solve(NetworkCase* caseInfo)
+		Solution* SolverImpl::Solve(PrimitiveNetwork& network)
 		{
-			assert(caseInfo);
 			assert(MaxDeviationTolerance() >= 0);
-			PNetwork = make_shared<PrimitiveNetworkImpl>(caseInfo, this->NodeReorder());
+			PNetwork = &network;
 			PQNodeCount = PNetwork->PQNodes.size();
 			PVNodeCount = PNetwork->PVNodes.size();
 			NodeCount = PNetwork->Nodes.size();
@@ -86,7 +86,7 @@ namespace PowerSolutions
 				complexd PowerConsumption;
 				for (auto& c : PNetwork->BusMapping[node->Bus]->Components)
 				{
-					auto powerInjection = c->EvalPowerInjection(PNetwork.get());
+					auto powerInjection = c->EvalPowerInjection(PNetwork);
 					//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
 					if (powerInjection.size() > 0)
 					{
@@ -108,7 +108,7 @@ namespace PowerSolutions
 				auto c = dynamic_cast<Component*>(obj);
 				if (c != nullptr)
 				{
-					vector<complexd> powerInjection = c->EvalPowerInjection(PNetwork.get());
+					vector<complexd> powerInjection = c->EvalPowerInjection(PNetwork);
 					if (powerInjection.size() > 0)
 					{
 						s->AddComponentFlow(c, ComponentFlowSolution(powerInjection));

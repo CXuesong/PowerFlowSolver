@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PowerFlowObjectModel.h"
 #include "NetworkCase.h"
+#include "PrimitiveNetwork.h"
 #include "Exceptions.h"
 #include <algorithm>
 
@@ -257,6 +258,17 @@ namespace PowerSolutions
 				m_TapRatio * (m_TapRatio - 1.0) / m_Impedance);
 		}
 
+		std::vector<complexd> Transformer::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		{
+			//注意，计算支路功率时
+			//对于变压器，不能将π型等值电路两侧的接地导纳拆开计算。
+			//只能按照Γ型等值电路进行计算。
+			auto p = DoublePortComponent::EvalPowerInjection(pNetwork);
+			auto v = pNetwork->BusMapping[Bus1()]->Voltage;
+			p[0] = v * v * conj(m_Admittance);
+			return p;
+		}
+
 		Transformer* Transformer::Create(Bus *bus1, Bus *bus2, complexd impedance, complexd admittance, complexd tapRatio)
 		{
 			auto newInst = new Transformer(impedance, admittance, tapRatio);
@@ -270,21 +282,17 @@ namespace PowerSolutions
 			return new Transformer(m_Impedance, m_Admittance, m_TapRatio);
 		}
 
-		int ThreeWindingTransformer::ChildrenCount() const
+		Bus* ThreeWindingTransformer::ChildBusAt(int index)  const
 		{
-			return 4;
+			assert(index == 0);
+			assert(m_CommonBus != nullptr);
+			m_CommonBus->InitialVoltage(Bus1()->InitialVoltage());
+			return m_CommonBus.get();
 		}
 
-		NetworkObject* ThreeWindingTransformer::ChildAt(int index) const
+		int ThreeWindingTransformer::ChildBusCount()  const
 		{
-			switch (index)
-			{
-			case 0: return m_CommonBus.get();
-			case 1: return m_Transformer1.get();
-			case 2: return m_Transformer2.get();
-			case 3: return m_Transformer3.get();
-			default: assert(false); return nullptr;
-			}
+			return 1;
 		}
 
 		ThreeWindingTransformer::ThreeWindingTransformer()
@@ -296,6 +304,13 @@ namespace PowerSolutions
 			complexd admittance, complexd tapRatio1, complexd tapRatio2, complexd tapRatio3)
 			: ThreeWindingTransformer(nullptr, nullptr, nullptr,
 			impedance12, impedance13, impedance23, admittance, tapRatio1, tapRatio2, tapRatio3)
+		{ }
+
+		ThreeWindingTransformer::ThreeWindingTransformer(Bus *bus1, Bus *bus2, Bus *bus3,
+			complexd impedance12, complexd impedance13, complexd impedance23,
+			complexd tapRatio1, complexd tapRatio2, complexd tapRatio3)
+			: ThreeWindingTransformer(bus1, bus2, bus3,
+			impedance12, impedance13, impedance23, 0, tapRatio1, tapRatio2, tapRatio3)
 		{ }
 
 		ThreeWindingTransformer::ThreeWindingTransformer(Bus *bus1, Bus *bus2, Bus *bus3,
@@ -338,8 +353,6 @@ namespace PowerSolutions
 			//    Y
 			//    |
 			assert(Bus1() != nullptr);
-			//设置母线
-			m_CommonBus->InitialVoltage(Bus1()->InitialVoltage());
 			//设置变压器
 			m_Transformer1->Bus1(Bus1());
 			m_Transformer2->Bus1(Bus2());
@@ -348,17 +361,18 @@ namespace PowerSolutions
 			m_Transformer2->Bus2(m_CommonBus.get());
 			m_Transformer3->Bus2(m_CommonBus.get());
 			//注意此处的阻值为折算至一次侧的值。
-			auto z1 = Impedance1(),
-				z2 = Impedance2() / pow((m_TapRatio1 * m_TapRatio2), 2),
-				z3 = Impedance3() / pow((m_TapRatio1 * m_TapRatio3), 2),
-				y1 = m_Admittance;
+			auto a = (m_Impedance12 + m_Impedance23 - m_Impedance13) / 2.0;
+			auto z1 = Impedance1(), z2 = Impedance2(), z3 = Impedance3();
 			//'需要将折算到一次侧的二次、三次侧绕组参数折回对应的电压等级
 			//TODO 使用更为精确的比较策略（考虑标幺值引起的缩放）
-			if (abs(z1.imag()) < 1e-10) z1.imag(1e-10);
-			if (abs(z2.imag()) < 1e-10) z2.imag(1e-10);
-			if (abs(z3.imag()) < 1e-10) z3.imag(1e-10);
+			const auto MinImpedance = 1e-8;
+			if (abs(z1.imag()) < MinImpedance) z1.imag(MinImpedance * 10);
+			if (abs(z2.imag()) < MinImpedance) z2.imag(MinImpedance * 10);
+			if (abs(z3.imag()) < MinImpedance) z3.imag(MinImpedance * 10);
+			z2 /= pow((m_TapRatio1 * m_TapRatio2), 2);
+			z3 /= pow((m_TapRatio1 * m_TapRatio3), 2);
 			m_Transformer1->Impedance(z1);
-			m_Transformer1->Admittance(y1);
+			m_Transformer1->Admittance(0);
 			m_Transformer1->TapRatio(m_TapRatio1);
 			m_Transformer2->Impedance(z2);
 			m_Transformer2->Admittance(0);
@@ -382,11 +396,12 @@ namespace PowerSolutions
 		void ThreeWindingTransformer::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
 		{
 			//在参与计算前，重新计算子级参数。
-			//未来重构趋势：将 ComplexComponent 展平，作为普通 Component 处理。
+			//TODO 移除子对象，直接变为纯计算。
 			UpdateChildren();
 			m_Transformer1->BuildAdmittanceInfo(pNetwork);
 			m_Transformer2->BuildAdmittanceInfo(pNetwork);
 			m_Transformer3->BuildAdmittanceInfo(pNetwork);
+			pNetwork->AddShunt(m_CommonBus.get(), m_Admittance);
 		}
 
 		vector<complexd> ThreeWindingTransformer::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
@@ -396,10 +411,10 @@ namespace PowerSolutions
 			auto power2 = m_Transformer2->EvalPowerInjection(pNetwork);
 			auto power3 = m_Transformer3->EvalPowerInjection(pNetwork);
 			//接地功率应该主要是由变压器1产生。
-			assert(abs(power2[0]) / abs(power1[0]) < 1e-5);
-			assert(abs(power3[0]) / abs(power1[0]) < 1e-5);
+			//潮流不收敛，或者导纳很小的时候，以下断言很可能失败。
+			//assert(abs(power2[0]) / abs(power1[0]) < 1e-5);
+			//assert(abs(power3[0]) / abs(power1[0]) < 1e-5);
 			return{ power1[0], power1[1], power2[1], power3[1] };
 		}
-
 	}
 }

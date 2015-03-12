@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "PrimitiveNetworkImpl.h"
+#include "PrimitiveNetwork.h"
 #include "Exceptions.h"
 #include "NetworkCase.h"
 #include "Utility.h"
@@ -10,12 +10,12 @@ using namespace PowerSolutions::Utility;
 namespace PowerSolutions {
 	namespace ObjectModel {
 
-		void PrimitiveNetworkImpl::AddPi(Bus* pbus1, Bus* pbus2, PiEquivalencyParameters pieqv)
+		void PrimitiveNetwork::AddPi(Bus* pbus1, Bus* pbus2, PiEquivalencyParameters pieqv)
 		{
 			//具有π形等值电路
 			int bus1 = BusMapping[pbus1]->Index;
 			int bus2 = BusMapping[pbus2]->Index;
-			_PS_TRACE(bus1 << " -- " << bus2 << "\t" << pieqv.Impedance() << "\t" << pieqv.Admittance1() << "\t" << pieqv.Admittance2());
+			_PS_TRACE(bus1 << " -- " << bus2 << "\t" << 1.0 / pieqv.Impedance() << "\t" << pieqv.Admittance1() << "\t" << pieqv.Admittance2());
 			//BUG CLOSED
 			//当系数矩阵非零元素数量增加时，
 			//可能会导致预先获取的零元素对应地址被覆盖，
@@ -31,7 +31,7 @@ namespace PowerSolutions {
 			assert(!isnan(Admittance.coeffRef(bus1, bus2).imag()));
 		}
 
-		void PrimitiveNetworkImpl::LoadNetworkCase(NetworkCase* network, bool nodeReorder)
+		void PrimitiveNetwork::LoadNetworkCase(NetworkCase* network, bool nodeReorder)
 		{
 			m_SourceNetwork = network;
 			//重置局部变量
@@ -44,11 +44,25 @@ namespace PowerSolutions {
 			PVNodes.clear();
 			SlackNode = nullptr;
 			//载入母线
-			network->ForEachDescendant([&](NetworkObject* obj){
-				auto* b = dynamic_cast<Bus*>(obj);
+			for (auto& obj : network->Objects())
+			{
+				auto b = dynamic_cast<Bus*>(obj);
 				if (b != nullptr)
+				{
 					m_Buses.push_back(b);
-			});
+					continue;
+				}
+				auto bc = dynamic_cast<IBusContainer*>(obj);
+				if (bc != nullptr)
+				{
+					for (auto i = 0, j = bc->ChildBusCount(); i < j; i++)
+					{
+						auto b = bc->ChildBusAt(i);
+						assert(b != nullptr);
+						m_Buses.push_back(b);
+					}
+				}
+			}
 			//在第一个 for 循环中提前粗略统计PQ/PV节点数目是为了后面 vector 提前预留内存使用。
 			BusMapping.reserve(m_Buses.size());
 			for (auto &obj : m_Buses)
@@ -63,10 +77,7 @@ namespace PowerSolutions {
 			for (auto& obj : network->Objects())
 			{
 				auto* c = dynamic_cast<Component*>(obj);
-				if (c != nullptr && !IsKindOf<ComplexComponent>(c))
-				{
-					c->BuildNodeInfo(this);
-				}
+				if (c != nullptr) c->BuildNodeInfo(this);
 			}
 			//注意，此时的统计的PQ节点数量中还包含了孤立的节点
 			//从 BusMapping 中移除未被引用的节点。
@@ -172,25 +183,25 @@ namespace PowerSolutions {
 			_PS_TRACE("\n导纳矩阵 ==========\n" << Admittance);
 		}
 
-		PrimitiveNetworkImpl::PrimitiveNetworkImpl(ObjectModel::NetworkCase* network, bool nodeReorder)
+		PrimitiveNetwork::PrimitiveNetwork(ObjectModel::NetworkCase& network, bool nodeReorder)
 		{
-			this->LoadNetworkCase(network, nodeReorder);
+			this->LoadNetworkCase(&network, nodeReorder);
 		}
 
-		void PrimitiveNetworkImpl::AddShunt(Bus* bus, complexd admittance)
+		void PrimitiveNetwork::AddShunt(Bus* bus, complexd admittance)
 		{
 			auto index = BusMapping[bus]->Index;
 			Admittance.coeffRef(index, index) += admittance;
 		}
 
-		void PrimitiveNetworkImpl::AddPQ(Bus* bus, complexd power)
+		void PrimitiveNetwork::AddPQ(Bus* bus, complexd power)
 		{
 			auto info = BusMapping[bus];
 			info->ActivePowerInjection += power.real();
 			info->ReactivePowerInjection += power.imag();
 		}
 
-		void PrimitiveNetworkImpl::AddPV(Bus* bus, double activePower, double voltage)
+		void PrimitiveNetwork::AddPV(Bus* bus, double activePower, double voltage)
 		{
 			auto info = BusMapping[bus];
 			//false 表示这种情况是不可以的，需要引发异常。
@@ -204,7 +215,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetworkImpl::AddSlack(Bus* bus, complexd voltagePhasor)
+		void PrimitiveNetwork::AddSlack(Bus* bus, complexd voltagePhasor)
 		{
 			auto info = BusMapping[bus];
 			if (SlackNode == nullptr)
@@ -229,7 +240,7 @@ namespace PowerSolutions {
 
 		}
 
-		void PrimitiveNetworkImpl::ClaimBranch(Bus* bus1, Bus* bus2)
+		void PrimitiveNetwork::ClaimBranch(Bus* bus1, Bus* bus2)
 		{
 			//加入支路-组件列表中
 			if (Branches.insert(make_pair(bus1, bus2)).second)
@@ -240,11 +251,15 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetworkImpl::ClaimParent(Bus* bus, SinglePortComponent* c)
+		void PrimitiveNetwork::ClaimParent(Bus* bus, SinglePortComponent* c)
 		{
 			//加入母线的单端元件列表中。
 			BusMapping[bus]->Components.push_back(c);
 		}
 
+		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
+			: Bus(bus), Type(NodeType::PQNode),
+			Voltage(0), Angle(0)
+		{ }
 	}
 }

@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "NRSolver.h"
+#include "PrimitiveNetwork.h"
 #include "Exceptions.h"
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
@@ -127,7 +128,6 @@ namespace PowerSolutions
 			auto &Admittance = PNetwork->Admittance;
 			for (int m = 0; m < NodeCount; m++)
 			{
-				//TODO 优化回调
 				auto *nodeM = PNetwork->Nodes[m];
 				double Um = NodeVoltage(m);
 				double thetaM = NodeAngle(m);
@@ -186,6 +186,8 @@ namespace PowerSolutions
 			// 对非对角元有
 			// H =  L
 			// N = -M
+
+			//TODO 由于节点连接性的稀疏性，可以不把循环做完。
 			for (int m = 0; m < NodeCount - 1; m++)
 			{
 				auto *nodeM = PNetwork->Nodes[m];

@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <crtdbg.h>
+#include "../PowerSolutions.PowerFlow/Export/PowerSolutions/PrimitiveNetwork.h"
 
 using namespace PowerSolutions;
 using namespace PowerSolutions::ObjectModel;
@@ -25,43 +26,7 @@ namespace NativeUnitTest1
 	TEST_CLASS(UnitTest1)
 	{
 	public:
-		TEST_METHOD(NativePowerFlowTestMethod1)
-		{
-			// TODO:  ?????????????
-			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
-			NetworkCase network;
-			auto b1 = network.CreateBus(),
-				b2 = network.CreateBus(),
-				b3 = network.CreateBus(),
-				b4 = network.CreateBus();
-			network.AddObject({
-				new Transformer(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636),
-				new PVGenerator(b3, 0.2, 1.05),
-				new SlackGenerator(b4, 1.05),
-				new PQLoad(b2, complexd(0.5, 0.3)),
-				new PQLoad(b4, complexd(0.15, 0.1)),
-				new ShuntAdmittance(b2, complexd(0, 0.05)),
-				new Line(b4, b3, complexd(0.260331, 0.495868), complexd(0, 0.051728)),
-				new Line(b1, b4, complexd(0.173554, 0.330579), complexd(0, 0.034486)),
-				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
-				/*new ThreeWindingTransformer(b1, b2, b3, 1, 2, 3, 5, 1, 0.5, 0.3),*/
-			});
-			//for (int i = 0; i < 1000; i++)
-			//	auto nc2 = shared_ptr<NetworkCase>(network.Clone());
-			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
-			solver->MaxDeviationTolerance(1e-12);
-			solver->NodeReorder(false);
-			auto s = solver->Solve(&network);
-			delete s;
-			s = solver->Solve(&network);
-			for (auto& item : s->NodeFlow())
-			{
-				cout << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
-			}
-			delete s;
-		}
-
-		TEST_METHOD(NativeNetworkCaseTest1)
+		TEST_METHOD(NativeNetworkCaseCloneTest1)
 		{
 			//Clone Test
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
@@ -83,7 +48,7 @@ namespace NativeUnitTest1
 				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
 				new ThreeWindingTransformer(b1, b2, b3, 1, 2, 3, 5, 1, 0.5, 0.3)
 			});
-			//��¡����
+			//��¡����
 			NetworkCaseTrackingInfo *info;
 			auto network2 = network.Clone(info);
 			for (auto& c : network.Objects())
@@ -96,6 +61,132 @@ namespace NativeUnitTest1
 			}
 			Logger::WriteMessage(ss.str().c_str());
 			delete info;
+		}
+
+		TEST_METHOD(NativePowerFlowTestMethod1)
+		{
+			// TODO:  �ڴ�������Դ���
+			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+			NetworkCase network;
+			auto b1 = network.CreateBus(),
+				b2 = network.CreateBus(),
+				b3 = network.CreateBus(),
+				b4 = network.CreateBus();
+			network.AddObject({
+				new Transformer(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636),
+				new PVGenerator(b3, 0.2, 1.05),
+				new SlackGenerator(b4, 1.05),
+				new PQLoad(b2, complexd(0.5, 0.3)),
+				new PQLoad(b4, complexd(0.15, 0.1)),
+				new ShuntAdmittance(b2, complexd(0, 0.05)),
+				new Line(b4, b3, complexd(0.260331, 0.495868), complexd(0, 0.051728)),
+				new Line(b1, b4, complexd(0.173554, 0.330579), complexd(0, 0.034486)),
+				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
+				//new ThreeWindingTransformer(b1, b2, b3, 0.001, 0.002, 0.003, 0.005, 1, 1.1, 1.5)
+			});
+			//for (int i = 0; i < 1000; i++)
+			//	auto nc2 = shared_ptr<NetworkCase>(network.Clone());
+			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
+			solver->MaxDeviationTolerance(1e-12);
+			auto s = solver->Solve(PrimitiveNetwork(network, true));
+			delete s;
+			s = solver->Solve(network);
+			stringstream ss;
+			for (auto& item : s->NodeFlow())
+			{
+				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
+			}
+			Logger::WriteMessage(ss.str().c_str());
+			delete s;
+		}
+
+		TEST_METHOD(NativePowerFlowTestMethod2)
+		{
+			// �������ѹ�����ԡ�
+			/*
+					Dim Base110 As New PerUnitBase(110, 100)
+					Dim Base35 As New PerUnitBase(35, 100)
+					Dim Base10 As New PerUnitBase(10, 100)
+					Network.MaxDeviation = 0.0001
+					With Network.Buses
+					Dim b1 = .Add("1-PV", 1, Base10),
+					b2 = .Add("2-Pri", 1, Base110),
+					b3 = .Add("3-Load", 1, Base110),
+					b4 = .Add("4-Slack", 1, Base35),
+					bT = .Add("5-TwT", 1, Base110)
+					ThreeWindingTransformer.Create(b2, b4, b1,
+					0.01, 0.105, 0.01, 0.17, 0.01, 0.065, 1,
+					110 / 35, 110 / 10, New PerUnitBase(110, 100))
+					PVGenerator.Create(b1, 0.8, 1, New PerUnitBase(10, 100))
+					SlackGenerator.Create(b4, 35)
+					PQLoad.Create(b3, 0.8, 0.6, New PerUnitBase(110, 100))
+					Line.Create(b2, b3, 0.01, 0.1, 0.001, New PerUnitBase(110, 200))
+					End With
+
+					# ��������
+					Attribute.Locale zh-CN
+					Attribute.Name ���������
+					Attribute.Annotation Generated by PowerFlowSolver.Interop
+					Attribute.Solver NR
+					Attribute.NodeReorder True
+					Attribute.MaxIterations 20
+					Attribute.MaxDeviation 0.0001
+
+					# ĸ���б�
+					Bus 0,1-PV,10
+					Bus 1,2-Pri,110
+					Bus 2,3-Load,110
+					Bus 3,4-Slack,35
+					Bus 4,5-TwT,110
+					# �Զ����ɵ�ĸ��
+					Bus 5,TwT-2-Pri,110
+
+					# Ԫ���б�
+					# �������ѹ��������Ϊ�����������ѹ��
+					# ��ȷֱ�Ϊ 1, 0.318181818181818, 0.0909090909090909
+					PVGenerator 0,80,10
+					SlackGenerator 3,35
+					PQLoad 2,80,60
+					Line 1,2,0.605,6.05,1.65289256198347E-05
+					# �Զ����ɵ�Ԫ��
+					Transformer 1,5,0.605,12.705,0,0,1
+					Transformer 3,5,0.06125,1.01239669421488E-08,0,0,0.318181818181818
+					Transformer 0,5,0.005,0.065,0,0,0.0909090909090909
+
+					ĸ��            ��ѹ       ��λ     �й�����   �޹�����   �й�����   �޹�����  ֧·��
+					[p.u.]     [ ��]      [p.u.]     [p.u.]     [p.u.]     [p.u.]
+					[#0]1-PV        10         3.244665   80        -3.916739      -          -           1
+					[#1]2-Pri        100.6982  -4.847346      -          -          -          -           2
+					[#2]3-Load       96.32472  -7.4931     4.85e-009     -       80         60             1
+					[#3]4-Slack       35            -       2.011347   88.1072       -          -           1
+					[#4]5-TwT       ĸ��δ����ϵͳ��
+					[#5]TwT-2-Pri      109.99     0.2524323     -          -          -          -           3
+			*/
+			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+			NetworkCase network;
+			auto b1 = network.CreateBus(10),
+				b2 = network.CreateBus(110),
+				b3 = network.CreateBus(110),
+				b4 = network.CreateBus(35);
+			network.AddObject({
+				new PVGenerator(b1, 80, 10),
+				new SlackGenerator(b4, 35),
+				new PQLoad(b3, complexd(80, 60)),
+				new Line(b2, b3, complexd(0.605, 6.05), complexd(0, 1.65289256198347E-05)),
+				new ThreeWindingTransformer(b2, b4, b1, complexd(1.21, 12.705), complexd(1.21, 20.57),
+				complexd(1.21, 7.865), 0, 1, 1 / 0.318181818181818, 1 / 0.0909090909090909)
+			});
+			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
+			solver->MaxDeviationTolerance(1e-12);
+			auto s = solver->Solve(PrimitiveNetwork(network, false));
+			stringstream ss;
+			ss << (int)s->Status() << endl;
+			for (auto& item : s->NodeFlow())
+			{
+				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
+			}
+			Logger::WriteMessage(ss.str().c_str());
+			delete s;
 		}
 	};
 }

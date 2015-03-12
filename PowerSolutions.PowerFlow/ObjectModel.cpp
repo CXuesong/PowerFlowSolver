@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "PowerFlowObjectModel.h"
 #include "NetworkCase.h"
+#include "PrimitiveNetwork.h"
 #include "Exceptions.h"
 #include <algorithm>
 
@@ -119,7 +120,7 @@ namespace PowerSolutions
 			pNetwork->AddPi(Bus1(), Bus2(), this->PiEquivalency());
 		}
 
-		TriPortComponent::TriPortComponent(Bus* bus1, Bus* bus2, Bus* bus3) : ComplexComponent(3)
+		TriPortComponent::TriPortComponent(Bus* bus1, Bus* bus2, Bus* bus3) : Component(3)
 		{
 			Buses(0, bus1);
 			Buses(1, bus2);
@@ -147,10 +148,5 @@ namespace PowerSolutions
 		{
 			return new Bus(m_InitialVoltage);
 		}
-
-		ComplexComponent::ComplexComponent(int portCount)
-			: Component(portCount)
-		{ }
-
 	}
 }

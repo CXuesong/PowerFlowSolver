@@ -1,6 +1,12 @@
 #ifndef __POWERSOLUTIONS_H
 #define __POWERSOLUTIONS_H
 
+#ifdef _PS_LIB_EXPORT
+#define _PS_INTERNAL public
+#else
+#define _PS_INTERNAL private
+#endif
+
 #include <complex>
 
 namespace PowerSolutions {

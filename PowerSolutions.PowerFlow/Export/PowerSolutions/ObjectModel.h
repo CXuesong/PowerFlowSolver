@@ -180,20 +180,7 @@ namespace PowerSolutions {
 			DoublePortComponent(Bus* bus1, Bus* bus2);
 		};
 
-		//表示一个由母线和元件组成的复合元件。
-		class ComplexComponent : public Component
-		{
-		public:
-			//获取容器中子级的数量。
-			virtual int ChildrenCount() const = 0;
-			//按索引获取容器中的某个子级。索引从0开始。
-			virtual NetworkObject* ChildAt(int index) const = 0;
-		protected:
-			ComplexComponent(int portCount);
-		};
-
-
-		class TriPortComponent : public ComplexComponent
+		class TriPortComponent : public Component
 		{
 		public:
 			Bus* Bus1() const { return Buses(0); }		//此元件连接到的母线1。
@@ -206,6 +193,13 @@ namespace PowerSolutions {
 			int PortCount() const = delete;					//基础结构。
 		protected:
 			TriPortComponent(Bus* bus1, Bus* bus2, Bus* bus3);
+		};
+
+		class IBusContainer abstract	//表示元件内部包含一个或多个母线。
+		{
+		public:
+			virtual int ChildBusCount() const = 0;			//获取元件内部母线的数量。
+			virtual Bus* ChildBusAt(int index) const  = 0;	//按照索引获取元件内部的母线。索引从0开始。
 		};
 	}
 }

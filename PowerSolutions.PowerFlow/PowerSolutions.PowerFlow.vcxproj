@@ -135,7 +135,7 @@
     <ClCompile Include="NetworkCase.cpp" />
     <ClCompile Include="ObjectModel.cpp" />
     <ClCompile Include="PowerFlowObjectModel.cpp" />
-    <ClCompile Include="PrimitiveNetworkImpl.cpp" />
+    <ClCompile Include="PrimitiveNetwork.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Export\PowerSolutions\Exceptions.h" />
@@ -143,13 +143,13 @@
     <ClInclude Include="Export\PowerSolutions\ObjectModel.h" />
     <ClInclude Include="Export\PowerSolutions\PowerFlowObjectModel.h" />
     <ClInclude Include="Export\PowerSolutions\PowerFlowSolution.h" />
+    <ClInclude Include="Export\PowerSolutions\PrimitiveNetwork.h" />
     <ClInclude Include="NRSolver.h" />
     <ClInclude Include="PowerFlowSolversImpl.h" />
     <ClInclude Include="Export\PowerSolutions\PowerSolutions.h" />
     <ClInclude Include="Export\PowerSolutions\PowerFlow.h" />
     <ClInclude Include="Export\PowerSolutions\PowerFlowSolvers.h" />
     <ClInclude Include="Export\PowerSolutions\Utility.h" />
-    <ClInclude Include="PrimitiveNetworkImpl.h" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

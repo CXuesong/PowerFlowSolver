@@ -154,6 +154,7 @@ namespace PowerSolutions {
 		public:
 			virtual void Validate() const;
 			virtual PiEquivalencyParameters PiEquivalency() const override;//获取此元件π型等值电路参数。
+			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
@@ -172,7 +173,7 @@ namespace PowerSolutions {
 		};
 
 		//含有非标准变比的无铁损三绕组变压器。
-		class ThreeWindingTransformer final : public TriPortComponent
+		class ThreeWindingTransformer final : public TriPortComponent, public IBusContainer
 		{
 		private:
 			std::unique_ptr<Bus> m_CommonBus;
@@ -208,8 +209,8 @@ namespace PowerSolutions {
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
 			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
 		private:	//基础结构。
-			virtual int ChildrenCount() const override;
-			virtual NetworkObject* ChildAt(int index) const override;
+			virtual int ChildBusCount() const override;
+			virtual Bus* ChildBusAt(int index) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
@@ -221,6 +222,9 @@ namespace PowerSolutions {
 			ThreeWindingTransformer();
 			ThreeWindingTransformer(complexd impedance12, complexd impedance13, complexd impedance23,
 				complexd admittance, complexd tapRatio1, complexd tapRatio2, complexd tapRatio3);
+			ThreeWindingTransformer(Bus *bus1, Bus *bus2, Bus *bus3,
+				complexd impedance12, complexd impedance13, complexd impedance23,
+				complexd tapRatio1, complexd tapRatio2, complexd tapRatio3);
 			ThreeWindingTransformer(Bus *bus1, Bus *bus2, Bus *bus3,
 				complexd impedance12, complexd impedance13, complexd impedance23,
 				complexd admittance, complexd tapRatio1, complexd tapRatio2, complexd tapRatio3);
