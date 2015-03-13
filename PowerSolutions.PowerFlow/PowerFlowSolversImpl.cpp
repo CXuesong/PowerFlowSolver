@@ -91,6 +91,7 @@ namespace PowerSolutions
 					if (powerInjection.size() > 0)
 					{
 						assert(powerInjection.size() == 2);
+						// 师兄：接地补偿不应计入负荷。
 						//PQ负载相当于注入（抽出）功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
 						//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
 						PowerGeneration -= powerInjection[0] + powerInjection[1];

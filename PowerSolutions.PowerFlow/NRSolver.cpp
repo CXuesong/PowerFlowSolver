@@ -120,6 +120,7 @@ namespace PowerSolutions
 
 		void NRSolver::EvalPowerInjection()
 		{
+			//TODO 计入导纳矩阵可能的不对称性
 			//计算各节点的实际注入功率，以及功率偏差 PowerInjectionDeviation
 			PowerInjectionDeviation = ConstraintPowerInjection;
 			for (auto& node : PNetwork->Nodes) node->ClearPowerInjections();

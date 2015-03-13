@@ -81,7 +81,7 @@ namespace PowerSolutions {
 		public:
 			NetworkCase* SourceNetwork() const { return m_SourceNetwork; }
 			const BusCollection& Buses() const { return m_Buses; }
-			Eigen::SparseMatrix<complexd> Admittance;	//导纳矩阵的上三角部分（row <= col）。
+			Eigen::SparseMatrix<complexd> Admittance;	//完整的导纳矩阵。
 			//const ComponentCollection& Components() const { return m_Components; }
 			//const BusComponentCollection& BusComponents() const { return m_BusComponents; }
 			NodeCollection PQNodes;			//参与计算的母线（PQ节点）信息，按照矩阵索引排序。

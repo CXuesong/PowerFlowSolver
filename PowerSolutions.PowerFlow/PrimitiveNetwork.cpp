@@ -23,12 +23,13 @@ namespace PowerSolutions {
 			complexd transAdmittance = 1.0 / pieqv.Impedance();
 			Admittance.coeffRef(bus1, bus1) += transAdmittance + pieqv.Admittance1();
 			Admittance.coeffRef(bus2, bus2) += transAdmittance + pieqv.Admittance2();
-			if (bus1 > bus2) swap(bus1, bus2);
 			Admittance.coeffRef(bus1, bus2) -= transAdmittance;
+			Admittance.coeffRef(bus2, bus1) -= transAdmittance;
 			//TraceFile << pieqv->PiAdmittance1() << " /- " << transAdmittance << " -\\ " << pieqv->PiAdmittance2() << endl;
 			assert(!isnan(Admittance.coeffRef(bus1, bus1).imag()));
 			assert(!isnan(Admittance.coeffRef(bus2, bus2).imag()));
 			assert(!isnan(Admittance.coeffRef(bus1, bus2).imag()));
+			assert(!isnan(Admittance.coeffRef(bus2, bus1).imag()));
 		}
 
 		void PrimitiveNetwork::LoadNetworkCase(NetworkCase* network, bool nodeReorder)
