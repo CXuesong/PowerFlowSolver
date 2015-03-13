@@ -171,8 +171,7 @@ namespace PowerSolutions {
 			vector<int> ColSpace;
 			ColSpace.resize(Nodes.size());
 			//将节点表格映射为对应节点的支路数量
-			transform(Nodes.begin(), Nodes.end(), ColSpace.begin(), [](NodeInfo *node){ return node->Degree + 1; });
-			//按照支路数量+1来预留矩阵列空间。
+			transform(Nodes.begin(), Nodes.end(), ColSpace.begin(), [](NodeInfo *node){ return node->Degree * 2 + 1; });
 			Admittance.reserve(ColSpace);
 			//生成导纳矩阵
 			for (auto& obj : network->Objects())

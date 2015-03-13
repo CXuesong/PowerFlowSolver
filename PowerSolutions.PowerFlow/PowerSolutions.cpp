@@ -9,7 +9,12 @@ namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		ofstream& TraceFile = ofstream(TraceFilePath, ios::out | ios::trunc);
+		ofstream& TraceFile = ofstream("TraceFile.txt", ios::out | ios::trunc);
+
+		void TraceFilePath(char path[])
+		{
+			TraceFile.open("TraceFile.txt", ios::out | ios::trunc);
+		}
 	}
 }
 #endif
