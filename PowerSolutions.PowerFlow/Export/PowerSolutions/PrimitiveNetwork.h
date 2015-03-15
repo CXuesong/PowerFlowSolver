@@ -27,12 +27,14 @@ namespace PowerSolutions {
 				//TODO 实现参数和状态的解耦
 			public:
 				typedef std::list<Component*> ComponentCollection;
+				typedef std::list<Bus*> BusCollection;
 			public:
 				ObjectModel::Bus* Bus;			//母线的组件信息。
 				ComponentCollection Components;	//母线所连接的元件。
+				BusCollection AdjacentBuses;	//与此母线邻接的母线。
 				int Index = -1;					//节点索引（Nodes）。
 				int SubIndex = -1;				//节点在相应类型的节点列表（PQNodes/PVNodes）中的索引。
-				int Degree = 0;					//母线连结出来的分支数量。
+				int Degree() const { return AdjacentBuses.size(); }					//母线连结出来的分支数量。
 				NodeType Type;					//母线的类型。
 				//求解变量的缓存值。
 				//生成目标解相量之前，

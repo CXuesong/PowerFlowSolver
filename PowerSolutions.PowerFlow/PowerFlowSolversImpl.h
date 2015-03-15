@@ -25,7 +25,7 @@ namespace PowerSolutions
 		protected:	//内部数据
 			ObjectModel::PrimitiveNetwork* PNetwork;
 			//操作密集型数据的局部缓存。
-			int NodeCount;							//实际参与计算的节点数量。
+			int NodeCount;								//实际参与计算的节点数量。
 			int PQNodeCount;							//PQ节点数量。
 			int PVNodeCount;							//PV节点数量。
 		protected:

@@ -102,7 +102,7 @@ namespace PowerSolutions
 					}
 				}
 				s->AddNodeFlow(node->Bus,
-					NodeFlowSolution(node->VoltagePhasor(), PowerGeneration, PowerConsumption, node->Degree));
+					NodeFlowSolution(node->VoltagePhasor(), PowerGeneration, PowerConsumption, node->Degree()));
 				totalPowerGeneration += PowerGeneration;
 				totalPowerConsumption += PowerConsumption;
 			}

@@ -117,7 +117,7 @@ namespace PowerSolutions {
 			while (true)
 			{
 				auto i = find_if(m_BusMapping.begin(), m_BusMapping.end(),
-					[](NodeDictionary::value_type &item){return item.second->Degree == 0; });
+					[](NodeDictionary::value_type &item){return item.second->Degree() == 0; });
 				if (i != m_BusMapping.end())
 					m_BusMapping.erase(i);
 				else
@@ -153,7 +153,7 @@ namespace PowerSolutions {
 					//将平衡节点放到列表的末尾
 					if (x->Type == NodeType::SlackNode) return false;
 					if (y->Type == NodeType::SlackNode) return true;
-					return x->Degree < y->Degree;
+					return x->Degree() < y->Degree();
 				});
 			} else {
 				//不论如何，平衡节点应该在 Nodes 集合的最后面。
@@ -169,7 +169,7 @@ namespace PowerSolutions {
 			//CASE 如果没有PV节点，会导致异常
 			for (auto node : m_Nodes)
 			{
-				assert(node->Degree > 0);
+				assert(node->Degree() > 0);
 				//为节点编号。
 				node->Index = IndexCounter1 + IndexCounter2;
 				if (node->Type == NodeType::PQNode)
@@ -201,7 +201,7 @@ namespace PowerSolutions {
 			vector<int> ColSpace;
 			ColSpace.resize(m_Nodes.size());
 			//将节点表格映射为对应节点的支路数量
-			transform(m_Nodes.begin(), m_Nodes.end(), ColSpace.begin(), [](NodeInfo *node){ return node->Degree * 2 + 1; });
+			transform(m_Nodes.begin(), m_Nodes.end(), ColSpace.begin(), [](NodeInfo *node){ return node->Degree() * 2 + 1; });
 			Admittance.reserve(ColSpace);
 			//生成导纳矩阵
 			for (auto& obj : network->Objects())
@@ -271,12 +271,15 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::ClaimBranch(Bus* bus1, Bus* bus2)
 		{
+			if (bus1 == bus2)
+				bus1 = bus2;
+			assert(bus1 != bus2);	//不允许自环。
 			//加入支路-组件列表中
 			if (m_Branches.insert(make_pair(bus1, bus2)).second)
 			{
 				//成功向支路列表中加入了新项，说明出现了新支路。
-				Nodes(bus1)->Degree++;
-				Nodes(bus2)->Degree++;
+				Nodes(bus1)->AdjacentBuses.push_back(bus2);
+				Nodes(bus2)->AdjacentBuses.push_back(bus1);
 			}
 		}
 

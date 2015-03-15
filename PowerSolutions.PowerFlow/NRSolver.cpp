@@ -49,10 +49,10 @@ namespace PowerSolutions
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
 				auto *node = PNetwork->Nodes()[n];
-				JocobianColSpace[n] = min(node->Degree * 2, EquationCount());
+				JocobianColSpace[n] = min(node->Degree() * 2, EquationCount());
 				if (node->Type == NodeType::PQNode)
 				{
-					JocobianColSpace[Block1EquationCount() + node->SubIndex] = min(node->Degree * 2, EquationCount());
+					JocobianColSpace[Block1EquationCount() + node->SubIndex] = min(node->Degree() * 2, EquationCount());
 				}
 			}
 			Jocobian.resize(EquationCount(), EquationCount());
