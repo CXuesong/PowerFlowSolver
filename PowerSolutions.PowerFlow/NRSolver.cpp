@@ -48,7 +48,7 @@ namespace PowerSolutions
 			JocobianColSpace.resize(EquationCount());
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
-				auto *node = PNetwork->Nodes[n];
+				auto *node = PNetwork->Nodes()[n];
 				JocobianColSpace[n] = min(node->Degree * 2, EquationCount());
 				if (node->Type == NodeType::PQNode)
 				{
@@ -59,7 +59,7 @@ namespace PowerSolutions
 			Jocobian.reserve(JocobianColSpace);
 
 			//生成目标注入功率向量 y，以及迭代初值向量。
-			for (auto& node : PNetwork->Nodes)
+			for (auto& node : PNetwork->Nodes())
 			{
 				if (node->Type != NodeType::SlackNode)
 				{
@@ -95,7 +95,7 @@ namespace PowerSolutions
 
 		void NRSolver::AfterIterations()
 		{
-			for (auto& node : PNetwork->Nodes)
+			for (auto& node : PNetwork->Nodes())
 			{
 				node->Voltage = NodeVoltage(node->Index);
 				node->Angle = NodeAngle(node->Index);
@@ -104,7 +104,7 @@ namespace PowerSolutions
 
 		inline double NRSolver::NodeVoltage(int NodeIndex)
 		{
-			auto *node = PNetwork->Nodes[NodeIndex];
+			auto *node = PNetwork->Nodes()[NodeIndex];
 			if (node->Type == NodeType::PQNode)
 				return CurrentAnswer(Block1EquationCount() + node->SubIndex);
 			else
@@ -123,13 +123,13 @@ namespace PowerSolutions
 			//TODO 计入导纳矩阵可能的不对称性
 			//计算各节点的实际注入功率，以及功率偏差 PowerInjectionDeviation
 			PowerInjectionDeviation = ConstraintPowerInjection;
-			for (auto& node : PNetwork->Nodes) node->ClearPowerInjections();
+			for (auto& node : PNetwork->Nodes()) node->ClearPowerInjections();
 			//遍历所有节点，包括平衡节点
 			//此处使用 for 而非 for-each 是为了与数学表达保持一致
 			auto &Admittance = PNetwork->Admittance;
 			for (int m = 0; m < NodeCount; m++)
 			{
-				auto *nodeM = PNetwork->Nodes[m];
+				auto *nodeM = PNetwork->Nodes()[m];
 				double Um = NodeVoltage(m);
 				double thetaM = NodeAngle(m);
 				int subM = Block1EquationCount() + nodeM->SubIndex;
@@ -143,7 +143,7 @@ namespace PowerSolutions
 					double thetaMn = thetaM - NodeAngle(n);
 					double sinMn = sin(thetaMn);
 					double cosMn = cos(thetaMn);
-					auto *nodeN = PNetwork->Nodes[n];
+					auto *nodeN = PNetwork->Nodes()[n];
 					//累计上一次迭代结果对应的注入功率
 					nodeM->ActivePowerInjection += UmUn * (Y.real() * cosMn + Y.imag() * sinMn);
 					nodeM->ReactivePowerInjection += UmUn * (Y.real() * sinMn - Y.imag() * cosMn);
@@ -164,12 +164,12 @@ namespace PowerSolutions
 				}
 			}
 			_PS_TRACE("平衡节点 ======");
-			_PS_TRACE("有功注入：" << PNetwork->SlackNode->ActivePowerInjection);
-			_PS_TRACE("无功注入：" << PNetwork->SlackNode->ReactivePowerInjection);
+			_PS_TRACE("有功注入：" << PNetwork->SlackNode()->ActivePowerInjection);
+			_PS_TRACE("无功注入：" << PNetwork->SlackNode()->ReactivePowerInjection);
 			_PS_TRACE("偏差 deltaY ==========");
 			_PS_TRACE(PowerInjectionDeviation);
 		}
-
+		
 		void NRSolver::GenerateJacobian()
 		{
 			Jocobian.setZero();
@@ -191,7 +191,7 @@ namespace PowerSolutions
 			//TODO 由于节点连接性的稀疏性，可以不把循环做完。
 			for (int m = 0; m < NodeCount - 1; m++)
 			{
-				auto *nodeM = PNetwork->Nodes[m];
+				auto *nodeM = PNetwork->Nodes()[m];
 				double Um = NodeVoltage(m);
 				double thetaM = NodeAngle(m);
 				int subM = Block1EquationCount() + nodeM->SubIndex;
@@ -215,7 +215,7 @@ namespace PowerSolutions
 					double N = -UmUn * (Y.real() * cosMn + Y.imag() * sinMn);
 					double Np = -UmUn * (Y.real() * cosMn - Y.imag() * sinMn);
 					//cout << "::" << m << "," << n << " = " << Jocobian.coeffRef(1, 0) << endl;
-					auto *nodeN = PNetwork->Nodes[n];
+					auto *nodeN = PNetwork->Nodes()[n];
 
 					int subN = Block1EquationCount() + nodeN->SubIndex;
 					if (nodeM->Type == NodeType::PQNode)

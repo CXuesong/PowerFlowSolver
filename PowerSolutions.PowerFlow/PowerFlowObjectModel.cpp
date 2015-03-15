@@ -214,7 +214,7 @@ namespace PowerSolutions
 			//注意此部分功率不应累加至出力功率
 			// S = U^2 * conj(Y)
 			//BUG FIXED:电压没有取平方
-			auto v = pNetwork->BusMapping[Bus1()]->Voltage;
+			auto v = pNetwork->Nodes(Bus1())->Voltage;
 			auto p = v  * v * conj(m_Admittance);
 			return{ p, -p };
 		}
@@ -264,7 +264,7 @@ namespace PowerSolutions
 			//对于变压器，不能将π型等值电路两侧的接地导纳拆开计算。
 			//只能按照Γ型等值电路进行计算。
 			auto p = DoublePortComponent::EvalPowerInjection(pNetwork);
-			auto v = pNetwork->BusMapping[Bus1()]->Voltage;
+			auto v = pNetwork->Nodes(Bus1())->Voltage;
 			p[0] = v * v * conj(m_Admittance);
 			return p;
 		}
@@ -388,6 +388,7 @@ namespace PowerSolutions
 
 		void ThreeWindingTransformer::BuildNodeInfo(PrimitiveNetwork* pNetwork)
 		{
+			Component::BuildNodeInfo(pNetwork);
 			pNetwork->ClaimBranch(Bus1(), m_CommonBus.get());
 			pNetwork->ClaimBranch(Bus2(), m_CommonBus.get());
 			pNetwork->ClaimBranch(Bus3(), m_CommonBus.get());

@@ -75,6 +75,15 @@ namespace PowerSolutions
 			: m_Buses(portCount)
 		{ }
 
+		void Component::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		{
+			for (auto& b : m_Buses)
+			{
+				assert(b != nullptr);
+				pNetwork->ClaimParent(b, this);
+			}
+		}
+
 		void Component::OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const
 		{
 			NetworkObject::OnCloned(newInstance, context);
@@ -92,11 +101,6 @@ namespace PowerSolutions
 			Buses(0, bus1);
 		}
 
-		void SinglePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork)
-		{
-			pNetwork->ClaimParent(this->Bus1(), this);
-		}
-
 		DoublePortComponent::DoublePortComponent(Bus* bus1, Bus* bus2) : Component(2)
 		{
 			Buses(0, bus1);
@@ -111,8 +115,8 @@ namespace PowerSolutions
 		vector<complexd> DoublePortComponent::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
 		{
 			return this->PiEquivalency().EvalPowerInjection(
-				pNetwork->BusMapping[Bus1()]->VoltagePhasor(),
-				pNetwork->BusMapping[Bus2()]->VoltagePhasor());
+				pNetwork->Nodes(Bus1())->VoltagePhasor(),
+				pNetwork->Nodes(Bus2())->VoltagePhasor());
 		}
 
 		void DoublePortComponent::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)

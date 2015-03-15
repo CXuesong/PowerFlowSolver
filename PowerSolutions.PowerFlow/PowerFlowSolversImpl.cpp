@@ -28,9 +28,9 @@ namespace PowerSolutions
 		{
 			assert(MaxDeviationTolerance() >= 0);
 			PNetwork = &network;
-			PQNodeCount = PNetwork->PQNodes.size();
-			PVNodeCount = PNetwork->PVNodes.size();
-			NodeCount = PNetwork->Nodes.size();
+			PQNodeCount = PNetwork->PQNodes().size();
+			PVNodeCount = PNetwork->PVNodes().size();
+			NodeCount = PNetwork->Nodes().size();
 			BeforeIterations();
 			for (int i = 0; i <= MaxIterations(); i++)
 			{
@@ -75,27 +75,30 @@ namespace PowerSolutions
 			s->Status(status);
 			s->IterationCount(iterCount);
 			s->MaxDeviation(maxDev);
-			s->NodeCount(PNetwork->Nodes.size());
-			s->PQNodeCount(PNetwork->PQNodes.size());
-			s->PVNodeCount(PNetwork->PVNodes.size());
-			s->SlackNode(PNetwork->SlackNode->Bus);
+			s->NodeCount(PNetwork->Nodes().size());
+			s->PQNodeCount(PNetwork->PQNodes().size());
+			s->PVNodeCount(PNetwork->PVNodes().size());
+			s->SlackNode(PNetwork->SlackNode()->Bus);
 			//根据注入功率和负载情况计算节点出力信息。
-			for (auto& node : PNetwork->Nodes)
+			for (auto& node : PNetwork->Nodes())
 			{
 				complexd PowerGeneration(node->ActivePowerInjection, node->ReactivePowerInjection);
 				complexd PowerConsumption;
-				for (auto& c : PNetwork->BusMapping[node->Bus]->Components)
+				for (auto& c : PNetwork->Nodes(node->Bus)->Components)
 				{
-					auto powerInjection = c->EvalPowerInjection(PNetwork);
-					//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
-					if (powerInjection.size() > 0)
+					if (c->PortCount() == 1)
 					{
-						assert(powerInjection.size() == 2);
-						// 师兄：接地补偿不应计入负荷。
-						//PQ负载相当于注入（抽出）功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
-						//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
-						PowerGeneration -= powerInjection[0] + powerInjection[1];
-						PowerConsumption -= powerInjection[1];
+						auto powerInjection = c->EvalPowerInjection(PNetwork);
+						//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
+						if (powerInjection.size() > 0)
+						{
+							assert(powerInjection.size() == 2);
+							// 师兄：接地补偿不应计入负荷。
+							//PQ负载相当于注入（抽出）功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
+							//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
+							PowerGeneration -= powerInjection[0] + powerInjection[1];
+							PowerConsumption -= powerInjection[1];
+						}
 					}
 				}
 				s->AddNodeFlow(node->Bus,

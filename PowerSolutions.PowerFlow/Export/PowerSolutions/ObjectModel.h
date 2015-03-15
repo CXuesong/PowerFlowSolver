@@ -131,7 +131,7 @@ namespace PowerSolutions {
 			{
 				return static_cast<Component*>(NetworkObject::Clone(context));
 			}
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) {}
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) {}
 			/*
 			功率流向
@@ -154,8 +154,6 @@ namespace PowerSolutions {
 		public:
 			Bus* Bus1() const { return Buses(0); }	//此元件连接到的母线。
 			void Bus1(Bus* val) { Buses(0, val); }
-		public:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
 		protected:
