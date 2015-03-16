@@ -271,15 +271,15 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::ClaimBranch(Bus* bus1, Bus* bus2)
 		{
-			if (bus1 == bus2)
-				bus1 = bus2;
 			assert(bus1 != bus2);	//不允许自环。
 			//加入支路-组件列表中
-			if (m_Branches.insert(make_pair(bus1, bus2)).second)
+			auto node1 = m_BusMapping.at(bus1);
+			auto node2 = m_BusMapping.at(bus2);
+			if (m_Branches.insert(make_pair(node1, node2)).second)
 			{
 				//成功向支路列表中加入了新项，说明出现了新支路。
-				Nodes(bus1)->AdjacentBuses.push_back(bus2);
-				Nodes(bus2)->AdjacentBuses.push_back(bus1);
+				Nodes(bus1)->AdjacentNodes.push_back(node2);
+				Nodes(bus2)->AdjacentNodes.push_back(node1);
 			}
 		}
 

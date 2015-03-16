@@ -27,14 +27,14 @@ namespace PowerSolutions {
 				//TODO 实现参数和状态的解耦
 			public:
 				typedef std::list<Component*> ComponentCollection;
-				typedef std::list<Bus*> BusCollection;
+				typedef std::list<NodeInfo*> NodeInfoCollection;
 			public:
 				ObjectModel::Bus* Bus;			//母线的组件信息。
 				ComponentCollection Components;	//母线所连接的元件。
-				BusCollection AdjacentBuses;	//与此母线邻接的母线。
+				NodeInfoCollection AdjacentNodes;	//与此母线邻接的节点。
 				int Index = -1;					//节点索引（Nodes）。
 				int SubIndex = -1;				//节点在相应类型的节点列表（PQNodes/PVNodes）中的索引。
-				int Degree() const { return AdjacentBuses.size(); }					//母线连结出来的分支数量。
+				int Degree() const { return AdjacentNodes.size(); }					//母线连结出来的分支数量。
 				NodeType Type;					//母线的类型。
 				//求解变量的缓存值。
 				//生成目标解相量之前，
@@ -63,8 +63,8 @@ namespace PowerSolutions {
 			typedef std::list<Component*> ComponentCollection;
 			typedef std::vector<NodeInfo*> NodeCollection;
 			typedef std::unordered_map<ObjectModel::Bus*, NodeInfo*> NodeDictionary;
-			typedef std::unordered_set < std::pair<ObjectModel::Bus*, ObjectModel::Bus*>,
-				Utility::UnorderedPairHasher<ObjectModel::Bus*>, Utility::UnorderedPairEqualityComparer < ObjectModel::Bus* >>
+			typedef std::unordered_set < std::pair<NodeInfo*, NodeInfo*>,
+				Utility::UnorderedPairHasher<NodeInfo*>, Utility::UnorderedPairEqualityComparer < NodeInfo* >>
 				BranchCollection;
 			//typedef std::unordered_multimap<Bus*, Component*> BusComponentCollection;
 		_PS_INTERNAL:
