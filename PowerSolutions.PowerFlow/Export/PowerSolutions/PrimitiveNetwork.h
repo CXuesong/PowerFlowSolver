@@ -58,15 +58,29 @@ namespace PowerSolutions {
 			public:
 				NodeInfo(ObjectModel::Bus* bus);
 			};
+			typedef std::pair<NodeInfo*, NodeInfo*> NodePair;
+			class BranchInfo
+			{
+			private:
+				int m_Index;
+				NodePair m_Nodes;
+			public:
+				int Index() const { return m_Index; }
+				NodePair Nodes() const { return m_Nodes; }
+			public:
+				BranchInfo(int index, NodeInfo* node1, NodeInfo* node2)
+					: m_Index(index), m_Nodes(node1, node2)
+				{ }
+			};
 		public:
 			typedef std::list<Bus*> BusCollection;
 			typedef std::list<Component*> ComponentCollection;
 			typedef std::vector<NodeInfo*> NodeCollection;
 			typedef std::unordered_map<ObjectModel::Bus*, NodeInfo*> NodeDictionary;
-			typedef std::unordered_set < std::pair<NodeInfo*, NodeInfo*>,
+			typedef std::vector<BranchInfo*> BranchCollection;
+			typedef std::unordered_map < NodePair, BranchInfo*,
 				Utility::UnorderedPairHasher<NodeInfo*>, Utility::UnorderedPairEqualityComparer < NodeInfo* >>
-				BranchCollection;
-			//typedef std::unordered_multimap<Bus*, Component*> BusComponentCollection;
+				BranchDictionary;
 		_PS_INTERNAL:
 			void AddPi(Bus* bus1, Bus* bus2, PiEquivalencyParameters pi);
 			void AddShunt(Bus* bus, complexd admittance);
@@ -84,9 +98,10 @@ namespace PowerSolutions {
 			NodeCollection m_PVNodes;			//参与计算的母线（PV节点）信息，按照矩阵索引排序。
 			//注意到在NR法中，PQ 节点和 PV 节点的顺序是可以交错的。
 			NodeCollection m_Nodes;
-			NodeDictionary m_BusMapping;				//Bus --> 节点信息
+			NodeDictionary m_BusDict;				//Bus --> 节点信息
 			NodeInfo* m_SlackNode;
 			BranchCollection m_Branches;
+			BranchDictionary m_BranchDict;
 		public:
 			NetworkCase* SourceNetwork() const { return m_SourceNetwork; }
 			bool NodeReorder() const { return m_NodeReorder; }
@@ -101,12 +116,21 @@ namespace PowerSolutions {
 			NodeInfo* Nodes(size_t index) const { return m_Nodes[index]; }
 			NodeInfo* Nodes(Bus* busRef) const 
 			{
-				auto i = m_BusMapping.find(busRef);
-				if (i == m_BusMapping.end()) return nullptr;
+				auto i = m_BusDict.find(busRef);
+				if (i == m_BusDict.end()) return nullptr;
 				return i->second;
 			}
-			NodeInfo* SlackNode() const { return m_SlackNode; }			//平衡节点的信息。
+			NodeInfo* SlackNode() const { return m_SlackNode; }				//平衡节点的信息。
 			const BranchCollection& Branches() const { return m_Branches; }	//记录节点连接（支路）(m,n)
+			BranchInfo* Branches(size_t index) const { return m_Branches[index]; }
+			BranchInfo* Branches(NodePair branchRef) const
+			{
+				auto i = m_BranchDict.find(branchRef);
+				if (i == m_BranchDict.end()) return nullptr;
+				return i->second;
+			}
+		public:	//图论支持
+			void ConnectedSubsets(std::vector<PrimitiveNetwork*>& ret);
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network);
 		public:

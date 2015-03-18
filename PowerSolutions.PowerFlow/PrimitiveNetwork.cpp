@@ -64,7 +64,7 @@ namespace PowerSolutions {
 			m_SourceNetwork = network;
 			//重置局部变量
 			m_Buses.clear();
-			m_BusMapping.clear();
+			m_BusDict.clear();
 			m_Branches.clear();
 			m_Nodes.clear();
 			m_PQNodes.clear();
@@ -91,11 +91,11 @@ namespace PowerSolutions {
 				}
 			}
 			//在第一个 for 循环中提前粗略统计PQ/PV节点数目是为了后面 vector 提前预留内存使用。
-			m_BusMapping.reserve(m_Buses.size());
+			m_BusDict.reserve(m_Buses.size());
 			for (auto &obj : m_Buses)
 			{
 				//默认PQ节点
-				m_BusMapping.emplace(obj, new NodeInfo(obj));
+				m_BusDict.emplace(obj, new NodeInfo(obj));
 			}
 			//如果所有的节点均有连接，则支路数量为 n(n-1)/2
 			//此处假设每个母线上均有6回接线
@@ -113,13 +113,13 @@ namespace PowerSolutions {
 			}
 			//注意，此时的统计的PQ节点数量中还包含了孤立的节点
 			//从 BusMapping 中移除未被引用的节点。
-			assert(m_BusMapping.size() == m_Buses.size());
+			assert(m_BusDict.size() == m_Buses.size());
 			while (true)
 			{
-				auto i = find_if(m_BusMapping.begin(), m_BusMapping.end(),
+				auto i = find_if(m_BusDict.begin(), m_BusDict.end(),
 					[](NodeDictionary::value_type &item){return item.second->Degree() == 0; });
-				if (i != m_BusMapping.end())
-					m_BusMapping.erase(i);
+				if (i != m_BusDict.end())
+					m_BusDict.erase(i);
 				else
 					break;
 			};
@@ -127,7 +127,7 @@ namespace PowerSolutions {
 			if (m_SlackNode == nullptr) throw Exception(ExceptionCode::SlackBus);
 			//统计PQ/PV节点数量，便于预留空间。
 			size_t PQNodeCount = 0, PVNodeCount = 0;
-			for (auto& p : m_BusMapping)
+			for (auto& p : m_BusDict)
 			{
 				switch (p.second->Type)
 				{
@@ -141,7 +141,7 @@ namespace PowerSolutions {
 			}
 			//复制节点列表。
 			m_Nodes.resize(PQNodeCount + PVNodeCount + 1);
-			transform(m_BusMapping.cbegin(), m_BusMapping.cend(), m_Nodes.begin(),
+			transform(m_BusDict.cbegin(), m_BusDict.cend(), m_Nodes.begin(),
 				[](const NodeDictionary::value_type &item){return item.second; });
 			//采用静态节点优化编号,即将节点的出线数从小到大依次排列
 			//对Nodes列表进行排序。
@@ -273,11 +273,15 @@ namespace PowerSolutions {
 		{
 			assert(bus1 != bus2);	//不允许自环。
 			//加入支路-组件列表中
-			auto node1 = m_BusMapping.at(bus1);
-			auto node2 = m_BusMapping.at(bus2);
-			if (m_Branches.insert(make_pair(node1, node2)).second)
+			auto node1 = m_BusDict.at(bus1);
+			auto node2 = m_BusDict.at(bus2);
+			auto result = m_BranchDict.emplace(make_pair(node1, node2), nullptr);
+			if (result.second)
 			{
 				//成功向支路列表中加入了新项，说明出现了新支路。
+				auto newBranch = new BranchInfo(m_Branches.size(), node1, node2);
+				m_Branches.push_back(newBranch);
+				result.first->second = newBranch;
 				Nodes(bus1)->AdjacentNodes.push_back(node2);
 				Nodes(bus2)->AdjacentNodes.push_back(node1);
 			}
@@ -287,6 +291,11 @@ namespace PowerSolutions {
 		{
 			//加入母线的元件列表中。
 			Nodes(bus)->Components.push_back(c);
+		}
+
+		void PrimitiveNetwork::ConnectedSubsets(vector<PrimitiveNetwork*>& ret)
+		{
+
 		}
 
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
