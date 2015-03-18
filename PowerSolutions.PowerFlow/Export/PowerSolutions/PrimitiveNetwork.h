@@ -55,6 +55,11 @@ namespace PowerSolutions {
 				{
 					return std::polar(Voltage, Angle);
 				}
+				bool HasPowerInjection()		//获取一个值，指示此节点是否存在注入功率。
+				{
+					//如果以后发现此方法判断不严格，可以修改。
+					return ActivePowerInjection != 0 || ReactivePowerInjection != 0;
+				}
 			public:
 				NodeInfo(ObjectModel::Bus* bus);
 			};
@@ -130,7 +135,7 @@ namespace PowerSolutions {
 				return i->second;
 			}
 		public:	//图论支持
-			void ConnectedSubsets(std::vector<PrimitiveNetwork*>& ret);
+			std::vector<std::shared_ptr<PrimitiveNetwork*>>&& ConnectedSubsets();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network);
 		public:

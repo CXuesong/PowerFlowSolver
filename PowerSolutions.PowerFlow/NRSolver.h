@@ -6,7 +6,6 @@ by Chen [CXuesong.], 2015
 
 #pragma once
 #include "PowerFlowSolversImpl.h"
-#include <Eigen/Sparse>
 
 namespace PowerSolutions
 {

@@ -95,16 +95,16 @@ namespace PowerSolutions
 
 		void NRSolver::AfterIterations()
 		{
-			for (auto& node : PNetwork->Nodes())
+			for (int i = 0; i < NodeCount; i++)
 			{
-				node->Voltage = NodeVoltage(node->Index);
-				node->Angle = NodeAngle(node->Index);
+				VoltageVector(i) = NodeVoltage(i);
+				AngleVector(i) = NodeAngle(i);
 			}
 		}
 
 		inline double NRSolver::NodeVoltage(int NodeIndex)
 		{
-			auto *node = PNetwork->Nodes()[NodeIndex];
+			auto *node = PNetwork->Nodes(NodeIndex);
 			if (node->Type == NodeType::PQNode)
 				return CurrentAnswer(Block1EquationCount() + node->SubIndex);
 			else
@@ -277,7 +277,6 @@ namespace PowerSolutions
 
 		bool NRSolver::GenerateNextAnswer()
 		{
-			//WriteOutput(OutputType::None, PROMPT_SOLVE_EQUATIONS);
 			SparseLU<SparseMatrix<double>> solver;
 			//求解矩阵方程
 			Jocobian.makeCompressed();

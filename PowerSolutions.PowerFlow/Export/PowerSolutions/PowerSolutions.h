@@ -9,6 +9,7 @@
 
 #include <complex>
 #include <iostream>
+#include <memory>
 
 namespace PowerSolutions {
 	//类型重定义

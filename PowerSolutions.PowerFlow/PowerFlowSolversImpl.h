@@ -13,6 +13,7 @@ by Chen [CXuesong.], 2015
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
+#include <Eigen/Dense>
 #include <Eigen/Sparse>
 
 namespace PowerSolutions
@@ -28,6 +29,9 @@ namespace PowerSolutions
 			int NodeCount;								//实际参与计算的节点数量。
 			int PQNodeCount;							//PQ节点数量。
 			int PVNodeCount;							//PV节点数量。
+			// 保存了当前的求解结果。
+			Eigen::VectorXd VoltageVector;
+			Eigen::VectorXd AngleVector;
 		protected:
 			//约定：以下函数将会按照声明顺序被依次调用。
 			virtual void BeforeIterations() = 0;

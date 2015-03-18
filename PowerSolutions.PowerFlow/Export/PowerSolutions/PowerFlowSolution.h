@@ -12,7 +12,7 @@ namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		struct NodeFlowSolution		//节点潮流结果
+		class NodeFlowSolution		//节点潮流结果
 		{
 		private:
 			complexd m_Voltage;
@@ -35,7 +35,7 @@ namespace PowerSolutions
 			{ }
 		};
 
-		struct BranchFlowSolution		//（每元件或节点编号对）支路潮流结果
+		class BranchFlowSolution		//（每元件或节点编号对）支路潮流结果
 		{
 			//建议：支路编号	I侧节点名称	J侧节点名称		I侧注入有功	I侧注入无功	J侧注入有功	J侧注入无功	支路有功损耗	支路无功损耗
 			// Power1          Power2
@@ -82,7 +82,7 @@ namespace PowerSolutions
 			{ }
 		};
 
-		struct ComponentFlowSolution		//每元件潮流结果
+		class ComponentFlowSolution		//每元件潮流结果
 		{
 			// Power1          Power2
 			// --->--------------<----
@@ -100,6 +100,7 @@ namespace PowerSolutions
 				: m_Power(power)
 			{ }
 		};
+
 		// 求解最终的结论
 		enum class SolutionStatus : byte
 		{
@@ -113,11 +114,11 @@ namespace PowerSolutions
 		class Solution
 		{
 		public:
-			typedef std::unordered_map<ObjectModel::Bus*, NodeFlowSolution> NodeFlowCollection;
-			typedef std::unordered_map<std::pair<ObjectModel::Bus*, ObjectModel::Bus*>, BranchFlowSolution,
+			typedef std::unordered_map<ObjectModel::Bus*, std::shared_ptr<NodeFlowSolution>> NodeFlowCollection;
+			typedef std::unordered_map <ObjectModel::BusPair, std::shared_ptr<BranchFlowSolution>,
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
-				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>> BranchFlowCollection;
-			typedef std::unordered_map<ObjectModel::Component*, ComponentFlowSolution> ComponentFlowCollection;
+				Utility::UnorderedPairEqualityComparer < ObjectModel::Bus* >> BranchFlowCollection;
+			typedef std::unordered_map<ObjectModel::Component*, std::shared_ptr<ComponentFlowSolution>> ComponentFlowCollection;
 		private:
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
 			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
@@ -133,7 +134,7 @@ namespace PowerSolutions
 			SolutionStatus m_Status;
 			int m_IterationCount;
 			double m_MaxDeviation;
-		private:	//Internal
+		_PS_INTERNAL:
 			friend class SolverImpl;
 			void NodeCount(size_t val) { m_NodeCount = val; }
 			void PQNodeCount(size_t val) { m_PQNodeCount = val; }
@@ -163,7 +164,17 @@ namespace PowerSolutions
 			double MaxDeviation() const { return m_MaxDeviation; }
 		public:
 			const NodeFlowCollection& NodeFlow() const { return m_NodeFlow; }
+			std::shared_ptr<NodeFlowSolution> NodeFlow(ObjectModel::Bus* busRef) const {
+				auto i = m_NodeFlow.find(busRef);
+				if (i == m_NodeFlow.end()) return nullptr;
+				return i->second;
+			}
 			const ComponentFlowCollection& ComponentFlow() const { return m_ComponentFlow; }
+			std::shared_ptr<ComponentFlowSolution> ComponentFlow(ObjectModel::Component* c) const {
+				auto i = m_ComponentFlow.find(c);
+				if (i == m_ComponentFlow.end()) return nullptr;
+				return i->second;
+			}
 			const BranchFlowCollection& BranchFlow() const { return m_BranchFlow; }
 		protected:	//internal
 			Solution();

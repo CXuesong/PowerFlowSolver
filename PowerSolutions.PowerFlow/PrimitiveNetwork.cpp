@@ -3,6 +3,7 @@
 #include "Exceptions.h"
 #include "NetworkCase.h"
 #include "Utility.h"
+#include <stack>
 
 using namespace std;
 using namespace PowerSolutions::Utility;
@@ -293,9 +294,11 @@ namespace PowerSolutions {
 			Nodes(bus)->Components.push_back(c);
 		}
 
-		void PrimitiveNetwork::ConnectedSubsets(vector<PrimitiveNetwork*>& ret)
+		std::vector<std::shared_ptr<PrimitiveNetwork*>>&& PrimitiveNetwork::ConnectedSubsets()
 		{
-
+			// 进行深度优先搜索。
+			vector<bool> NodeVisited(m_Nodes.size());
+			//stack<NodeInfo*>
 		}
 
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
