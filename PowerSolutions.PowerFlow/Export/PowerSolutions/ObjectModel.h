@@ -16,6 +16,11 @@ by Chen [CXuesong.], 2015
 #include <functional>
 
 namespace PowerSolutions {
+	namespace PowerFlow
+	{
+		class PrimitiveSolution;
+		struct ComponentFlowSolution;
+	}
 	namespace ObjectModel
 	{
 		class NetworkCase;
@@ -38,7 +43,7 @@ namespace PowerSolutions {
 			complexd Admittance2() const { return m_Admittance2; }	//节点2接地导纳。
 			void Admittance2(complexd val) { m_Admittance2 = val; }
 		public:
-			std::vector<complexd> EvalPowerInjection(complexd voltage1, complexd voltage2) const;
+			PowerFlow::ComponentFlowSolution EvalComponentFlow(complexd voltage1, complexd voltage2) const;
 		public:
 			PiEquivalencyParameters(complexd z, complexd y1, complexd y2);
 		};
@@ -60,7 +65,7 @@ namespace PowerSolutions {
 		public:
 			PerUnitBase(double voltage, double power);
 		};
-		
+
 		// 为网络案例中的对象（例如元件或母线）提供公共基类。
 		// 网络案例中的所有对象通过内存地址（指针）来互相区分，因而无需额外增加编号这一特性。因为对象模型中的编号其实和实际计算时的编号没有什么关系。
 		class NetworkObject
@@ -142,7 +147,7 @@ namespace PowerSolutions {
 			//根据节点电压获取此元件注入指定母线节点的功率。
 			//index = 0 : 接地功率
 			//index > 0 : 某端口的注入母线的功率
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const = 0;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const = 0;
 		protected:
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const override;
 		protected:
@@ -171,7 +176,7 @@ namespace PowerSolutions {
 			virtual PiEquivalencyParameters PiEquivalency() const = 0;//获取此元件π型等值电路参数。
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
 		protected:

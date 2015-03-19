@@ -3,8 +3,9 @@
 #define __POWERSOLUTIONS_POWERFLOWSOLVERS_H
 
 #include "NetworkCase.h"
+#include "PrimitiveNetwork.h"
 #include "PowerFlowSolution.h"
-#include <memory>
+#include <vector>
 
 namespace PowerSolutions
 {
@@ -36,6 +37,71 @@ namespace PowerSolutions
 
 		// 用于在迭代过程中接收每一步的迭代信息。
 		typedef void(__stdcall *IterationEventHandler)(class Solver* sender, IterationEventArgs* e);
+
+		// 用于在运算中保存节点的运算状态。
+		struct NodeEvaluationStatus
+		{
+		private:
+			double m_Voltage;
+			double m_Angle;
+			double m_ActivePowerInjection;
+			double m_ReactivePowerInjection;
+			ObjectModel::NodeType m_Type;
+			int m_Index;
+			int m_SubIndex;
+		public:
+			double Voltage() const { return m_Voltage; }
+			double Angle() const { return m_Angle; }
+			complexd VoltagePhasor() const { return std::polar(m_Voltage, m_Angle); }
+			double ActivePowerInjection() const { return m_ActivePowerInjection; }
+			double ReactivePowerInjection() const { return m_ReactivePowerInjection; }
+			complexd PowerInjection() const { return complexd(m_ActivePowerInjection, m_ReactivePowerInjection); }
+			ObjectModel::NodeType Type() const { return m_Type; }
+			void Type(ObjectModel::NodeType val) { m_Type = val; }
+			int Index() const { return m_Index; }
+			void Index(int val) { m_Index = val; }
+			int SubIndex() const { return m_SubIndex; }
+			void SubIndex(int val) { m_SubIndex = val; }
+			void SetVoltage(double voltage, double angle)
+			{
+				m_Voltage = voltage;
+				m_Angle = angle;
+			}
+			void ClearPowerInjection()
+			{
+				m_ActivePowerInjection = m_ReactivePowerInjection = 0;
+			}
+			void AddPowerInjections(double active, double reactive)
+			{
+				m_ActivePowerInjection += active;
+				m_ReactivePowerInjection += reactive;
+			}
+		public:
+			NodeEvaluationStatus(ObjectModel::PrimitiveNetwork::NodeInfo& info)
+				: m_Voltage(info.Voltage()), m_Angle(info.Angle()),
+				m_ActivePowerInjection(info.ActivePowerInjection()), m_ReactivePowerInjection(info.ReactivePowerInjection()),
+				m_Type(info.Type()), m_Index(info.Index()), m_SubIndex(info.SubIndex())
+			{ }
+		};
+
+		class PrimitiveSolution
+		{
+		public:
+			typedef std::vector<NodeEvaluationStatus> NodeStatusCollection;
+		private:
+			NodeStatusCollection m_NodeStatus;
+			ObjectModel::PrimitiveNetwork* m_Network;
+		_PS_INTERNAL:
+			NodeStatusCollection& NodeStatus() { return m_NodeStatus; }
+			NodeEvaluationStatus& NodeStatus(int nodeIndex) { return m_NodeStatus.at(nodeIndex); }
+		public:
+			const NodeStatusCollection& NodeStatus() const { return m_NodeStatus; }
+			const NodeEvaluationStatus& NodeStatus(int nodeIndex) const { return m_NodeStatus.at(nodeIndex); }
+			const NodeEvaluationStatus& NodeStatus(ObjectModel::Bus* bus) const { return m_NodeStatus.at(m_Network->Nodes(bus)->Index()); }
+			ObjectModel::PrimitiveNetwork* Network() const { return m_Network; }
+		public:
+			PrimitiveSolution(ObjectModel::PrimitiveNetwork& network);
+		};
 
 		// 抽象用于完成稳态潮流的解决过程。
 		class Solver

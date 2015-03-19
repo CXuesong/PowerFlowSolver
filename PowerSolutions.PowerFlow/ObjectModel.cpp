@@ -3,9 +3,13 @@
 #include "NetworkCase.h"
 #include "PrimitiveNetwork.h"
 #include "Exceptions.h"
+#include "PowerFlowSolvers.h"
+#include "PowerFlowSolution.h"
 #include <algorithm>
 
 using namespace PowerSolutions;
+using PowerSolutions::PowerFlow::PrimitiveSolution;
+using PowerSolutions::PowerFlow::ComponentFlowSolution;
 using namespace std;
 
 namespace PowerSolutions
@@ -16,22 +20,21 @@ namespace PowerSolutions
 			: m_Impedance(z), m_Admittance1(y1), m_Admittance2(y2)
 		{ }
 
-		vector<complexd> PiEquivalencyParameters::EvalPowerInjection(complexd voltage1, complexd voltage2) const
+		ComponentFlowSolution PiEquivalencyParameters::EvalComponentFlow(complexd voltage1, complexd voltage2) const
 		{
-			vector<complexd> power(3);
-			complexd power1, power2, shunt1, shunt2;
+			ComponentFlowSolution s(2);
 			//以下宏定义了注入线路的功率，以及从线路流到地的功率。
 #define _EvalPower(v1, a1, v2, a2, y10, z12) \
 			conj((v1)*(v1)*(y10) + (v1)*((v1) - polar((v2), (a2)-(a1)))/(z12))	//以 v1 作为参考相量
 #define _EvalShuntPower(v, y10) (v) * (v) * conj(y10)
-			power[1] = -_EvalPower(abs(voltage1), arg(voltage1),
-				abs(voltage2), arg(voltage2), m_Admittance1, m_Impedance);
-			power[2] = -_EvalPower(abs(voltage2), arg(voltage2),
-				abs(voltage1), arg(voltage1), m_Admittance2, m_Impedance);
-			power[0] = _EvalShuntPower(abs(voltage1), m_Admittance1) + _EvalShuntPower(abs(voltage2), m_Admittance2);
+			s.PowerInjections(0, -_EvalPower(abs(voltage1), arg(voltage1),
+				abs(voltage2), arg(voltage2), m_Admittance1, m_Impedance));
+			s.PowerInjections(1, -_EvalPower(abs(voltage2), arg(voltage2),
+				abs(voltage1), arg(voltage1), m_Admittance2, m_Impedance));
+			s.PowerShunt(_EvalShuntPower(abs(voltage1), m_Admittance1) + _EvalShuntPower(abs(voltage2), m_Admittance2));
 #undef _EvalPower
 #undef _EvalShuntPower
-			return power;
+			return s;
 		}
 
 		PerUnitBase::PerUnitBase(double voltage, double power)
@@ -112,11 +115,12 @@ namespace PowerSolutions
 			pNetwork->ClaimBranch(Bus1(), Bus2());
 		}
 
-		vector<complexd> DoublePortComponent::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		PowerFlow::ComponentFlowSolution DoublePortComponent::EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const
 		{
-			return this->PiEquivalency().EvalPowerInjection(
-				pNetwork->Nodes(Bus1())->VoltagePhasor(),
-				pNetwork->Nodes(Bus2())->VoltagePhasor());
+			auto s = this->PiEquivalency().EvalComponentFlow(
+				solution.NodeStatus(Bus1()).VoltagePhasor(),
+				solution.NodeStatus(Bus2()).VoltagePhasor());
+			return s;
 		}
 
 		void DoublePortComponent::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)

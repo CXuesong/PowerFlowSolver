@@ -38,5 +38,12 @@ namespace PowerSolutions
 			return this->Solve(pn);
 		}
 
+		PrimitiveSolution::PrimitiveSolution(PrimitiveNetwork& network) 
+			: m_Network(&network)
+		{
+			m_NodeStatus.reserve(network.Nodes().size());
+			for (auto& node : network.Nodes())
+				m_NodeStatus.push_back(NodeEvaluationStatus(*node));
+		}
 	}
 }

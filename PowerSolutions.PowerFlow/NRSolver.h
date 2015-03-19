@@ -34,6 +34,10 @@ namespace PowerSolutions
 			bool GenerateNextAnswer();			//解出迭代的当前结果。
 			double NodeVoltage(int NodeIndex);
 			double NodeAngle(int NodeIndex);
+			void UpdateNodeStatus(int nodeIndex)
+			{
+				PSolution->NodeStatus(nodeIndex).SetVoltage(NodeVoltage(nodeIndex), NodeAngle(nodeIndex));
+			}
 		protected:
 			virtual void BeforeIterations() override;
 			virtual double EvalDeviation() override;

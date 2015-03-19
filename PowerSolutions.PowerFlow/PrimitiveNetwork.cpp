@@ -29,35 +29,6 @@ namespace PowerSolutions {
 				delete item;
 		}
 
-		void PrimitiveNetwork::AddPi(Bus* pbus1, Bus* pbus2, PiEquivalencyParameters pieqv)
-		{
-			//具有π形等值电路
-			int bus1 = Nodes(pbus1)->Index;
-			int bus2 = Nodes(pbus2)->Index;
-			_PS_TRACE(bus1 << " -- " << bus2 << "\t" << 1.0 / pieqv.Impedance() << "\t" << pieqv.Admittance1() << "\t" << pieqv.Admittance2());
-			//BUG CLOSED
-			//当系数矩阵非零元素数量增加时，
-			//可能会导致预先获取的零元素对应地址被覆盖，
-			//因此不能提前使用引用变量保存位置。
-			//如果此时重新使用 coeffRef 即可得到正确的结果。
-			complexd transAdmittance = 1.0 / pieqv.Impedance();
-			if (m_IgnoreShuntAdmittance)
-			{
-				Admittance.coeffRef(bus1, bus1) += transAdmittance + pieqv.Admittance1();
-				Admittance.coeffRef(bus2, bus2) += transAdmittance + pieqv.Admittance2();
-			} else {
-				Admittance.coeffRef(bus1, bus1) += transAdmittance;
-				Admittance.coeffRef(bus2, bus2) += transAdmittance;
-			}
-			Admittance.coeffRef(bus1, bus2) -= transAdmittance;
-			Admittance.coeffRef(bus2, bus1) -= transAdmittance;
-			//TraceFile << pieqv->PiAdmittance1() << " /- " << transAdmittance << " -\\ " << pieqv->PiAdmittance2() << endl;
-			assert(!isnan(Admittance.coeffRef(bus1, bus1).imag()));
-			assert(!isnan(Admittance.coeffRef(bus2, bus2).imag()));
-			assert(!isnan(Admittance.coeffRef(bus1, bus2).imag()));
-			assert(!isnan(Admittance.coeffRef(bus2, bus1).imag()));
-		}
-
 		void PrimitiveNetwork::LoadNetworkCase(ObjectModel::NetworkCase* network)
 		{
 			//LoadNetworkCase 只能调用一次。
@@ -78,6 +49,7 @@ namespace PowerSolutions {
 				if (b != nullptr)
 				{
 					m_Buses.push_back(b);
+					_PS_TRACE("BUS " << b << endl);
 					continue;
 				}
 				auto bc = dynamic_cast<IBusContainer*>(obj);
@@ -130,7 +102,7 @@ namespace PowerSolutions {
 			size_t PQNodeCount = 0, PVNodeCount = 0;
 			for (auto& p : m_BusDict)
 			{
-				switch (p.second->Type)
+				switch (p.second->Type())
 				{
 				case NodeType::PQNode:
 					PQNodeCount++;
@@ -152,14 +124,14 @@ namespace PowerSolutions {
 					[](const NodeCollection::value_type &x, const NodeCollection::value_type &y)
 				{
 					//将平衡节点放到列表的末尾
-					if (x->Type == NodeType::SlackNode) return false;
-					if (y->Type == NodeType::SlackNode) return true;
+					if (x->Type() == NodeType::SlackNode) return false;
+					if (y->Type() == NodeType::SlackNode) return true;
 					return x->Degree() < y->Degree();
 				});
 			} else {
 				//不论如何，平衡节点应该在 Nodes 集合的最后面。
 				//此处考虑到性能，仅仅交换平衡节点和除平衡节点以外最后一个节点的位置。
-				swap(*find_if(m_Nodes.begin(), m_Nodes.end(), [](NodeInfo* node){return node->Type == NodeType::SlackNode; }),
+				swap(*find_if(m_Nodes.begin(), m_Nodes.end(), [](NodeInfo* node){return node->Type() == NodeType::SlackNode; }),
 					m_Nodes.back());
 			}
 			//按照新的顺序重新编号
@@ -172,27 +144,27 @@ namespace PowerSolutions {
 			{
 				assert(node->Degree() > 0);
 				//为节点编号。
-				node->Index = IndexCounter1 + IndexCounter2;
-				if (node->Type == NodeType::PQNode)
+				node->Index(IndexCounter1 + IndexCounter2);
+				if (node->Type() == NodeType::PQNode)
 				{
-					node->SubIndex = IndexCounter1;
+					node->SubIndex(IndexCounter1);
 					IndexCounter1++;
 					m_PQNodes.push_back(node);
-				} else if (node->Type == NodeType::PVNode)
+				} else if (node->Type() == NodeType::PVNode)
 				{
-					node->SubIndex = IndexCounter2;
+					node->SubIndex(IndexCounter2);
 					IndexCounter2++;
 					m_PVNodes.push_back(node);
 				}
 			}
 			//平衡节点编号放在最后面。
-			m_SlackNode->Index = IndexCounter1 + IndexCounter2;
-			m_SlackNode->SubIndex = 0;
+			m_SlackNode->Index(IndexCounter1 + IndexCounter2);
+			m_SlackNode->SubIndex(0);
 
 			_PS_TRACE("Bus\tIndex\tNodeType");
 			for (auto& node : m_Nodes)
 			{
-				_PS_TRACE((size_t)node << "\t" << node->Index << "\t" << (int)node->Type << endl);
+				_PS_TRACE(node->Bus() << "\t" << node->Index() << "\t" << (int)node->Type() << endl);
 			}
 
 			//生成导纳矩阵。
@@ -205,6 +177,7 @@ namespace PowerSolutions {
 			transform(m_Nodes.begin(), m_Nodes.end(), ColSpace.begin(), [](NodeInfo *node){ return node->Degree() * 2 + 1; });
 			Admittance.reserve(ColSpace);
 			//生成导纳矩阵
+			_PS_TRACE("Bus1 -- Bus2\tY12\tY1\tY2");
 			for (auto& obj : network->Objects())
 			{
 				auto* c = dynamic_cast<Component*>(obj);
@@ -215,11 +188,44 @@ namespace PowerSolutions {
 			_PS_TRACE("\n导纳矩阵 ==========\n" << Admittance);
 		}
 
+		void PrimitiveNetwork::AddPi(Bus* pbus1, Bus* pbus2, PiEquivalencyParameters pieqv)
+		{
+			//具有π形等值电路
+			int bus1 = Nodes(pbus1)->Index();
+			int bus2 = Nodes(pbus2)->Index();
+			//BUG CLOSED
+			//当系数矩阵非零元素数量增加时，
+			//可能会导致预先获取的零元素对应地址被覆盖，
+			//因此不能提前使用引用变量保存位置。
+			//如果此时重新使用 coeffRef 即可得到正确的结果。
+			complexd transAdmittance = 1.0 / pieqv.Impedance();
+			_PS_TRACE(bus1 << " -- " << bus2 << "\t" << transAdmittance << "\t" << pieqv.Admittance1() << "\t" << pieqv.Admittance2());
+			//自导纳是正的
+			if (!m_IgnoreShuntAdmittance)
+			{
+				//计入接地导纳。
+				Admittance.coeffRef(bus1, bus1) += transAdmittance + pieqv.Admittance1();
+				Admittance.coeffRef(bus2, bus2) += transAdmittance + pieqv.Admittance2();
+			} else {
+				//不计接地导纳。
+				Admittance.coeffRef(bus1, bus1) += transAdmittance;
+				Admittance.coeffRef(bus2, bus2) += transAdmittance;
+			}
+			//互导纳是负的。
+			Admittance.coeffRef(bus1, bus2) -= transAdmittance;
+			Admittance.coeffRef(bus2, bus1) -= transAdmittance;
+			//TraceFile << pieqv->PiAdmittance1() << " /- " << transAdmittance << " -\\ " << pieqv->PiAdmittance2() << endl;
+			assert(!isnan(Admittance.coeffRef(bus1, bus1).imag()));
+			assert(!isnan(Admittance.coeffRef(bus2, bus2).imag()));
+			assert(!isnan(Admittance.coeffRef(bus1, bus2).imag()));
+			assert(!isnan(Admittance.coeffRef(bus2, bus1).imag()));
+		}
+
 		void PrimitiveNetwork::AddShunt(Bus* bus, complexd admittance)
 		{
 			if (!m_IgnoreShuntAdmittance)
 			{
-				auto index = Nodes(bus)->Index;
+				auto index = Nodes(bus)->Index();
 				Admittance.coeffRef(index, index) += admittance;
 			}
 		}
@@ -227,21 +233,21 @@ namespace PowerSolutions {
 		void PrimitiveNetwork::AddPQ(Bus* bus, complexd power)
 		{
 			auto info = Nodes(bus);
-			info->ActivePowerInjection += power.real();
-			info->ReactivePowerInjection += power.imag();
+			info->AddActivePowerInjection(power.real());
+			info->AddReactivePowerInjection(power.imag());
 		}
 
 		void PrimitiveNetwork::AddPV(Bus* bus, double activePower, double voltage)
 		{
 			auto info = Nodes(bus);
 			//false 表示这种情况是不可以的，需要引发异常。
-			if (info->Type != NodeType::PQNode && abs(info->Voltage - voltage) > 1e-10)
+			if (info->Type() != NodeType::PQNode && abs(info->Voltage() - voltage) > 1e-10)
 				throw Exception(ExceptionCode::VoltageMismatch);
-			if (info->Type != NodeType::SlackNode)
+			if (info->Type() != NodeType::SlackNode)
 			{
-				info->Voltage = voltage;
-				info->ActivePowerInjection += activePower;
-				info->Type = NodeType::PVNode;
+				info->Voltage(voltage);
+				info->AddActivePowerInjection(activePower);
+				info->Type(NodeType::PVNode);
 			}
 		}
 
@@ -251,17 +257,17 @@ namespace PowerSolutions {
 			if (m_SlackNode == nullptr)
 			{
 				//设置平衡机
-				if (info->Type != NodeType::PQNode && abs(info->Voltage - abs(voltagePhasor)) > 1e-10)
+				if (info->Type() != NodeType::PQNode && abs(info->Voltage() - abs(voltagePhasor)) > 1e-10)
 					throw Exception(ExceptionCode::VoltageMismatch);
-				info->Voltage = abs(voltagePhasor);
-				info->Angle = arg(voltagePhasor);
-				info->Type = NodeType::SlackNode;
+				info->Voltage(abs(voltagePhasor));
+				info->Angle(arg(voltagePhasor));
+				info->Type(NodeType::SlackNode);
 				m_SlackNode = info;
 			} else if (m_SlackNode == info)
 			{
 				//在同一个母线上放置了多台平衡发电机
 				//检查平衡机电压
-				if (abs(info->Voltage - abs(voltagePhasor)) > 1e-10)
+				if (abs(info->Voltage() - abs(voltagePhasor)) > 1e-10)
 					throw Exception(ExceptionCode::VoltageMismatch);
 			} else {
 				//存在多于一台平衡发电机
@@ -294,16 +300,19 @@ namespace PowerSolutions {
 			Nodes(bus)->Components.push_back(c);
 		}
 
-		std::vector<std::shared_ptr<PrimitiveNetwork*>>&& PrimitiveNetwork::ConnectedSubsets()
+		vector<shared_ptr<PrimitiveNetwork*>> PrimitiveNetwork::ConnectedSubsets()
 		{
+			vector<shared_ptr<PrimitiveNetwork*>> rv;
 			// 进行深度优先搜索。
 			vector<bool> NodeVisited(m_Nodes.size());
 			//stack<NodeInfo*>
+			return rv;
 		}
 
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
-			: Bus(bus), Type(NodeType::PQNode),
-			Voltage(0), Angle(0)
+			: m_Bus(bus), m_Type(NodeType::PQNode),
+			m_Voltage(0), m_Angle(0),
+			m_ActivePowerInjection(0), m_ReactivePowerInjection(0)
 		{ }
 	}
 }

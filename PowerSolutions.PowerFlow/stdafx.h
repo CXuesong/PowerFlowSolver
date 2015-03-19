@@ -4,6 +4,7 @@
 
 #include <cassert>
 #include <crtdbg.h>
+#include <xutility>
 
 #if _DEBUG
 #include <iostream>

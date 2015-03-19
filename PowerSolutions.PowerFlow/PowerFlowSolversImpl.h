@@ -30,8 +30,7 @@ namespace PowerSolutions
 			int PQNodeCount;							//PQ节点数量。
 			int PVNodeCount;							//PV节点数量。
 			// 保存了当前的求解结果。
-			Eigen::VectorXd VoltageVector;
-			Eigen::VectorXd AngleVector;
+			std::shared_ptr<PrimitiveSolution> PSolution;
 		protected:
 			//约定：以下函数将会按照声明顺序被依次调用。
 			virtual void BeforeIterations() = 0;

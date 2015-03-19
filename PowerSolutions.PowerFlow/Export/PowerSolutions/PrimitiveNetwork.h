@@ -24,41 +24,57 @@ namespace PowerSolutions {
 		public:
 			class NodeInfo
 			{
-				//TODO 实现参数和状态的解耦
 			public:
 				typedef std::list<Component*> ComponentCollection;
 				typedef std::list<NodeInfo*> NodeInfoCollection;
+			private:
+				ObjectModel::Bus* m_Bus;			//母线的组件信息。
+				double m_Voltage;
+				double m_Angle;					//弧度
+				int m_Index;					//节点索引（Nodes）。
+				int m_SubIndex;				//节点在相应类型的节点列表（PQNodes/PVNodes）中的索引。
+				NodeType m_Type;					//母线的类型。
+				double m_ActivePowerInjection;
+				double m_ReactivePowerInjection;
 			public:
-				ObjectModel::Bus* Bus;			//母线的组件信息。
+				ObjectModel::Bus* Bus() const { return m_Bus; }
+				void Bus(ObjectModel::Bus* val) { m_Bus = val; }
 				ComponentCollection Components;	//母线所连接的元件。
 				NodeInfoCollection AdjacentNodes;	//与此母线邻接的节点。
-				int Index = -1;					//节点索引（Nodes）。
-				int SubIndex = -1;				//节点在相应类型的节点列表（PQNodes/PVNodes）中的索引。
+				int Index() const { return m_Index; }
+				void Index(int val) { m_Index = val; }
+				int SubIndex() const { return m_SubIndex; }
+				void SubIndex(int val) { m_SubIndex = val; }
+				double Voltage() const { return m_Voltage; }
+				void Voltage(double val) { m_Voltage = val; }
+				double Angle() const { return m_Angle; }
+				void Angle(double val) { m_Angle = val; }
 				int Degree() const { return AdjacentNodes.size(); }					//母线连结出来的分支数量。
-				NodeType Type;					//母线的类型。
+				NodeType Type() const { return m_Type; }
+				void Type(NodeType val) { m_Type = val; }
 				//求解变量的缓存值。
 				//生成目标解相量之前，
 				//对于PQ节点，保存已知的P、Q；
 				//对于PV节点，保存已知的P、V。
 				//迭代结束后，保存了当前的解V/A/P/Q。
-				double Voltage;
-				double Angle;					//弧度
-				double ActivePowerInjection = 0;
-				double ReactivePowerInjection = 0;
+				double ActivePowerInjection() const { return m_ActivePowerInjection; }
+				void AddActivePowerInjection(double val) { m_ActivePowerInjection += val; }
+				double ReactivePowerInjection() const { return m_ReactivePowerInjection; }
+				void AddReactivePowerInjection(double val) { m_ReactivePowerInjection += val; }
 				//此内联函数无法放置在cpp中,因为其被 Solver 的派生类所调用，
 				//可能引发不可识别的外部函数的错误。
 				void ClearPowerInjections()
 				{
-					ActivePowerInjection = ReactivePowerInjection = 0;
+					m_ActivePowerInjection = m_ReactivePowerInjection = 0;
 				}
 				complexd VoltagePhasor()		//复数形式的电压相量
 				{
-					return std::polar(Voltage, Angle);
+					return std::polar(m_Voltage, m_Angle);
 				}
 				bool HasPowerInjection()		//获取一个值，指示此节点是否存在注入功率。
 				{
 					//如果以后发现此方法判断不严格，可以修改。
-					return ActivePowerInjection != 0 || ReactivePowerInjection != 0;
+					return ActivePowerInjection() != 0 || ReactivePowerInjection() != 0;
 				}
 			public:
 				NodeInfo(ObjectModel::Bus* bus);
@@ -119,7 +135,8 @@ namespace PowerSolutions {
 			const NodeCollection& PVNodes() const { return m_PVNodes; }
 			const NodeCollection& Nodes() const { return m_Nodes; }	//参与计算的三种节点，按照矩阵索引连续排序，注意平衡节点放在最后。
 			NodeInfo* Nodes(size_t index) const { return m_Nodes[index]; }
-			NodeInfo* Nodes(Bus* busRef) const 
+			NodeInfo* Nodes(Bus* busRef) const { return m_BusDict.at(busRef); }
+			NodeInfo* TryGetNode(Bus* busRef) const
 			{
 				auto i = m_BusDict.find(busRef);
 				if (i == m_BusDict.end()) return nullptr;
@@ -135,7 +152,7 @@ namespace PowerSolutions {
 				return i->second;
 			}
 		public:	//图论支持
-			std::vector<std::shared_ptr<PrimitiveNetwork*>>&& ConnectedSubsets();
+			std::vector<std::shared_ptr<PrimitiveNetwork*>> ConnectedSubsets();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network);
 		public:

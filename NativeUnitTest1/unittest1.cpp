@@ -88,10 +88,11 @@ namespace NativeUnitTest1
 			//	auto nc2 = shared_ptr<NetworkCase>(network.Clone());
 			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
 			solver->MaxDeviationTolerance(1e-12);
-			auto s = solver->Solve(PrimitiveNetwork(network, true));
+			auto s = solver->Solve(PrimitiveNetwork(network, false));
 			delete s;
 			s = solver->Solve(network);
 			stringstream ss;
+			ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
 			for (auto& item : s->NodeFlow())
 			{
 				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
@@ -100,9 +101,9 @@ namespace NativeUnitTest1
 			delete s;
 		}
 
+		// �������ѹ�����ԡ�
 		TEST_METHOD(NativePowerFlowTestMethod2)
 		{
-			// �������ѹ�����ԡ�
 			/*
 					Dim Base110 As New PerUnitBase(110, 100)
 					Dim Base35 As New PerUnitBase(35, 100)
@@ -180,7 +181,7 @@ namespace NativeUnitTest1
 			solver->MaxDeviationTolerance(1e-12);
 			auto s = solver->Solve(PrimitiveNetwork(network, false));
 			stringstream ss;
-			ss << (int)s->Status() << endl;
+			ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
 			for (auto& item : s->NodeFlow())
 			{
 				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;

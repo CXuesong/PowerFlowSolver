@@ -12,30 +12,28 @@ namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		class NodeFlowSolution		//节点潮流结果
+		struct NodeEvaluationStatus;
+
+		struct NodeFlowSolution		//节点潮流结果
 		{
 		private:
 			complexd m_Voltage;
 			complexd m_PowerGeneration;
 			complexd m_PowerConsumption;
-			int m_Degree;
 		public:
 			PowerSolutions::complexd Voltage() const { return m_Voltage; }
 			void Voltage(PowerSolutions::complexd val) { m_Voltage = val; }
 			PowerSolutions::complexd PowerGeneration() const { return m_PowerGeneration; }
-			void PowerGeneration(PowerSolutions::complexd val) { m_PowerGeneration = val; }
+			void AddPowerGeneration(PowerSolutions::complexd val) { m_PowerGeneration += val; }
 			PowerSolutions::complexd PowerConsumption() const { return m_PowerConsumption; }
-			void PowerConsumption(PowerSolutions::complexd val) { m_PowerConsumption = val; }
-			int Degree() const { return m_Degree; }
-			void Degree(int val) { m_Degree = val; }
+			void AddPowerConsumption(PowerSolutions::complexd val) { m_PowerConsumption += val; }
 		public:
-			NodeFlowSolution(complexd voltage, complexd powerGeneration, complexd powerConsumption, int degree)
-				: m_Voltage(voltage), m_PowerGeneration(powerGeneration), m_PowerConsumption(powerConsumption),
-				m_Degree(degree)
+			NodeFlowSolution(complexd voltage, complexd powerInjection)
+				: m_Voltage(voltage), m_PowerGeneration(powerInjection), m_PowerConsumption(0)
 			{ }
 		};
 
-		class BranchFlowSolution		//（每元件或节点编号对）支路潮流结果
+		struct BranchFlowSolution		//（每元件或节点编号对）支路潮流结果
 		{
 			//建议：支路编号	I侧节点名称	J侧节点名称		I侧注入有功	I侧注入无功	J侧注入有功	J侧注入无功	支路有功损耗	支路无功损耗
 			// Power1          Power2
@@ -82,23 +80,54 @@ namespace PowerSolutions
 			{ }
 		};
 
-		class ComponentFlowSolution		//每元件潮流结果
+		struct ComponentFlowSolution		//每元件潮流结果
 		{
-			// Power1          Power2
+			// Power0          Power1
 			// --->--------------<----
 			//       |       |
-			// S.P.1 |       | S.P.2
+			// S.P.0 |       | S.P.1
 			//       |       |
 		private:
-			std::vector<complexd> m_Power;
+			std::vector<complexd> m_PowerInjection;
+			complexd m_PowerShunt;
+			bool m_IsUnconstrained;
 		public:
-			std::vector<complexd> Power() const	//从指定节点注入母线的功率。请参阅：Component::EvalPowerInjection
-			{
-				return m_Power;
-			}
-			ComponentFlowSolution(std::vector<complexd>& power)
-				: m_Power(power)
+			//从指定节点注入母线的功率。
+			const std::vector<complexd>& PowerInjections() const { return m_PowerInjection; }
+			//从指定节点注入母线的功率。
+			complexd PowerInjections(int portIndex) const { return m_PowerInjection[portIndex]; }
+			void PowerInjections(int portIndex, complexd v) { m_PowerInjection[portIndex] = v; }
+			PowerSolutions::complexd PowerShunt() const { return m_PowerShunt; }
+			void PowerShunt(PowerSolutions::complexd val) { m_PowerShunt = val; }
+			//指示此元件自身的潮流是否为不定的。
+			bool IsUnconstrained() const { return m_IsUnconstrained; }
+			void IsUnconstrained(bool val) { m_IsUnconstrained = val; }
+		private:
+			ComponentFlowSolution(bool unconst)
+				: m_PowerInjection(0), m_PowerShunt(0, 0), m_IsUnconstrained(unconst)
 			{ }
+		public:
+			static ComponentFlowSolution Unconstrained()
+			{
+				return ComponentFlowSolution(true);
+			}
+			ComponentFlowSolution(int portCount)
+				: m_PowerInjection(portCount), m_PowerShunt(0, 0), m_IsUnconstrained(false)
+			{ }
+			ComponentFlowSolution(const std::vector<complexd>&& powerInjection, complexd powerShutnt)
+				: m_PowerInjection(powerInjection), m_PowerShunt(powerShutnt), m_IsUnconstrained(false)
+			{ }
+			ComponentFlowSolution(ComponentFlowSolution&& rhs)
+				: m_PowerInjection(std::move(rhs.m_PowerInjection)),
+				m_PowerShunt(rhs.m_PowerShunt), m_IsUnconstrained(rhs.m_IsUnconstrained)
+			{ }
+			ComponentFlowSolution& operator=(ComponentFlowSolution&& other)
+			{
+				m_PowerInjection = std::move(other.m_PowerInjection);
+				m_PowerShunt = other.m_PowerShunt;
+				m_IsUnconstrained = other.m_IsUnconstrained;
+				return *this;
+			}
 		};
 
 		// 求解最终的结论
@@ -114,11 +143,11 @@ namespace PowerSolutions
 		class Solution
 		{
 		public:
-			typedef std::unordered_map<ObjectModel::Bus*, std::shared_ptr<NodeFlowSolution>> NodeFlowCollection;
-			typedef std::unordered_map <ObjectModel::BusPair, std::shared_ptr<BranchFlowSolution>,
+			typedef std::unordered_map<ObjectModel::Bus*, NodeFlowSolution> NodeFlowCollection;
+			typedef std::unordered_map<std::pair<ObjectModel::Bus*, ObjectModel::Bus*>, BranchFlowSolution,
 				Utility::UnorderedPairHasher<ObjectModel::Bus*>,
-				Utility::UnorderedPairEqualityComparer < ObjectModel::Bus* >> BranchFlowCollection;
-			typedef std::unordered_map<ObjectModel::Component*, std::shared_ptr<ComponentFlowSolution>> ComponentFlowCollection;
+				Utility::UnorderedPairEqualityComparer<ObjectModel::Bus*>> BranchFlowCollection;
+			typedef std::unordered_map<ObjectModel::Component*, ComponentFlowSolution> ComponentFlowCollection;
 		private:
 			NodeFlowCollection m_NodeFlow;				//节点潮流信息。
 			ComponentFlowCollection m_ComponentFlow;	//（每元件）支路潮流信息。
@@ -147,7 +176,7 @@ namespace PowerSolutions
 			void Status(SolutionStatus val) { m_Status = val; }
 			void IterationCount(int val);
 			void MaxDeviation(double val) { m_MaxDeviation = val; }
-			void AddNodeFlow(ObjectModel::Bus* node, const NodeFlowSolution& solution);
+			void AddNodeFlow(ObjectModel::Bus* node, const NodeEvaluationStatus& status);
 			void AddComponentFlow(ObjectModel::Component* c, const ComponentFlowSolution& solution);
 			void AddBranchFlow(ObjectModel::Bus* node1, ObjectModel::Bus* node2, const BranchFlowSolution& solution);
 		public:
@@ -164,16 +193,12 @@ namespace PowerSolutions
 			double MaxDeviation() const { return m_MaxDeviation; }
 		public:
 			const NodeFlowCollection& NodeFlow() const { return m_NodeFlow; }
-			std::shared_ptr<NodeFlowSolution> NodeFlow(ObjectModel::Bus* busRef) const {
-				auto i = m_NodeFlow.find(busRef);
-				if (i == m_NodeFlow.end()) return nullptr;
-				return i->second;
+			const NodeFlowSolution& NodeFlow(ObjectModel::Bus* busRef) const {
+				return m_NodeFlow.at(busRef);
 			}
 			const ComponentFlowCollection& ComponentFlow() const { return m_ComponentFlow; }
-			std::shared_ptr<ComponentFlowSolution> ComponentFlow(ObjectModel::Component* c) const {
-				auto i = m_ComponentFlow.find(c);
-				if (i == m_ComponentFlow.end()) return nullptr;
-				return i->second;
+			const ComponentFlowSolution& ComponentFlow(ObjectModel::Component* c) const {
+				return m_ComponentFlow.at(c);
 			}
 			const BranchFlowCollection& BranchFlow() const { return m_BranchFlow; }
 		protected:	//internal

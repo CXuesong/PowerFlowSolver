@@ -48,11 +48,11 @@ namespace PowerSolutions
 			JocobianColSpace.resize(EquationCount());
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
-				auto *node = PNetwork->Nodes()[n];
+				auto *node = PNetwork->Nodes(n);
 				JocobianColSpace[n] = min(node->Degree() * 2, EquationCount());
-				if (node->Type == NodeType::PQNode)
+				if (node->Type() == NodeType::PQNode)
 				{
-					JocobianColSpace[Block1EquationCount() + node->SubIndex] = min(node->Degree() * 2, EquationCount());
+					JocobianColSpace[Block1EquationCount() + node->SubIndex()] = min(node->Degree() * 2, EquationCount());
 				}
 			}
 			Jocobian.resize(EquationCount(), EquationCount());
@@ -61,19 +61,18 @@ namespace PowerSolutions
 			//生成目标注入功率向量 y，以及迭代初值向量。
 			for (auto& node : PNetwork->Nodes())
 			{
-				if (node->Type != NodeType::SlackNode)
+				if (node->Type() != NodeType::SlackNode)
 				{
-					int subIndex = Block1EquationCount() + node->SubIndex;
-					ConstraintPowerInjection(node->Index) = node->ActivePowerInjection;
-					CurrentAnswer(node->Index) = arg(node->Bus->InitialVoltage());
-					if (node->Type == NodeType::PQNode)
+					int subIndex = Block1EquationCount() + node->SubIndex();
+					ConstraintPowerInjection(node->Index()) = node->ActivePowerInjection();
+					CurrentAnswer(node->Index()) = arg(node->Bus()->InitialVoltage());
+					if (node->Type() == NodeType::PQNode)
 					{
-						ConstraintPowerInjection(subIndex) = node->ReactivePowerInjection;
-						CurrentAnswer(subIndex) = abs(node->Bus->InitialVoltage());
+						ConstraintPowerInjection(subIndex) = node->ReactivePowerInjection();
+						CurrentAnswer(subIndex) = abs(node->Bus()->InitialVoltage());
 					}
 				}
 			}
-
 			_PS_TRACE("目标函数值 Y ==========");
 			_PS_TRACE(ConstraintPowerInjection);
 		}
@@ -96,19 +95,16 @@ namespace PowerSolutions
 		void NRSolver::AfterIterations()
 		{
 			for (int i = 0; i < NodeCount; i++)
-			{
-				VoltageVector(i) = NodeVoltage(i);
-				AngleVector(i) = NodeAngle(i);
-			}
+				UpdateNodeStatus(i);
 		}
 
 		inline double NRSolver::NodeVoltage(int NodeIndex)
 		{
 			auto *node = PNetwork->Nodes(NodeIndex);
-			if (node->Type == NodeType::PQNode)
-				return CurrentAnswer(Block1EquationCount() + node->SubIndex);
+			if (node->Type() == NodeType::PQNode)
+				return CurrentAnswer(Block1EquationCount() + node->SubIndex());
 			else
-				return node->Voltage;
+				return node->Voltage();
 		}
 
 		inline double NRSolver::NodeAngle(int NodeIndex)
@@ -123,16 +119,16 @@ namespace PowerSolutions
 			//TODO 计入导纳矩阵可能的不对称性
 			//计算各节点的实际注入功率，以及功率偏差 PowerInjectionDeviation
 			PowerInjectionDeviation = ConstraintPowerInjection;
-			for (auto& node : PNetwork->Nodes()) node->ClearPowerInjections();
+			for (auto& node : PSolution->NodeStatus()) node.ClearPowerInjection();
 			//遍历所有节点，包括平衡节点
 			//此处使用 for 而非 for-each 是为了与数学表达保持一致
 			auto &Admittance = PNetwork->Admittance;
 			for (int m = 0; m < NodeCount; m++)
 			{
-				auto *nodeM = PNetwork->Nodes()[m];
+				auto &nodeM = PSolution->NodeStatus(m);
 				double Um = NodeVoltage(m);
 				double thetaM = NodeAngle(m);
-				int subM = Block1EquationCount() + nodeM->SubIndex;
+				int subM = Block1EquationCount() + nodeM.SubIndex();
 				//计算非对角元素
 				for (int n = m + 1; n < NodeCount; n++)
 				{
@@ -143,29 +139,28 @@ namespace PowerSolutions
 					double thetaMn = thetaM - NodeAngle(n);
 					double sinMn = sin(thetaMn);
 					double cosMn = cos(thetaMn);
-					auto *nodeN = PNetwork->Nodes()[n];
+					auto &statusN = PSolution->NodeStatus(n);
 					//累计上一次迭代结果对应的注入功率
-					nodeM->ActivePowerInjection += UmUn * (Y.real() * cosMn + Y.imag() * sinMn);
-					nodeM->ReactivePowerInjection += UmUn * (Y.real() * sinMn - Y.imag() * cosMn);
-					nodeN->ActivePowerInjection += UmUn * (Y.real() * cosMn - Y.imag() * sinMn);
-					nodeN->ReactivePowerInjection -= UmUn * (Y.real() * sinMn + Y.imag() * cosMn);
+					nodeM.AddPowerInjections(UmUn * (Y.real() * cosMn + Y.imag() * sinMn),
+						UmUn * (Y.real() * sinMn - Y.imag() * cosMn));
+					statusN.AddPowerInjections(UmUn * (Y.real() * cosMn - Y.imag() * sinMn),
+						-UmUn * (Y.real() * sinMn + Y.imag() * cosMn));
 				}
 				//计算对角元素
 				double UmSqr = Um * Um;
 				complexd Y = Admittance.coeff(m, m);
-				nodeM->ActivePowerInjection += UmSqr * Y.real();
-				nodeM->ReactivePowerInjection -= UmSqr * Y.imag();
+				nodeM.AddPowerInjections(UmSqr * Y.real(), -UmSqr * Y.imag());
 				//生成功率偏差向量 Δy'
-				if (nodeM->Type != NodeType::SlackNode)
+				if (nodeM.Type() != NodeType::SlackNode)
 				{
-					PowerInjectionDeviation(m) -= nodeM->ActivePowerInjection;
-					if (nodeM->Type == NodeType::PQNode)
-						PowerInjectionDeviation(subM) -= nodeM->ReactivePowerInjection;
+					PowerInjectionDeviation(m) -= nodeM.ActivePowerInjection();
+					if (nodeM.Type() == NodeType::PQNode)
+						PowerInjectionDeviation(subM) -= nodeM.ReactivePowerInjection();
 				}
 			}
 			_PS_TRACE("平衡节点 ======");
-			_PS_TRACE("有功注入：" << PNetwork->SlackNode()->ActivePowerInjection);
-			_PS_TRACE("无功注入：" << PNetwork->SlackNode()->ReactivePowerInjection);
+			_PS_TRACE("有功注入：" << PSolution->NodeStatus(NodeCount - 1).ActivePowerInjection());
+			_PS_TRACE("无功注入：" << PSolution->NodeStatus(NodeCount - 1).ReactivePowerInjection());
 			_PS_TRACE("偏差 deltaY ==========");
 			_PS_TRACE(PowerInjectionDeviation);
 		}
@@ -187,40 +182,38 @@ namespace PowerSolutions
 			// 对非对角元有
 			// H =  L
 			// N = -M
-
-			//TODO 由于节点连接性的稀疏性，可以不把循环做完。
+			auto& Admittance = PNetwork->Admittance;
 			for (int m = 0; m < NodeCount - 1; m++)
 			{
-				auto *nodeM = PNetwork->Nodes()[m];
+				auto& nodeM = PSolution->NodeStatus(m);
 				double Um = NodeVoltage(m);
 				double thetaM = NodeAngle(m);
-				int subM = Block1EquationCount() + nodeM->SubIndex;
+				int subM = Block1EquationCount() + nodeM.SubIndex();
 				//计算非对角元素
-				auto& Admittance = PNetwork->Admittance;
 				for (int n = m + 1; n < NodeCount - 1; n++)
 				{
-					// 上三角矩阵，row < col
-					complexd Y = Admittance.coeff(m, n);
-					if (abs(Y) < 1e-10) continue;
+					complexd Ymn = Admittance.coeff(m, n);
+					complexd Ynm = Admittance.coeff(m, n);
+					//TODO 改为根据矩阵内部保存的索引来进行选择性循环。
+					if (abs(Ymn) < 1e-20 && abs(Ynm) < 1e-20) continue;
 					double UmUn = Um * NodeVoltage(n);
 					double thetaMn = thetaM - NodeAngle(n);
 					double sinMn = sin(thetaMn);
 					double cosMn = cos(thetaMn);
 					//H(m,n)
-					double H = Jocobian.coeffRef(m, n) = -UmUn * (Y.real() * sinMn - Y.imag() * cosMn);
+					double H = Jocobian.coeffRef(m, n) = -UmUn * (Ymn.real() * sinMn - Ymn.imag() * cosMn);
 					//H(n,m)
-					double Hp = Jocobian.coeffRef(n, m) = UmUn * (Y.real() * sinMn + Y.imag() * cosMn);
+					double Hp = Jocobian.coeffRef(n, m) = UmUn * (Ynm.real() * sinMn + Ynm.imag() * cosMn);
 					//i.e. H(n,m) = -UmUn * (-Y.real() * sinMn - Y.imag() * cosMn)
 					//N
-					double N = -UmUn * (Y.real() * cosMn + Y.imag() * sinMn);
-					double Np = -UmUn * (Y.real() * cosMn - Y.imag() * sinMn);
+					double N = -UmUn * (Ymn.real() * cosMn + Ymn.imag() * sinMn);
+					double Np = -UmUn * (Ynm.real() * cosMn - Ynm.imag() * sinMn);
 					//cout << "::" << m << "," << n << " = " << Jocobian.coeffRef(1, 0) << endl;
-					auto *nodeN = PNetwork->Nodes()[n];
-
-					int subN = Block1EquationCount() + nodeN->SubIndex;
-					if (nodeM->Type == NodeType::PQNode)
+					auto& nodeN = PSolution->NodeStatus(n);
+					int subN = Block1EquationCount() + nodeN.SubIndex();
+					if (nodeM.Type() == NodeType::PQNode)
 					{
-						if (nodeN->Type == NodeType::PQNode)
+						if (nodeN.Type() == NodeType::PQNode)
 						{
 							//PQ-PQ，子阵具有对称性
 							// N
@@ -245,7 +238,7 @@ namespace PowerSolutions
 							Jocobian.coeffRef(n, subM) = Np;
 						}
 					} else {
-						if (nodeN->Type == NodeType::PQNode)
+						if (nodeN.Type() == NodeType::PQNode)
 						{
 							//PV-PQ（m,n）
 							// N
@@ -260,15 +253,15 @@ namespace PowerSolutions
 				double UmSqr = Um * Um;
 				//计算对角元素
 				//H
-				Jocobian.coeffRef(m, m) = UmSqr * Y.imag() + nodeM->ReactivePowerInjection;
-				if (nodeM->Type == NodeType::PQNode)
+				Jocobian.coeffRef(m, m) = UmSqr * Y.imag() + nodeM.ReactivePowerInjection();
+				if (nodeM.Type() == NodeType::PQNode)
 				{
 					//N
-					Jocobian.coeffRef(m, subM) = -UmSqr * Y.real() - nodeM->ActivePowerInjection;
+					Jocobian.coeffRef(m, subM) = -UmSqr * Y.real() - nodeM.ActivePowerInjection();
 					//M
-					Jocobian.coeffRef(subM, m) = UmSqr * Y.real() - nodeM->ActivePowerInjection;
+					Jocobian.coeffRef(subM, m) = UmSqr * Y.real() - nodeM.ActivePowerInjection();
 					//L
-					Jocobian.coeffRef(subM, subM) = UmSqr * Y.imag() - nodeM->ReactivePowerInjection;
+					Jocobian.coeffRef(subM, subM) = UmSqr * Y.imag() - nodeM.ReactivePowerInjection();
 				}
 			}
 			_PS_TRACE("雅可比矩阵 ==========");
@@ -291,7 +284,7 @@ namespace PowerSolutions
 			//Δx = [theta ... theta V ... V]
 			CurrentAnswer.head(Block1EquationCount()) -= CorrectionAnswer.head(Block1EquationCount());
 			CurrentAnswer.tail(Block2EquationCount()) -= CurrentAnswer.tail(Block2EquationCount()).cwiseProduct(CorrectionAnswer.tail(Block2EquationCount()));
-			_PS_TRACE("解向量 ==========");
+			_PS_TRACE("当前解向量 ==========");
 			_PS_TRACE(CurrentAnswer);
 			return true;
 		}

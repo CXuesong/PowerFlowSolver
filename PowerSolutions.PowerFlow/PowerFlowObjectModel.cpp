@@ -3,9 +3,13 @@
 #include "NetworkCase.h"
 #include "PrimitiveNetwork.h"
 #include "Exceptions.h"
+#include "PowerFlowSolvers.h"
+#include "PowerFlowSolution.h"
 #include <algorithm>
 
 using namespace PowerSolutions;
+using PowerSolutions::PowerFlow::PrimitiveSolution;
+using PowerSolutions::PowerFlow::ComponentFlowSolution;
 using namespace std;
 
 namespace PowerSolutions
@@ -86,10 +90,10 @@ namespace PowerSolutions
 			pNetwork->AddPV(Bus1(), m_ActivePower, m_Voltage);
 		}
 
-		vector<complexd> PVGenerator::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		ComponentFlowSolution PVGenerator::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
 			//PV发电机无法确定自身发出的无功功率到底是多少，尤其是当一个节点上链接了不止一台发电机时。
-			return{ };
+			return ComponentFlowSolution::Unconstrained();
 		}
 
 		////////// 平衡节点发电机 //////////
@@ -128,10 +132,10 @@ namespace PowerSolutions
 			pNetwork->AddSlack(Bus1(), m_Voltage);
 		}
 
-		vector<complexd> SlackGenerator::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		ComponentFlowSolution SlackGenerator::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
 			//仅凭一台平衡机自身无法确定出力。
-			return{};
+			return ComponentFlowSolution::Unconstrained();
 		}
 
 		////////// PQ负载 //////////
@@ -170,9 +174,9 @@ namespace PowerSolutions
 			pNetwork->AddPQ(Bus1(), -m_Power);
 		}
 
-		vector<complexd> PQLoad::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		ComponentFlowSolution PQLoad::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			return { 0, -m_Power };
+			return ComponentFlowSolution({ -m_Power }, 0);
 		}
 
 		////////// 接地导纳 //////////
@@ -205,7 +209,7 @@ namespace PowerSolutions
 			return new ShuntAdmittance(m_Admittance);
 		}
 
-		vector<complexd> ShuntAdmittance::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		ComponentFlowSolution ShuntAdmittance::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
 			//  |   从 Bus 抽出 功率 [1]
 			//  |
@@ -214,9 +218,9 @@ namespace PowerSolutions
 			//注意此部分功率不应累加至出力功率
 			// S = U^2 * conj(Y)
 			//BUG FIXED:电压没有取平方
-			auto v = pNetwork->Nodes(Bus1())->Voltage;
+			auto v = solution.NodeStatus(Bus1()).Voltage();
 			auto p = v  * v * conj(m_Admittance);
-			return{ p, -p };
+			return ComponentFlowSolution({ -p }, p);
 		}
 
 		void ShuntAdmittance::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
@@ -258,14 +262,14 @@ namespace PowerSolutions
 				m_TapRatio * (m_TapRatio - 1.0) / m_Impedance);
 		}
 
-		std::vector<complexd> Transformer::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		PowerFlow::ComponentFlowSolution Transformer::EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const
 		{
 			//注意，计算支路功率时
 			//对于变压器，不能将π型等值电路两侧的接地导纳拆开计算。
 			//只能按照Γ型等值电路进行计算。
-			auto p = DoublePortComponent::EvalPowerInjection(pNetwork);
-			auto v = pNetwork->Nodes(Bus1())->Voltage;
-			p[0] = v * v * conj(m_Admittance);
+			auto p = DoublePortComponent::EvalComponentFlow(solution);
+			auto v = solution.NodeStatus(Bus1()).Voltage();
+			p.PowerShunt(v * v * conj(m_Admittance));
 			return p;
 		}
 
@@ -405,17 +409,19 @@ namespace PowerSolutions
 			pNetwork->AddShunt(m_CommonBus.get(), m_Admittance);
 		}
 
-		vector<complexd> ThreeWindingTransformer::EvalPowerInjection(PrimitiveNetwork* pNetwork) const
+		ComponentFlowSolution ThreeWindingTransformer::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
 			//参阅 ThreeWindingTransformer::UpdateChildren 中的三绕组变压器模型。
-			auto power1 = m_Transformer1->EvalPowerInjection(pNetwork);
-			auto power2 = m_Transformer2->EvalPowerInjection(pNetwork);
-			auto power3 = m_Transformer3->EvalPowerInjection(pNetwork);
+			auto power1 = m_Transformer1->EvalComponentFlow(solution);
+			auto power2 = m_Transformer2->EvalComponentFlow(solution);
+			auto power3 = m_Transformer3->EvalComponentFlow(solution);
 			//接地功率应该主要是由变压器1产生。
 			//潮流不收敛，或者导纳很小的时候，以下断言很可能失败。
 			//assert(abs(power2[0]) / abs(power1[0]) < 1e-5);
 			//assert(abs(power3[0]) / abs(power1[0]) < 1e-5);
-			return{ power1[0], power1[1], power2[1], power3[1] };
+			return ComponentFlowSolution({ power1.PowerInjections(0), 
+				power2.PowerInjections(0), power3.PowerInjections(0) }, 
+				power1.PowerShunt());
 		}
 	}
 }

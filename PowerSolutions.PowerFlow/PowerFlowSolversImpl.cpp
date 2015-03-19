@@ -31,6 +31,7 @@ namespace PowerSolutions
 			PQNodeCount = PNetwork->PQNodes().size();
 			PVNodeCount = PNetwork->PVNodes().size();
 			NodeCount = PNetwork->Nodes().size();
+			PSolution = make_shared<PrimitiveSolution>(network);
 			BeforeIterations();
 			for (int i = 0; i <= MaxIterations(); i++)
 			{
@@ -70,71 +71,51 @@ namespace PowerSolutions
 			AfterIterations();	//收尾工作
 			//注意：下面的工作不能引发异常，否则会由s引发内存泄漏。
 			auto s = new Solution();
-			complexd totalPowerGeneration, totalPowerConsumption,
-				totalPowerLoss, totalPowerShunt;
 			s->Status(status);
 			s->IterationCount(iterCount);
 			s->MaxDeviation(maxDev);
 			s->NodeCount(PNetwork->Nodes().size());
 			s->PQNodeCount(PNetwork->PQNodes().size());
 			s->PVNodeCount(PNetwork->PVNodes().size());
-			s->SlackNode(PNetwork->SlackNode()->Bus);
+			s->SlackNode(PNetwork->SlackNode()->Bus());
 			//根据注入功率和负载情况计算节点出力信息。
-			for (auto& node : PNetwork->Nodes())
-			{
-				complexd PowerGeneration(node->ActivePowerInjection, node->ReactivePowerInjection);
-				complexd PowerConsumption;
-				for (auto& c : PNetwork->Nodes(node->Bus)->Components)
-				{
-					if (c->PortCount() == 1)
-					{
-						auto powerInjection = c->EvalPowerInjection(PNetwork);
-						//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
-						if (powerInjection.size() > 0)
-						{
-							assert(powerInjection.size() == 2);
-							// 师兄：接地补偿不应计入负荷。
-							//PQ负载相当于注入（抽出）功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
-							//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
-							PowerGeneration -= powerInjection[0] + powerInjection[1];
-							PowerConsumption -= powerInjection[1];
-						}
-					}
-				}
-				s->AddNodeFlow(node->Bus,
-					NodeFlowSolution(node->VoltagePhasor(), PowerGeneration, PowerConsumption, node->Degree()));
-				totalPowerGeneration += PowerGeneration;
-				totalPowerConsumption += PowerConsumption;
-			}
-			//根据节点电压计算支路功率。
+			for (auto& node : PNetwork->Nodes()) s->AddNodeFlow(node->Bus(), PSolution->NodeStatus(node->Index()));
 			for (auto& obj : PNetwork->SourceNetwork()->Objects())
 			{
 				auto c = dynamic_cast<Component*>(obj);
 				if (c != nullptr)
 				{
-					vector<complexd> powerInjection = c->EvalPowerInjection(PNetwork);
-					if (powerInjection.size() > 0)
-					{
-						s->AddComponentFlow(c, ComponentFlowSolution(powerInjection));
-						//仅适用于双端元件。
-						DoublePortComponent *dpc = dynamic_cast<DoublePortComponent*>(c);
-						if (dpc != nullptr)
-						{
-							//追加元件潮流项
-							BranchFlowSolution branchFlow(-powerInjection[1], -powerInjection[2], powerInjection[0]);
-							//增加/追加支路潮流
-							s->AddBranchFlow(dpc->Bus1(), dpc->Bus2(), branchFlow);
-						}
-						if (c->PortCount() > 1)
-						{
-							assert(powerInjection.size() > 2);
-							totalPowerShunt += powerInjection[0];
-							//对于多端口元件，注入功率之和就是串联损耗。
-							//注意功率的参考方向是流入母线的。
-							for (auto i = powerInjection.size() - 1; i > 0; i--)
-								totalPowerLoss -= powerInjection[i];
-						}
-					}
+					auto cflow = c->EvalComponentFlow(*PSolution);
+					s->AddComponentFlow(c, cflow);
+				}
+			}
+			complexd totalPowerGeneration, totalPowerConsumption,
+				totalPowerLoss, totalPowerShunt;
+			for (auto& node : s->NodeFlow())
+			{
+				totalPowerGeneration += node.second.PowerGeneration();
+				totalPowerConsumption += node.second.PowerConsumption();
+			}
+			//根据节点电压计算支路功率。
+			for (auto& c : s->ComponentFlow())
+			{
+				//仅适用于双端元件。
+				DoublePortComponent *dpc = dynamic_cast<DoublePortComponent*>(c.first);
+				if (dpc != nullptr)
+				{
+					BranchFlowSolution branchFlow(-c.second.PowerInjections(0),
+						-c.second.PowerInjections(1), c.second.PowerShunt());
+					//增加/追加支路潮流
+					s->AddBranchFlow(dpc->Bus1(), dpc->Bus2(), branchFlow);
+				}
+				//统计。可以考虑三绕组变压器。
+				if (c.first->PortCount() > 1)
+				{
+					totalPowerShunt += c.second.PowerShunt();
+					//对于多端口元件，注入功率之和就是串联损耗。
+					//注意功率的参考方向是流入母线的。
+					for (auto& inj : c.second.PowerInjections())
+						totalPowerLoss -= inj;
 				}
 			}
 			s->TotalPowerGeneration(totalPowerGeneration);

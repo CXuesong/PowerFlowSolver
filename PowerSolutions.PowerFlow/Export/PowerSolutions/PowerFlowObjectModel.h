@@ -55,7 +55,7 @@ namespace PowerSolutions {
 			void Voltage(double val) { m_Voltage = val; }
 		public:
 			virtual void Validate() const;
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual NetworkObject* CloneInstance() const override;
@@ -78,7 +78,7 @@ namespace PowerSolutions {
 			void Voltage(complexd val) { m_Voltage = val; }
 		public:
 			virtual void Validate() const;
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual NetworkObject* CloneInstance() const override;
@@ -101,7 +101,7 @@ namespace PowerSolutions {
 			void Power(complexd val) { m_Power = val; }
 		public:
 			virtual void Validate() const;
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual NetworkObject* CloneInstance() const override;
@@ -125,7 +125,7 @@ namespace PowerSolutions {
 		public:
 			virtual void Validate() const;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
@@ -154,7 +154,7 @@ namespace PowerSolutions {
 		public:
 			virtual void Validate() const;
 			virtual PiEquivalencyParameters PiEquivalency() const override;//获取此元件π型等值电路参数。
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
@@ -207,7 +207,7 @@ namespace PowerSolutions {
 			virtual void Validate() const;
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
-			virtual std::vector<complexd> EvalPowerInjection(PrimitiveNetwork* pNetwork) const override;
+			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		private:	//基础结构。
 			virtual int ChildBusCount() const override;
 			virtual Bus* ChildBusAt(int index) const override;
