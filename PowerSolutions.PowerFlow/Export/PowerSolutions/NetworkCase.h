@@ -89,6 +89,7 @@ namespace PowerSolutions {
 			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
 			void Validate() const;				//验证整个网络实例的有效性。
 			PrimitiveNetwork* Expand() const;
+			NetworkCase* ShallowClone();
 			//构造此网络案例的一个副本，并获取副本和原型中所有对象的对应关系。
 			NetworkCase* Clone(NetworkCaseTrackingInfo*& trackingInfo);
 			//构造此网络案例的一个副本。

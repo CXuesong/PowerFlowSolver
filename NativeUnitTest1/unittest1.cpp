@@ -60,6 +60,7 @@ namespace NativeUnitTest1
 				ss << "Clone : " << typeid(*c).name() << ", " << c << "-->" << info->PrototypeOf(c) << endl;
 			}
 			Logger::WriteMessage(ss.str().c_str());
+			delete network2;
 			delete info;
 		}
 
@@ -208,18 +209,22 @@ namespace NativeUnitTest1
 				new ShuntAdmittance(b2, complexd(0, 0.05)),
 				new Line(b4, b3, complexd(0.260331, 0.495868), complexd(0, 0.051728)),
 				new Line(b1, b4, complexd(0.173554, 0.330579), complexd(0, 0.034486)),
-				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
-				new ThreeWindingTransformer(b1, b2, b3, 0.001, 0.002, 0.003, 0.005, 1, 1.1, 1.5)
+				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864))//,
+				//new ThreeWindingTransformer(b1, b2, b3, 0.001, 0.002, 0.003, 0.005, 1, 1.1, 1.5)
 			});
 			//构造一个相同的网络。
 			shared_ptr<NetworkCase> network2(network.Clone());
-			network2->AutoDeleteChildren(false);
+			NetworkObject* sg;
 			for (auto& obj : network2->Objects())
 			{
 				if (dynamic_cast<SlackGenerator*>(obj) == nullptr)
 					network.AddObject(obj);
+				else
+					sg = obj;
 			}
-			PrimitiveNetwork pn(network, true);
+			network2->RemoveObject(sg);
+			network2->AutoDeleteChildren(false);
+			PrimitiveNetwork pn(network, false);
 			stringstream ss;
 			auto PrintNetwork = [&ss](const PrimitiveNetwork& pn)
 			{

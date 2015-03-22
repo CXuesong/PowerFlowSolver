@@ -48,6 +48,7 @@ namespace PowerSolutions {
 			auto pos = find_if(m_Objects.cbegin(), m_Objects.cend(),
 				[&obj](const NetworkObject* item){return item == obj; });
 			if (pos == m_Objects.end()) return false;
+			if (m_AutoDeleteChildren) delete obj;
 			m_Objects.erase(pos);
 			return true;
 		}
@@ -67,6 +68,7 @@ namespace PowerSolutions {
 			//复制自身
 			auto nc = new NetworkCase();
 			auto context = new NetworkCaseTrackingInfo(m_Objects.size());
+			nc->m_AutoDeleteChildren = m_AutoDeleteChildren;
 			//复制母线和元件
 			//注意此处假定所有的元件均遵从向前引用的原则
 			for (auto& obj : m_Objects)
@@ -76,6 +78,14 @@ namespace PowerSolutions {
 				nc->AddObject(newObj);
 			}
 			trackingInfo = context;
+			return nc;
+		}
+
+		NetworkCase* NetworkCase::ShallowClone()
+		{
+			auto nc = new NetworkCase();
+			nc->m_AutoDeleteChildren = false;
+			nc->m_Objects = m_Objects;
 			return nc;
 		}
 

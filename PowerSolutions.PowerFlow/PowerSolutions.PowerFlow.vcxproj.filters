@@ -86,5 +86,8 @@
     <ClInclude Include="Export\PowerSolutions\PrimitiveNetwork.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="DCFlowSolver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

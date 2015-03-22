@@ -138,6 +138,7 @@
     <ClCompile Include="PrimitiveNetwork.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DCFlowSolver.h" />
     <ClInclude Include="Export\PowerSolutions\Exceptions.h" />
     <ClInclude Include="Export\PowerSolutions\NetworkCase.h" />
     <ClInclude Include="Export\PowerSolutions\ObjectModel.h" />

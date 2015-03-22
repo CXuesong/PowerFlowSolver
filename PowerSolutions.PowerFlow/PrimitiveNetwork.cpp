@@ -36,11 +36,9 @@ namespace PowerSolutions {
 		{
 			assert(source != nullptr);
 			//初始化公共属性。
-			int NodeCounter1 = 0, NodeCounter2 = 0;
 			//用于将 source 中的节点映射到 this 中的对应节点。
 			unordered_map<NodeInfo*, NodeInfo*> NewNodeDict(nodes.size());
-			vector<int> AdmittanceColSpace;
-			AdmittanceColSpace.reserve(nodes.size());
+			NodeInfo* MaxActivePowerNode = nullptr;	//记录有功功率最大的节点，稍后可以作为平衡节点使用。
 			while (!nodes.empty())
 			{
 				auto oldInst = nodes.top();
@@ -49,27 +47,45 @@ namespace PowerSolutions {
 				m_Nodes.push_back(newInst);
 				m_BusDict.emplace(newInst->Bus(), newInst);
 				NewNodeDict.emplace(oldInst, newInst);
-				AdmittanceColSpace.push_back(newInst->AdjacentNodes().size() * 2 + 1);
-				newInst->Index(NodeCounter1 + NodeCounter2);
-				switch (newInst->Type())
+				if (MaxActivePowerNode == nullptr ||
+					newInst->ActivePowerInjection() > MaxActivePowerNode->ActivePowerInjection())
+					MaxActivePowerNode = newInst;
+				if (newInst->Type() == NodeType::SlackNode)
 				{
-				case NodeType::PQNode:
-					newInst->SubIndex(NodeCounter1);
-					NodeCounter1++;
-					m_PQNodes.push_back(newInst);
-					break;
-				case NodeType::PVNode:
-					newInst->SubIndex(NodeCounter2);
-					NodeCounter2++;
-					m_PVNodes.push_back(newInst);
-					break;
-				case NodeType::SlackNode:
 					assert(m_SlackNode == nullptr);
 					assert(nodes.empty());
-					newInst->SubIndex(m_Nodes.size() - 1);
 					m_SlackNode = newInst;
 				}
 			}
+			if (m_SlackNode == nullptr)
+			{
+				//需要手动分配一个平衡节点。
+				MaxActivePowerNode->Type(NodeType::SlackNode);
+				m_SlackNode = MaxActivePowerNode;
+				swap(*find(m_Nodes.begin(), m_Nodes.end(), MaxActivePowerNode), m_Nodes.back());
+			}
+			int NodeCounter1 = 0, NodeCounter2 = 0;
+			vector<int> AdmittanceColSpace;
+			AdmittanceColSpace.reserve(m_Nodes.size());
+			for (auto& node : m_Nodes)
+			{
+				node->Index(NodeCounter1 + NodeCounter2);
+				switch (node->Type())
+				{
+				case NodeType::PQNode:
+					node->SubIndex(NodeCounter1);
+					NodeCounter1++;
+					m_PQNodes.push_back(node);
+					break;
+				case NodeType::PVNode:
+					node->SubIndex(NodeCounter2);
+					NodeCounter2++;
+					m_PVNodes.push_back(node);
+					break;
+				}
+				AdmittanceColSpace.push_back(node->AdjacentNodes().size() * 2 + 1);
+			}
+			m_SlackNode->SubIndex(m_Nodes.size() - 1);
 			Admittance.resize(m_Nodes.size(), m_Nodes.size());
 			Admittance.reserve(AdmittanceColSpace);
 			//修正旧的节点引用。
@@ -78,20 +94,16 @@ namespace PowerSolutions {
 				auto& oldNode = nodeP.first;
 				auto& newNode = nodeP.second;
 				auto m0 = oldNode->Index(), m = newNode->Index();
-				Admittance.coeffRef(m, m) = source->Admittance.coeffRef(m0, m0);
+				Admittance.coeffRef(m, m) = source->Admittance.coeff(m0, m0);
 				for (auto& anode : newNode->AdjacentNodes())
 				{
 					//注意下面两行顺序不能反。
 					auto n0 = anode->Index();
 					anode = NewNodeDict.at(anode);
 					auto n = anode->Index();
-					Admittance.coeffRef(m, n) = source->Admittance.coeffRef(m0, n0);
+					Admittance.coeffRef(m, n) = source->Admittance.coeff(m0, n0);
 					//Admittance.coeffRef(n, m) = source->Admittance.coeffRef(n0, m0);
 				}
-			}
-			if (m_SlackNode == nullptr)
-			{
-				//需要手动分配一个平衡节点。
 			}
 			while (!branches.empty())
 			{
@@ -378,7 +390,8 @@ namespace PowerSolutions {
 {
 			vector<shared_ptr<PrimitiveNetwork>> rv;
 			// 进行广度优先搜索（BFS）。
-			vector<bool> NodeVisited(m_Nodes.size());	//黑色节点
+			vector<bool> NodeDiscovered(m_Nodes.size());	//黑色节点
+			vector<bool> BranchVisited(m_Branches.size());
 			queue<NodeInfo*> NodeQueue;
 			struct NodeInfoComparer {
 				bool operator() (NodeInfo* x, NodeInfo* y) const
@@ -396,35 +409,39 @@ namespace PowerSolutions {
 			priority_queue<BranchInfo*, vector<BranchInfo*>, BranchInfoComparer> SubBranches;
 			while (true)
 			{
-				auto i = find(NodeVisited.begin(), NodeVisited.end(), false);
-				if (i == NodeVisited.end()) break;	//所有连通子图已经遍历完毕。
+				auto i = find(NodeDiscovered.begin(), NodeDiscovered.end(), false);
+				if (i == NodeDiscovered.end()) break;	//所有连通子图已经遍历完毕。
 				assert(NodeQueue.empty() && SubNodes.empty() && SubBranches.empty());
-				auto startingIndex = distance(NodeVisited.begin(), i);
+				auto startingIndex = distance(NodeDiscovered.begin(), i);
 				NodeQueue.push(m_Nodes[startingIndex]);
-				SubNodes.push(NodeQueue.back());
+				NodeDiscovered[startingIndex] = true;
 				while (!NodeQueue.empty())
 				{
 					auto node0 = NodeQueue.front();
 					NodeQueue.pop();
-					//注意到此处没有记录灰色节点，
-					//因此对入队列的、现在已经染为黑色的节点需要先行判断。
+					//记录灰色节点。
 					_PS_TRACE("node " << node0->Bus());
-					if (NodeVisited[node0->Index()]) continue;
 					//将刚刚发现的灰色节点加入列表。
 					SubNodes.push(node0);
 					for (auto& node : node0->AdjacentNodes())
 					{
-						if (!NodeVisited[node->Index()])
+						if (node0 > node)
 						{
+							//如果不存在 node0 > node 的判断
+							//则每条边恰好被遍历两次。
 							_PS_TRACE("branch " << node0->Bus() << "\t" << node->Bus());
-							SubBranches.emplace(m_BranchDict.at(NodePair(node0, node)));
+							SubBranches.push(m_BranchDict.at(NodePair(node0, node)));
+						}
+						if (!NodeDiscovered[node->Index()])
+						{
+							//将节点染灰。
+							NodeDiscovered[node->Index()] = true;
+							//接入待探索列表。
 							NodeQueue.push(node);
-							//记录当前节点的邻接节点。
-							//染灰（此处未处理）
 						}
 					}
-					//将当前节点标记为已访问。
-					NodeVisited[node0->Index()] = true;
+					//将当前节点标记为已访问。（染黑）
+					//NodeVisited[node0->Index()] = true;
 				}
 				_PS_TRACE("emplace");
 				rv.emplace_back(new PrimitiveNetwork(this, SubNodes, SubBranches));
