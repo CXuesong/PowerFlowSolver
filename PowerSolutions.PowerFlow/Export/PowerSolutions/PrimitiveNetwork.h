@@ -28,35 +28,39 @@ namespace PowerSolutions {
 				typedef std::list<Component*> ComponentCollection;
 				typedef std::list<NodeInfo*> NodeInfoCollection;
 			private:
-				ObjectModel::Bus* m_Bus;			//母线的组件信息。
+				ObjectModel::Bus* m_Bus;
 				double m_Voltage;
-				double m_Angle;					//弧度
-				int m_Index;					//节点索引（Nodes）。
-				int m_SubIndex;				//节点在相应类型的节点列表（PQNodes/PVNodes）中的索引。
-				NodeType m_Type;					//母线的类型。
+				double m_Angle;
+				int m_Index;
+				int m_SubIndex;
+				NodeType m_Type;
 				double m_ActivePowerInjection;
 				double m_ReactivePowerInjection;
+				ComponentCollection m_Components;
+				NodeInfoCollection m_AdjacentNodes;
 			public:
+				//母线的组件信息。
 				ObjectModel::Bus* Bus() const { return m_Bus; }
 				void Bus(ObjectModel::Bus* val) { m_Bus = val; }
-				ComponentCollection Components;	//母线所连接的元件。
-				NodeInfoCollection AdjacentNodes;	//与此母线邻接的节点。
+				//母线所连接的元件。
+				ComponentCollection& Components() { return m_Components; }
+				//与此母线邻接的节点。
+				NodeInfoCollection& AdjacentNodes() { return m_AdjacentNodes; }
+				//节点索引（Nodes）。
 				int Index() const { return m_Index; }
 				void Index(int val) { m_Index = val; }
+				//节点在相应类型的节点列表（PQNodes/PVNodes）中的索引。
 				int SubIndex() const { return m_SubIndex; }
 				void SubIndex(int val) { m_SubIndex = val; }
 				double Voltage() const { return m_Voltage; }
 				void Voltage(double val) { m_Voltage = val; }
-				double Angle() const { return m_Angle; }
+				double Angle() const { return m_Angle; }		//弧度
 				void Angle(double val) { m_Angle = val; }
-				int Degree() const { return AdjacentNodes.size(); }					//母线连结出来的分支数量。
-				NodeType Type() const { return m_Type; }
+				int Degree() const { return m_AdjacentNodes.size(); }		//母线连结出来的分支数量。
+				NodeType Type() const { return m_Type; }		//母线的类型。
 				void Type(NodeType val) { m_Type = val; }
-				//求解变量的缓存值。
-				//生成目标解相量之前，
 				//对于PQ节点，保存已知的P、Q；
 				//对于PV节点，保存已知的P、V。
-				//迭代结束后，保存了当前的解V/A/P/Q。
 				double ActivePowerInjection() const { return m_ActivePowerInjection; }
 				void AddActivePowerInjection(double val) { m_ActivePowerInjection += val; }
 				double ReactivePowerInjection() const { return m_ReactivePowerInjection; }
@@ -152,9 +156,11 @@ namespace PowerSolutions {
 				return i->second;
 			}
 		public:	//图论支持
-			std::vector<std::shared_ptr<PrimitiveNetwork*>> ConnectedSubsets();
+			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubsets();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network);
+			template <class TNodeQueue, class TBranchQueue>
+			PrimitiveNetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);
 		public:
 			PrimitiveNetwork(ObjectModel::NetworkCase& network, bool nodeReorder);
 			PrimitiveNetwork(ObjectModel::NetworkCase& network, bool nodeReorder, bool ignoreShuntAdmittance);

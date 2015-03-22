@@ -70,8 +70,7 @@ namespace PowerSolutions {
 		// 网络案例中的所有对象通过内存地址（指针）来互相区分，因而无需额外增加编号这一特性。因为对象模型中的编号其实和实际计算时的编号没有什么关系。
 		class NetworkObject
 		{
-			friend class NetworkCase;
-			friend class PrimitiveNetworkImpl;
+			//friend class NetworkCase;
 		private:
 		public:
 			virtual void Validate() const;
@@ -83,6 +82,7 @@ namespace PowerSolutions {
 			//在抽象派生类中重写，用于向指定的副本中填充此类的数据。
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const;
 			NetworkObject();
+		public:
 			virtual ~NetworkObject();
 		private:
 			//不允许拷贝构造函数。
