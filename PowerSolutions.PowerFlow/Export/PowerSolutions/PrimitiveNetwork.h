@@ -22,11 +22,14 @@ namespace PowerSolutions {
 		class PrimitiveNetwork
 		{
 		public:
+			class NodeInfo;
+			class BranchInfo;
+			typedef std::pair<NodeInfo*, NodeInfo*> NodePair;
 			class NodeInfo
 			{
 			public:
 				typedef std::list<Component*> ComponentCollection;
-				typedef std::list<NodeInfo*> NodeInfoCollection;
+				typedef std::list<BranchInfo*> BranchInfoCollection;
 			private:
 				ObjectModel::Bus* m_Bus;
 				double m_Voltage;
@@ -37,7 +40,7 @@ namespace PowerSolutions {
 				double m_ActivePowerInjection;
 				double m_ReactivePowerInjection;
 				ComponentCollection m_Components;
-				NodeInfoCollection m_AdjacentNodes;
+				BranchInfoCollection m_AdjacentBranches;
 			public:
 				//母线的组件信息。
 				ObjectModel::Bus* Bus() const { return m_Bus; }
@@ -45,7 +48,7 @@ namespace PowerSolutions {
 				//母线所连接的元件。
 				ComponentCollection& Components() { return m_Components; }
 				//与此母线邻接的节点。
-				NodeInfoCollection& AdjacentNodes() { return m_AdjacentNodes; }
+				BranchInfoCollection& AdjacentBranches() { return m_AdjacentBranches; }
 				//节点索引（Nodes）。
 				int Index() const { return m_Index; }
 				void Index(int val) { m_Index = val; }
@@ -56,7 +59,7 @@ namespace PowerSolutions {
 				void Voltage(double val) { m_Voltage = val; }
 				double Angle() const { return m_Angle; }		//弧度
 				void Angle(double val) { m_Angle = val; }
-				int Degree() const { return m_AdjacentNodes.size(); }		//母线连结出来的分支数量。
+				int Degree() const { return m_AdjacentBranches.size(); }		//母线连结出来的分支数量。
 				NodeType Type() const { return m_Type; }		//母线的类型。
 				void Type(NodeType val) { m_Type = val; }
 				//对于PQ节点，保存已知的P、Q；
@@ -83,15 +86,27 @@ namespace PowerSolutions {
 			public:
 				NodeInfo(ObjectModel::Bus* bus);
 			};
-			typedef std::pair<NodeInfo*, NodeInfo*> NodePair;
 			class BranchInfo
 			{
+			public:
+				typedef std::list<Component*> ComponentCollection;
 			private:
 				int m_Index;
 				NodePair m_Nodes;
+				ComponentCollection m_Components;
 			public:
+				int Multiplicity() const { return m_Components.size(); }
 				int Index() const { return m_Index; }
+				void Index(int val) { m_Index = val; }
 				NodePair Nodes() const { return m_Nodes; }
+				void Nodes(NodePair val) { m_Nodes = val; }
+				ComponentCollection& Components() { return m_Components; }
+				NodeInfo* AnotherNode(NodeInfo* thisNode)
+				{
+					assert(m_Nodes.first == thisNode || m_Nodes.second == thisNode);
+					if (m_Nodes.first == thisNode) return m_Nodes.second;
+					return m_Nodes.first;
+				}
 			public:
 				BranchInfo(int index, NodeInfo* node1, NodeInfo* node2)
 					: m_Index(index), m_Nodes(node1, node2)
@@ -113,7 +128,7 @@ namespace PowerSolutions {
 			void AddPV(Bus* bus, double activePower, double voltage);
 			void AddSlack(Bus* bus, complexd voltagePhasor);
 			void ClaimParent(Bus* bus, Component* c);
-			void ClaimBranch(Bus* bus1, Bus* bus2);
+			void ClaimBranch(Bus* bus1, Bus* bus2, Component* c);
 		private:
 			NetworkCase* m_SourceNetwork;
 			bool m_NodeReorder;
@@ -151,9 +166,12 @@ namespace PowerSolutions {
 			BranchInfo* Branches(size_t index) const { return m_Branches[index]; }
 			BranchInfo* Branches(NodePair branchRef) const
 			{
-				auto i = m_BranchDict.find(branchRef);
-				if (i == m_BranchDict.end()) return nullptr;
-				return i->second;
+				return m_BranchDict.at(branchRef);
+			}
+			BranchInfo* Branches(BusPair branchRef) const
+			{
+				return m_BranchDict.at(std::make_pair(m_BusDict.at(branchRef.first),
+					m_BusDict.at(branchRef.second)));
 			}
 		public:	//图论支持
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubsets();

@@ -393,9 +393,9 @@ namespace PowerSolutions
 		void ThreeWindingTransformer::BuildNodeInfo(PrimitiveNetwork* pNetwork)
 		{
 			Component::BuildNodeInfo(pNetwork);
-			pNetwork->ClaimBranch(Bus1(), m_CommonBus.get());
-			pNetwork->ClaimBranch(Bus2(), m_CommonBus.get());
-			pNetwork->ClaimBranch(Bus3(), m_CommonBus.get());
+			pNetwork->ClaimBranch(Bus1(), m_CommonBus.get(), this);
+			pNetwork->ClaimBranch(Bus2(), m_CommonBus.get(), this);
+			pNetwork->ClaimBranch(Bus3(), m_CommonBus.get(), this);
 		}
 
 		void ThreeWindingTransformer::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)

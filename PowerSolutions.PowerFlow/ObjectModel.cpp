@@ -112,7 +112,7 @@ namespace PowerSolutions
 
 		void DoublePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork)
 		{
-			pNetwork->ClaimBranch(Bus1(), Bus2());
+			pNetwork->ClaimBranch(Bus1(), Bus2(), this);
 		}
 
 		PowerFlow::ComponentFlowSolution DoublePortComponent::EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const

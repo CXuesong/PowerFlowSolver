@@ -38,12 +38,15 @@ namespace PowerSolutions {
 			//初始化公共属性。
 			//用于将 source 中的节点映射到 this 中的对应节点。
 			unordered_map<NodeInfo*, NodeInfo*> NewNodeDict(nodes.size());
+			unordered_map<BranchInfo*, BranchInfo*> NewBranchDict(nodes.size());
 			NodeInfo* MaxActivePowerNode = nullptr;	//记录有功功率最大的节点，稍后可以作为平衡节点使用。
+			//复制节点对象模型。
 			while (!nodes.empty())
 			{
 				auto oldInst = nodes.top();
 				auto newInst = new NodeInfo(*oldInst);
 				nodes.pop();
+				//在后面的代码中重新进行编号。
 				m_Nodes.push_back(newInst);
 				m_BusDict.emplace(newInst->Bus(), newInst);
 				NewNodeDict.emplace(oldInst, newInst);
@@ -57,6 +60,18 @@ namespace PowerSolutions {
 					m_SlackNode = newInst;
 				}
 			}
+			//复制边对象模型。
+			while (!branches.empty())
+			{
+				BranchInfo* oldInst = branches.top();
+				auto newInst = new BranchInfo(*oldInst);
+				newInst->Index(m_Branches.size());
+				newInst->Nodes(make_pair(NewNodeDict.at(oldInst->Nodes().first),
+					NewNodeDict.at(oldInst->Nodes().second)));
+				m_Branches.push_back(newInst);
+				NewBranchDict.emplace(oldInst, newInst);
+				branches.pop();
+			}
 			if (m_SlackNode == nullptr)
 			{
 				//需要手动分配一个平衡节点。
@@ -64,6 +79,7 @@ namespace PowerSolutions {
 				m_SlackNode = MaxActivePowerNode;
 				swap(*find(m_Nodes.begin(), m_Nodes.end(), MaxActivePowerNode), m_Nodes.back());
 			}
+			//为节点重新编号。
 			int NodeCounter1 = 0, NodeCounter2 = 0;
 			vector<int> AdmittanceColSpace;
 			AdmittanceColSpace.reserve(m_Nodes.size());
@@ -83,7 +99,7 @@ namespace PowerSolutions {
 					m_PVNodes.push_back(node);
 					break;
 				}
-				AdmittanceColSpace.push_back(node->AdjacentNodes().size() * 2 + 1);
+				AdmittanceColSpace.push_back(node->AdjacentBranches().size() * 2 + 1);
 			}
 			m_SlackNode->SubIndex(m_Nodes.size() - 1);
 			Admittance.resize(m_Nodes.size(), m_Nodes.size());
@@ -95,24 +111,15 @@ namespace PowerSolutions {
 				auto& newNode = nodeP.second;
 				auto m0 = oldNode->Index(), m = newNode->Index();
 				Admittance.coeffRef(m, m) = source->Admittance.coeff(m0, m0);
-				for (auto& anode : newNode->AdjacentNodes())
+				for (auto& abranch : newNode->AdjacentBranches())
 				{
 					//注意下面两行顺序不能反。
-					auto n0 = anode->Index();
-					anode = NewNodeDict.at(anode);
-					auto n = anode->Index();
+					auto n0 = abranch->AnotherNode(oldNode)->Index();
+					abranch = NewBranchDict.at(abranch);
+					auto n = abranch->AnotherNode(newNode)->Index();
 					Admittance.coeffRef(m, n) = source->Admittance.coeff(m0, n0);
 					//Admittance.coeffRef(n, m) = source->Admittance.coeffRef(n0, m0);
 				}
-			}
-			while (!branches.empty())
-			{
-				BranchInfo* oldInst = branches.top();
-				auto newInst = new BranchInfo(m_Branches.size(), 
-					NewNodeDict.at(oldInst->Nodes().first), 
-					NewNodeDict.at(oldInst->Nodes().second));
-				branches.pop();
-				m_Branches.push_back(newInst);
 			}
 		}
 
@@ -362,7 +369,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::ClaimBranch(Bus* bus1, Bus* bus2)
+		void PrimitiveNetwork::ClaimBranch(Bus* bus1, Bus* bus2, Component* c)
 		{
 			assert(bus1 != bus2);	//不允许自环。
 			//加入支路-组件列表中
@@ -375,9 +382,11 @@ namespace PowerSolutions {
 				auto newBranch = new BranchInfo(m_Branches.size(), node1, node2);
 				m_Branches.push_back(newBranch);
 				result.first->second = newBranch;
-				Nodes(bus1)->AdjacentNodes().push_back(node2);
-				Nodes(bus2)->AdjacentNodes().push_back(node1);
+				Nodes(bus1)->AdjacentBranches().push_back(newBranch);
+				Nodes(bus2)->AdjacentBranches().push_back(newBranch);
 			}
+			//为支路增加一个元件。
+			result.first->second->Components().push_back(c);
 		}
 
 		void PrimitiveNetwork::ClaimParent(Bus* bus, Component* c)
@@ -423,8 +432,9 @@ namespace PowerSolutions {
 					_PS_TRACE("node " << node0->Bus());
 					//将刚刚发现的灰色节点加入列表。
 					SubNodes.push(node0);
-					for (auto& node : node0->AdjacentNodes())
+					for (auto& ab : node0->AdjacentBranches())
 					{
+						auto node = ab->AnotherNode(node0);
 						if (node0 > node)
 						{
 							//如果不存在 node0 > node 的判断
