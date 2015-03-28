@@ -173,6 +173,11 @@ namespace PowerSolutions {
 				return m_BranchDict.at(std::make_pair(m_BusDict.at(branchRef.first),
 					m_BusDict.at(branchRef.second)));
 			}
+			BranchInfo* Branches(std::pair<size_t, size_t> branchRefIndex) const
+			{
+				return m_BranchDict.at(std::make_pair(m_Nodes[branchRefIndex.first],
+					m_Nodes[branchRefIndex.second]));
+			}
 		public:	//Í¼ÂÛÖ§³Ö
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubsets();
 		private:
