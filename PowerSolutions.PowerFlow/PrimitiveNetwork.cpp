@@ -143,7 +143,7 @@ namespace PowerSolutions {
 				if (b != nullptr)
 				{
 					m_Buses.push_back(b);
-					_PS_TRACE("BUS " << b << endl);
+					_PS_TRACE("BUS " << b);
 					continue;
 				}
 				auto bc = dynamic_cast<IBusContainer*>(obj);
@@ -173,8 +173,7 @@ namespace PowerSolutions {
 				auto* c = dynamic_cast<Component*>(obj);
 				if (c != nullptr)
 				{
-					//补充节点信息
-					//包括节点的度
+					//补充节点信息以及支路连接信息。
 					c->BuildNodeInfo(this);
 				}
 			}
@@ -262,13 +261,13 @@ namespace PowerSolutions {
 			}
 
 			//生成导纳矩阵。
-			// 上三角矩阵，row < col
 			//为导纳稀疏矩阵预留空间
 			Admittance.resize(m_Nodes.size(), m_Nodes.size());
 			vector<int> ColSpace;
 			ColSpace.resize(m_Nodes.size());
 			//将节点表格映射为对应节点的支路数量
-			transform(m_Nodes.begin(), m_Nodes.end(), ColSpace.begin(), [](NodeInfo *node){ return node->Degree() * 2 + 1; });
+			transform(m_Nodes.begin(), m_Nodes.end(), ColSpace.begin(), 
+				[](NodeInfo *node){ return node->Degree() * 2 + 1; });
 			Admittance.reserve(ColSpace);
 			//生成导纳矩阵
 			_PS_TRACE("Bus1 -- Bus2\tY12\tY1\tY2");

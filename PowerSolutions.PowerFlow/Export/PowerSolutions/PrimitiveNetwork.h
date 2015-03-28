@@ -142,6 +142,7 @@ namespace PowerSolutions {
 			NodeInfo* m_SlackNode;
 			BranchCollection m_Branches;
 			BranchDictionary m_BranchDict;
+			//Eigen::SparseMatrix<bool> m_IncidenceMatrix;
 		public:
 			NetworkCase* SourceNetwork() const { return m_SourceNetwork; }
 			bool NodeReorder() const { return m_NodeReorder; }
@@ -178,7 +179,14 @@ namespace PowerSolutions {
 				return m_BranchDict.at(std::make_pair(m_Nodes[branchRefIndex.first],
 					m_Nodes[branchRefIndex.second]));
 			}
+			BranchInfo* TryGetBranch(NodePair branchRef) const
+			{
+				auto i = m_BranchDict.find(branchRef);
+				if (i == m_BranchDict.end()) return nullptr;
+				return i->second;
+			}
 		public:	//Í¼ÂÛÖ§³Ö
+			//const Eigen::SparseMatrix<bool>& IncidenceMatrix() const { return m_IncidenceMatrix; }
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubsets();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network);
