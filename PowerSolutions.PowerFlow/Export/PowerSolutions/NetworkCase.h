@@ -70,7 +70,7 @@ namespace PowerSolutions {
 			bool m_AutoDeleteChildren;
 		private:	//internal
 		public:
-			const NetworkObjectCollection& Objects() { return m_Objects; }
+			const NetworkObjectCollection& Objects() const { return m_Objects; }
 			//按照 Index 属性查找一个母线。
 			Bus* Buses(int index) const;
 			//向网络案例中加入一条母线。
@@ -89,6 +89,7 @@ namespace PowerSolutions {
 			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
 			void Validate() const;				//验证整个网络实例的有效性。
 			PrimitiveNetwork* Expand() const;
+			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
 			NetworkCase* ShallowClone();
 			//构造此网络案例的一个副本，并获取副本和原型中所有对象的对应关系。
 			NetworkCase* Clone(NetworkCaseTrackingInfo*& trackingInfo);
