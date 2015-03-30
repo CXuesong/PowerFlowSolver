@@ -237,7 +237,7 @@ namespace NativeUnitTest1
 			};
 			ss << "Ô­Ê¼ÍøÂç" << endl;
 			PrintNetwork(pn);
-			auto subPN = pn.ConnectedSubsets();
+			auto subPN = pn.ConnectedSubnetworks();
 			for (auto& sn : subPN)
 			{
 				ss << "×ÓÍøÂç" << endl;

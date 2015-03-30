@@ -99,6 +99,7 @@ namespace PowerSolutions {
 				int Index() const { return m_Index; }
 				void Index(int val) { m_Index = val; }
 				NodePair Nodes() const { return m_Nodes; }
+				BusPair Buses() const { return std::make_pair(m_Nodes.first->Bus(), m_Nodes.second->Bus()); }
 				void Nodes(NodePair val) { m_Nodes = val; }
 				ComponentCollection& Components() { return m_Components; }
 				NodeInfo* AnotherNode(NodeInfo* thisNode)
@@ -187,7 +188,7 @@ namespace PowerSolutions {
 			}
 		public:	//Í¼ÂÛÖ§³Ö
 			//const Eigen::SparseMatrix<bool>& IncidenceMatrix() const { return m_IncidenceMatrix; }
-			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubsets();
+			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network);
 			template <class TNodeQueue, class TBranchQueue>

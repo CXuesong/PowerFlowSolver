@@ -394,7 +394,7 @@ namespace PowerSolutions {
 			Nodes(bus)->Components().push_back(c);
 		}
 
-		vector<shared_ptr<PrimitiveNetwork>> PrimitiveNetwork::ConnectedSubsets()
+		vector<shared_ptr<PrimitiveNetwork>> PrimitiveNetwork::ConnectedSubnetworks()
 {
 			vector<shared_ptr<PrimitiveNetwork>> rv;
 			// 进行广度优先搜索（BFS）。
