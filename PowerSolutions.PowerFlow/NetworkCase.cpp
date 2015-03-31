@@ -81,8 +81,8 @@ namespace PowerSolutions {
 			return nc;
 		}
 
-		NetworkCase* NetworkCase::ShallowClone()
-		{
+		NetworkCase* NetworkCase::ShallowClone() const
+{
 			auto nc = new NetworkCase();
 			nc->m_AutoDeleteChildren = false;
 			nc->m_Objects = m_Objects;

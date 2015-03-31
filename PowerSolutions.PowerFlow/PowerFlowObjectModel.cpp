@@ -323,7 +323,7 @@ namespace PowerSolutions
 			: TriPortComponent(bus1, bus2, bus3),
 			m_Impedance12(impedance12), m_Impedance13(impedance13), m_Impedance23(impedance23),
 			m_Admittance(admittance), m_TapRatio1(tapRatio1), m_TapRatio2(tapRatio2), m_TapRatio3(tapRatio3),
-			m_CommonBus(new Bus(-1)), m_Transformer1(new Transformer()), m_Transformer2(new Transformer()),
+			m_CommonBus(new Bus(this, 1)), m_Transformer1(new Transformer()), m_Transformer2(new Transformer()),
 			m_Transformer3(new Transformer())
 		{ }
 

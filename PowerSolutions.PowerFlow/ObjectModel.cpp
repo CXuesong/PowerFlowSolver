@@ -42,8 +42,18 @@ namespace PowerSolutions
 		{ }
 
 		////////// ÍøÂç¶ÔÏó //////////
+#if _DEBUG
+		unsigned long NetworkObject::_IDCounter = 0;
+
+		NetworkObject::NetworkObject()
+			: _ID(_IDCounter)
+		{
+			_IDCounter++;
+		}
+#elif
 		NetworkObject::NetworkObject()
 		{ }
+#endif
 
 		NetworkObject::~NetworkObject()
 		{
@@ -112,6 +122,7 @@ namespace PowerSolutions
 
 		void DoublePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork)
 		{
+			Component::BuildNodeInfo(pNetwork);
 			pNetwork->ClaimBranch(Bus1(), Bus2(), this);
 		}
 
@@ -137,11 +148,15 @@ namespace PowerSolutions
 
 		////////// Ä¸Ïß //////////
 		Bus::Bus()
-			: m_InitialVoltage(1, 0)
+			: Bus(nullptr, 1.0)
 		{ }
 
 		Bus::Bus(complexd initialVoltage)
-			:  m_InitialVoltage(initialVoltage)
+			: Bus(nullptr, initialVoltage)
+		{ }
+
+		Bus::Bus(IBusContainer* parent, complexd initialVoltage)
+			: m_Parent(parent), m_InitialVoltage(initialVoltage)
 		{ }
 
 		void Bus::Validate() const

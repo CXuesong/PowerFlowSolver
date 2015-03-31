@@ -45,7 +45,7 @@ namespace PowerSolutions {
 				//母线的组件信息。
 				ObjectModel::Bus* Bus() const { return m_Bus; }
 				void Bus(ObjectModel::Bus* val) { m_Bus = val; }
-				//母线所连接的元件。
+				//母线所连接的元件。包括单端与多端元件。
 				ComponentCollection& Components() { return m_Components; }
 				//与此母线邻接的节点。
 				BranchInfoCollection& AdjacentBranches() { return m_AdjacentBranches; }

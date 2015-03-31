@@ -157,7 +157,6 @@ namespace PowerSolutions {
 					}
 				}
 			}
-			//在第一个 for 循环中提前粗略统计PQ/PV节点数目是为了后面 vector 提前预留内存使用。
 			m_BusDict.reserve(m_Buses.size());
 			for (auto &obj : m_Buses)
 			{

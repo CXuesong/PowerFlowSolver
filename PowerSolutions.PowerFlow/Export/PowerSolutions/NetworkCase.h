@@ -90,7 +90,7 @@ namespace PowerSolutions {
 			void Validate() const;				//验证整个网络实例的有效性。
 			PrimitiveNetwork* Expand() const;
 			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
-			NetworkCase* ShallowClone();
+			NetworkCase* ShallowClone() const;
 			//构造此网络案例的一个副本，并获取副本和原型中所有对象的对应关系。
 			NetworkCase* Clone(NetworkCaseTrackingInfo*& trackingInfo);
 			//构造此网络案例的一个副本。

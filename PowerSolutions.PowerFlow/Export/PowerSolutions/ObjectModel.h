@@ -27,6 +27,7 @@ namespace PowerSolutions {
 		class PrimitiveNetwork;
 		class NetworkCaseTrackingInfo;
 		class Component;
+		class IBusContainer;
 
 		//用于表示一个π型等值参数。
 		struct PiEquivalencyParameters
@@ -70,8 +71,11 @@ namespace PowerSolutions {
 		// 网络案例中的所有对象通过内存地址（指针）来互相区分，因而无需额外增加编号这一特性。因为对象模型中的编号其实和实际计算时的编号没有什么关系。
 		class NetworkObject
 		{
-			//friend class NetworkCase;
-		private:
+#if _DEBUG
+		public:
+			static unsigned long _IDCounter;
+			unsigned long _ID;	//用于在调试模式下区分不同的网络对象。
+#endif
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。
@@ -96,10 +100,10 @@ namespace PowerSolutions {
 			friend class Component;
 		private:
 			complexd m_InitialVoltage;
-		private:	//Internal
-			void AttachComponent(Component* c);
-			void DetachComponent(Component* c);
+			IBusContainer* m_Parent;
 		public:
+			IBusContainer* Parent() const { return m_Parent; }
+			void Parent(IBusContainer* val) { m_Parent = val; }
 			complexd InitialVoltage() const { return m_InitialVoltage; }	//迭代时母线使用的初始电压值（幅值：标幺值，相角：弧度）。
 			void InitialVoltage(complexd val) { m_InitialVoltage = val; }
 		public:
@@ -114,6 +118,8 @@ namespace PowerSolutions {
 		public:
 			Bus();
 			Bus(complexd initialVoltage);
+		_PS_INTERNAL:
+			Bus(IBusContainer* parent, complexd initialVoltage);
 		};
 
 		typedef std::pair<ObjectModel::Bus*, ObjectModel::Bus*> BusPair;
