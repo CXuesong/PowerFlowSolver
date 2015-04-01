@@ -122,8 +122,9 @@ namespace PowerSolutions
 			void IterationEvent(IterationEventHandler val) { m_IterationEvent = val; }
 		public:
 			// 求解网络的功率潮流分布，并生成一个潮流分析报告。
-			virtual Solution* Solve(ObjectModel::PrimitiveNetwork& network) = 0;
-			Solution* Solve(ObjectModel::NetworkCase& network);
+			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) = 0;
+			std::shared_ptr<Solution> Solve(std::shared_ptr<ObjectModel::PrimitiveNetwork> network);
+			std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network);
 			Solver();
 			virtual ~Solver();
 		public:

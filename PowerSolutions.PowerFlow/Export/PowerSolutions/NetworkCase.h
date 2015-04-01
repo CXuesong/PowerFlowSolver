@@ -4,6 +4,7 @@
 #include "PowerSolutions.h"
 #include "ObjectModel.h"
 #include "Utility.h"
+#include "PrimitiveNetwork.h"
 #include <list>
 #include <unordered_map>
 #include <unordered_set>
@@ -14,7 +15,7 @@ namespace PowerSolutions {
 
 		// 在执行 NetworkCase::Clone 时用于将原来的网络案例（原型，Prototype）中的某些网络对象（尤其是母线）映射到新的网络案例（副本，Clone）中。
 		// 在使用 NetworkCase::TrackingClone 后，用于实现原型网络案例和副本网络案例对象之间的对应。
-		class NetworkCaseTrackingInfo
+		class NetworkCaseCorrespondenceInfo
 		{
 		private:
 			struct MappingInfo
@@ -45,12 +46,12 @@ namespace PowerSolutions {
 				return static_cast<TObj*>(PrototypeOf(static_cast<NetworkObject*>(cloneObj)));
 			}
 		private:	//internal
-			NetworkCaseTrackingInfo(std::size_t objectCount)
+			NetworkCaseCorrespondenceInfo(std::size_t objectCount)
 			{
 				objectMapping.reserve(objectCount * 2);
 			}
 		public:
-			NetworkCaseTrackingInfo()
+			NetworkCaseCorrespondenceInfo()
 			{ }
 		};
 
@@ -88,18 +89,17 @@ namespace PowerSolutions {
 			bool RemoveObject(NetworkObject* obj);
 			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
 			void Validate() const;				//验证整个网络实例的有效性。
-			PrimitiveNetwork* Expand() const;
+			std::shared_ptr<PrimitiveNetwork> ToPrimitive(PrimitiveNetworkOptions options = PrimitiveNetworkOptions::NodeReorder);
 			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
-			NetworkCase* ShallowClone() const;
+			std::shared_ptr<NetworkCase> ShallowClone() const;
 			//构造此网络案例的一个副本，并获取副本和原型中所有对象的对应关系。
-			NetworkCase* Clone(NetworkCaseTrackingInfo*& trackingInfo);
+			std::pair < std::shared_ptr<NetworkCase>, std::shared_ptr<NetworkCaseCorrespondenceInfo> >
+				CorrespondenceClone();
 			//构造此网络案例的一个副本。
-			NetworkCase* Clone() 
+			std::shared_ptr<NetworkCase> Clone()
 			{
-				NetworkCaseTrackingInfo* infoptr;
-				auto nc = Clone(infoptr);
-				delete infoptr;
-				return nc;
+				auto info = CorrespondenceClone();
+				return info.first;
 			}
 		public:
 			NetworkCase();

@@ -19,8 +19,17 @@ namespace PowerSolutions {
 			PVNode,			//PV节点。
 			SlackNode,		//平衡节点。
 		};
+		enum class PrimitiveNetworkOptions : byte
+		{
+			None = 0,
+			NodeReorder = 1,			//进行节点编号优化。
+			IgnoreShuntAdmittance = 2,	//忽略接地导纳，用于直流潮流计算。注意此选项不会改变 NodeInfo::Components 的行为。
+			NoAdmittanceMatrix = 4,		//不生成导纳矩阵，一般用于纯图论分析。
+			AutoSetSlackNode = 8,		//如果网络中不存在平衡节点，则将发电容量最大的PV节点作为平衡节点。
+		};
 		class PrimitiveNetwork
 		{
+			friend class NetworkCase;
 		public:
 			class NodeInfo;
 			class BranchInfo;
@@ -132,8 +141,7 @@ namespace PowerSolutions {
 			void ClaimBranch(Bus* bus1, Bus* bus2, Component* c);
 		private:
 			NetworkCase* m_SourceNetwork;
-			bool m_NodeReorder;
-			bool m_IgnoreShuntAdmittance;
+			PrimitiveNetworkOptions m_Options;
 			BusCollection m_Buses;
 			NodeCollection m_PQNodes;			//参与计算的母线（PQ节点）信息，按照矩阵索引排序。
 			NodeCollection m_PVNodes;			//参与计算的母线（PV节点）信息，按照矩阵索引排序。
@@ -146,8 +154,7 @@ namespace PowerSolutions {
 			//Eigen::SparseMatrix<bool> m_IncidenceMatrix;
 		public:
 			NetworkCase* SourceNetwork() const { return m_SourceNetwork; }
-			bool NodeReorder() const { return m_NodeReorder; }
-			bool IgnoreShuntAdmittance() const { return m_IgnoreShuntAdmittance; }
+			PrimitiveNetworkOptions Options() const { return m_Options; }
 			const BusCollection& Buses() const { return m_Buses; }
 			Eigen::SparseMatrix<complexd> Admittance;	//完整的导纳矩阵。
 			//const ComponentCollection& Components() const { return m_Components; }
@@ -155,7 +162,7 @@ namespace PowerSolutions {
 			const NodeCollection& PQNodes() const { return m_PQNodes; }
 			const NodeCollection& PVNodes() const { return m_PVNodes; }
 			const NodeCollection& Nodes() const { return m_Nodes; }	//参与计算的三种节点，按照矩阵索引连续排序，注意平衡节点放在最后。
-			NodeInfo* Nodes(size_t index) const { return m_Nodes[index]; }
+			NodeInfo* Nodes(size_t index) const { return m_Nodes.at(index); }
 			NodeInfo* Nodes(Bus* busRef) const { return m_BusDict.at(busRef); }
 			NodeInfo* TryGetNode(Bus* busRef) const
 			{
@@ -165,7 +172,7 @@ namespace PowerSolutions {
 			}
 			NodeInfo* SlackNode() const { return m_SlackNode; }				//平衡节点的信息。
 			const BranchCollection& Branches() const { return m_Branches; }	//记录节点连接（支路）(m,n)
-			BranchInfo* Branches(size_t index) const { return m_Branches[index]; }
+			BranchInfo* Branches(size_t index) const { return m_Branches.at(index); }
 			BranchInfo* Branches(NodePair branchRef) const
 			{
 				return m_BranchDict.at(branchRef);
@@ -187,18 +194,22 @@ namespace PowerSolutions {
 				return i->second;
 			}
 		public:	//图论支持
-			//const Eigen::SparseMatrix<bool>& IncidenceMatrix() const { return m_IncidenceMatrix; }
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks();
 		private:
-			void LoadNetworkCase(ObjectModel::NetworkCase* network);
+			void LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
 			template <class TNodeQueue, class TBranchQueue>
 			PrimitiveNetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);
+		private:	// internal
+			PrimitiveNetwork();
 		public:
-			PrimitiveNetwork(ObjectModel::NetworkCase& network, bool nodeReorder);
-			PrimitiveNetwork(ObjectModel::NetworkCase& network, bool nodeReorder, bool ignoreShuntAdmittance);
 			~PrimitiveNetwork();
 		};
 	}
+	template<>
+	struct enable_bitmask_operators < ObjectModel::PrimitiveNetworkOptions >
+	{
+		static const bool enable = true;
+	};
 }
 
 #endif	//__POWERSOLUTIONS_POWERFLOW_PRIMITIVENETWORK_H

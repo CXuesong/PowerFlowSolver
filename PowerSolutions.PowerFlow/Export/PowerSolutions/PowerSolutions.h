@@ -20,6 +20,31 @@ namespace PowerSolutions {
 		//调试支持
 		void TraceFilePath(char path[]);
 	}
+
+	//强类型枚举的按位运算支持。
+	template<typename E>
+	struct enable_bitmask_operators{
+		static const bool enable = false;
+	};
+
+	template<typename E>
+	typename std::enable_if<enable_bitmask_operators<E>::enable, E>::type
+		operator|(E lhs, E rhs)
+	{
+		typedef typename std::underlying_type<E>::type underlying;
+		return static_cast<E>(static_cast<underlying>(lhs) |
+			static_cast<underlying>(rhs));
+	}
+
+	template<typename E>
+	typename std::enable_if<enable_bitmask_operators<E>::enable, E>::type
+		operator&(E lhs, E rhs)
+	{
+		typedef typename std::underlying_type<E>::type underlying;
+		return static_cast<E>(static_cast<underlying>(lhs) &
+			static_cast<underlying>(rhs));
+	}
+
 }
 
 #if _DEBUG

@@ -61,6 +61,12 @@ namespace PowerSolutions
 		{
 			return dynamic_cast<TCheck*>(obj) != nullptr;
 		}
+
+		template<class TEnum>
+		bool HasFlag(TEnum v, TEnum testV)
+		{
+
+		}
 	}
 }
 

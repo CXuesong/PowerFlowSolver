@@ -37,9 +37,9 @@ namespace PowerSolutions
 			virtual double EvalDeviation() = 0;		//计算当前结果的迭代误差。
 			virtual bool OnIteration() = 0;
 			virtual void AfterIterations() = 0;
-			Solution* GenerateSolution(SolutionStatus status, int iterCount, double maxDev);
+			std::shared_ptr<Solution> GenerateSolution(SolutionStatus status, int iterCount, double maxDev);
 		public:
-			virtual Solution* Solve(ObjectModel::PrimitiveNetwork& network) override;		// 求解网络的功率潮流分布。返回值表示是否成功收敛。
+			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) override;		// 求解网络的功率潮流分布。返回值表示是否成功收敛。
 			SolverImpl();
 			virtual ~SolverImpl();
 		};

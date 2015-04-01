@@ -32,10 +32,16 @@ namespace PowerSolutions
 			return nullptr;
 		}
 
-		Solution* Solver::Solve(ObjectModel::NetworkCase& network)
+		shared_ptr<Solution> Solver::Solve(ObjectModel::NetworkCase& network)
 		{
-			PrimitiveNetwork pn(network, true);
-			return this->Solve(pn);
+			auto pn = network.ToPrimitive(PrimitiveNetworkOptions::NodeReorder);
+			return this->Solve(*pn);
+		}
+
+		shared_ptr<Solution> Solver::Solve(shared_ptr<ObjectModel::PrimitiveNetwork> network)
+		{
+			//此函数仅为了保持传入 shared_ptr 的引用不失效。
+			return Solve(*network);
 		}
 
 		PrimitiveSolution::PrimitiveSolution(PrimitiveNetwork& network) 

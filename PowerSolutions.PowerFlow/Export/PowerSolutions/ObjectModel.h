@@ -25,7 +25,7 @@ namespace PowerSolutions {
 	{
 		class NetworkCase;
 		class PrimitiveNetwork;
-		class NetworkCaseTrackingInfo;
+		class NetworkCaseCorrespondenceInfo;
 		class Component;
 		class IBusContainer;
 
@@ -74,17 +74,17 @@ namespace PowerSolutions {
 #if _DEBUG
 		public:
 			static unsigned long _IDCounter;
-			unsigned long _ID;	//用于在调试模式下区分不同的网络对象。
+			unsigned long _ID;	//一个标识符，用于在调试模式下区分不同的网络对象。
 #endif
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。
-			NetworkObject* Clone(const NetworkCaseTrackingInfo& context) const;
+			NetworkObject* Clone(const NetworkCaseCorrespondenceInfo& context) const;
 		protected:
 			//在非抽象派生类中重写，用于返回一个包含派生类数据的实例。
 			virtual NetworkObject* CloneInstance() const = 0;
 			//在抽象派生类中重写，用于向指定的副本中填充此类的数据。
-			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const;
+			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const;
 			NetworkObject();
 		public:
 			virtual ~NetworkObject();
@@ -109,7 +109,7 @@ namespace PowerSolutions {
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。
-			NetworkObject* Clone(const NetworkCaseTrackingInfo& context) const
+			NetworkObject* Clone(const NetworkCaseCorrespondenceInfo& context) const
 			{
 				return static_cast<Bus*>(NetworkObject::Clone(context));
 			}
@@ -138,7 +138,7 @@ namespace PowerSolutions {
 			//获取此元件端口的数目。
 			int PortCount() const { return m_Buses.size(); }
 			//获取此对象的一个副本。
-			NetworkObject* Clone(const NetworkCaseTrackingInfo& context) const
+			NetworkObject* Clone(const NetworkCaseCorrespondenceInfo& context) const
 			{
 				return static_cast<Component*>(NetworkObject::Clone(context));
 			}
@@ -155,7 +155,7 @@ namespace PowerSolutions {
 			//index > 0 : 某端口的注入母线的功率
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const = 0;
 		protected:
-			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const override;
+			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const override;
 		protected:
 			Component(int portCount);
 		};

@@ -48,20 +48,17 @@ namespace NativeUnitTest1
 				new Line(b1, b3, complexd(0.130165, 0.247934), complexd(0, 0.025864)),
 				new ThreeWindingTransformer(b1, b2, b3, 1, 2, 3, 5, 1, 0.5, 0.3)
 			});
-			//锟斤拷隆锟斤拷锟斤拷
-			NetworkCaseTrackingInfo *info;
-			auto network2 = network.Clone(info);
+			//克隆测试
+			auto info = network.CorrespondenceClone();
 			for (auto& c : network.Objects())
 			{
-				ss << "Proto : " << typeid(*c).name() << ", " << c << "-->" << info->CloneOf(c) << endl;
+				ss << "Proto : " << typeid(*c).name() << ", " << c << "-->" << info.second->CloneOf(c) << endl;
 			}
-			for (auto& c : network2->Objects())
+			for (auto& c : info.first->Objects())
 			{
-				ss << "Clone : " << typeid(*c).name() << ", " << c << "-->" << info->PrototypeOf(c) << endl;
+				ss << "Clone : " << typeid(*c).name() << ", " << c << "-->" << info.second->PrototypeOf(c) << endl;
 			}
 			Logger::WriteMessage(ss.str().c_str());
-			delete network2;
-			delete info;
 		}
 
 		TEST_METHOD(NativePowerFlowTest1)
@@ -89,8 +86,7 @@ namespace NativeUnitTest1
 			//	auto nc2 = shared_ptr<NetworkCase>(network.Clone());
 			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
 			solver->MaxDeviationTolerance(1e-12);
-			auto s = solver->Solve(PrimitiveNetwork(network, false));
-			delete s;
+			auto s = solver->Solve((network));
 			s = solver->Solve(network);
 			stringstream ss;
 			ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
@@ -99,7 +95,6 @@ namespace NativeUnitTest1
 				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
 			}
 			Logger::WriteMessage(ss.str().c_str());
-			delete s;
 		}
 
 		// 三绕组变压器测试。
@@ -180,7 +175,7 @@ namespace NativeUnitTest1
 			});
 			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
 			solver->MaxDeviationTolerance(1e-12);
-			auto s = solver->Solve(PrimitiveNetwork(network, false));
+			auto s = solver->Solve(network);
 			stringstream ss;
 			ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
 			for (auto& item : s->NodeFlow())
@@ -188,10 +183,9 @@ namespace NativeUnitTest1
 				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
 			}
 			Logger::WriteMessage(ss.str().c_str());
-			delete s;
 		}
 
-		TEST_METHOD(NativePrimitiveNetworkSubTest)
+		TEST_METHOD(NativePrimitiveNetworkTest)
 		{
 			// TODO:  在此输入测试代码
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
@@ -217,6 +211,7 @@ namespace NativeUnitTest1
 			NetworkObject* sg;
 			for (auto& obj : network2->Objects())
 			{
+				//将新网路中的副本对象放回原网络中。
 				if (dynamic_cast<SlackGenerator*>(obj) == nullptr)
 					network.AddObject(obj);
 				else
@@ -224,7 +219,7 @@ namespace NativeUnitTest1
 			}
 			network2->RemoveObject(sg);
 			network2->AutoDeleteChildren(false);
-			PrimitiveNetwork pn(network, false);
+			auto pn = network.ToPrimitive();
 			stringstream ss;
 			auto PrintNetwork = [&ss](const PrimitiveNetwork& pn)
 			{
@@ -236,8 +231,8 @@ namespace NativeUnitTest1
 				ss << pn.Admittance << endl << endl;
 			};
 			ss << "原始网络" << endl;
-			PrintNetwork(pn);
-			auto subPN = pn.ConnectedSubnetworks();
+			PrintNetwork(*pn);
+			auto subPN = pn->ConnectedSubnetworks();
 			for (auto& sn : subPN)
 			{
 				ss << "子网络" << endl;

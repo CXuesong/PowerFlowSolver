@@ -24,7 +24,7 @@ namespace PowerSolutions
 		{
 		}
 
-		Solution* SolverImpl::Solve(PrimitiveNetwork& network)
+		std::shared_ptr<Solution> SolverImpl::Solve(ObjectModel::PrimitiveNetwork& network)
 		{
 			assert(MaxDeviationTolerance() >= 0);
 			PNetwork = &network;
@@ -66,11 +66,11 @@ namespace PowerSolutions
 			return GenerateSolution(SolutionStatus::MaxIteration, MaxIterations(), EvalDeviation());
 		}
 
-		Solution* SolverImpl::GenerateSolution(SolutionStatus status, int iterCount, double maxDev)
+		shared_ptr<Solution> SolverImpl::GenerateSolution(SolutionStatus status, int iterCount, double maxDev)
 		{
 			AfterIterations();	//收尾工作
 			//注意：下面的工作不能引发异常，否则会由s引发内存泄漏。
-			auto s = new Solution();
+			shared_ptr<Solution> s(new Solution());
 			s->Status(status);
 			s->IterationCount(iterCount);
 			s->MaxDeviation(maxDev);

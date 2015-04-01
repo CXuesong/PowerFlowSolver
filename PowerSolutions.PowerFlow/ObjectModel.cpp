@@ -49,21 +49,23 @@ namespace PowerSolutions
 			: _ID(_IDCounter)
 		{
 			_IDCounter++;
+			_PS_TRACE("NO Construct #" << _ID << " @ " << this);
 		}
-#elif
+#else
 		NetworkObject::NetworkObject()
 		{ }
 #endif
 
 		NetworkObject::~NetworkObject()
 		{
+			_PS_TRACE("NO Dispose #" << _ID << " @ " << this);
 		}
 
 		void NetworkObject::Validate() const
 		{
 		}
 
-		NetworkObject* NetworkObject::Clone(const NetworkCaseTrackingInfo& context) const
+		NetworkObject* NetworkObject::Clone(const NetworkCaseCorrespondenceInfo& context) const
 		{
 			//使用重写程度最高的函数构造新实例，同时设置派生类的属性。
 			auto newInstance = CloneInstance();
@@ -74,7 +76,7 @@ namespace PowerSolutions
 			return newInstance;
 		}
 
-		void NetworkObject::OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const
+		void NetworkObject::OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const
 		{
 			//约定：Clone不会复制指向父级的指针，
 			//且不在对应 caseInfo 中主动调用 Attach 以确定依存关系。
@@ -97,7 +99,7 @@ namespace PowerSolutions
 			}
 		}
 
-		void Component::OnCloned(NetworkObject* newInstance, const NetworkCaseTrackingInfo& context) const
+		void Component::OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const
 		{
 			NetworkObject::OnCloned(newInstance, context);
 			auto inst = static_cast<Component*>(newInstance);

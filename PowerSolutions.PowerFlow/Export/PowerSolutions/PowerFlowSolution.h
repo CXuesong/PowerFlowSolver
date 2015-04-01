@@ -163,7 +163,7 @@ namespace PowerSolutions
 			SolutionStatus m_Status;
 			int m_IterationCount;
 			double m_MaxDeviation;
-		_PS_INTERNAL:
+		protected:	//internal
 			friend class SolverImpl;
 			void NodeCount(size_t val) { m_NodeCount = val; }
 			void PQNodeCount(size_t val) { m_PQNodeCount = val; }
