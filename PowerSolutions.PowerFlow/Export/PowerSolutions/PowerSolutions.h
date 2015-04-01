@@ -51,9 +51,10 @@ namespace PowerSolutions {
 #include <iostream>
 #include <fstream>
 #define _PS_TRACE(iosExpression) \
-	::PowerSolutions::PowerFlow::TraceFile << iosExpression << std::endl
+	if (::PowerSolutions::PowerFlow::TraceFile.is_open()) \
+		::PowerSolutions::PowerFlow::TraceFile << iosExpression << std::endl;
 #define _PS_TRACE_IF(condition, iosExpression) \
-	if (condition)  ::PowerSolutions::PowerFlow::TraceFile << iosExpression << std::endl
+	if (condition) _PS_TRACE(iosExpression)
 
 namespace PowerSolutions
 {

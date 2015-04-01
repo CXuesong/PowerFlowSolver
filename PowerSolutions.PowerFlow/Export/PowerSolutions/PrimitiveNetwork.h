@@ -25,7 +25,12 @@ namespace PowerSolutions {
 			NodeReorder = 1,			//进行节点编号优化。
 			IgnoreShuntAdmittance = 2,	//忽略接地导纳，用于直流潮流计算。注意此选项不会改变 NodeInfo::Components 的行为。
 			NoAdmittanceMatrix = 4,		//不生成导纳矩阵，一般用于纯图论分析。
-			AutoSetSlackNode = 8,		//如果网络中不存在平衡节点，则将发电容量最大的PV节点作为平衡节点。
+			AutoAssignSlackNode = 8,		//如果网络中不存在平衡节点，则将发电容量最大的PV节点作为平衡节点。
+			//保证网络中存在平衡节点。
+			//如果网络中既不存在平衡节点，也不存在PV节点，则选择一PQ节点作为平衡节点。
+			ForceSetSlackNode = AutoAssignSlackNode | 16,
+			//仅保留适用于纯图论分析的网络参数（例如节点及其邻接表）。
+			PureGraphicalAnalysis = NoAdmittanceMatrix | ForceSetSlackNode,
 		};
 		class PrimitiveNetwork
 		{
@@ -197,8 +202,9 @@ namespace PowerSolutions {
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
+			void AssignSlackNode();
 			template <class TNodeQueue, class TBranchQueue>
-			PrimitiveNetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);
+			void LoadSubnetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);
 		private:	// internal
 			PrimitiveNetwork();
 		public:

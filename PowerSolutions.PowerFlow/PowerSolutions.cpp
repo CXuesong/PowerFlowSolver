@@ -13,7 +13,8 @@ namespace PowerSolutions
 
 		void TraceFilePath(char path[])
 		{
-			TraceFile.open("TraceFile.txt", ios::out | ios::trunc);
+			TraceFile.close();
+			TraceFile.open(path, ios::out | ios::trunc);
 		}
 #else
 		void TraceFilePath(char path[])

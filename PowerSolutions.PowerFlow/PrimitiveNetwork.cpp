@@ -13,25 +13,29 @@ namespace PowerSolutions {
 	namespace ObjectModel {
 
 		PrimitiveNetwork::PrimitiveNetwork()
-		{ }
+		{
+			_PS_TRACE("PN Construct " << this);
+		}
 
 		PrimitiveNetwork::~PrimitiveNetwork()
 		{
-			//_PS_TRACE("PN Dispose " << this);
-			for (auto& item : m_Nodes) delete item;
+			_PS_TRACE("PN Dispose " << this);
+			//BUG FIXED 使用 m_Nodes 作为遍历删除的对象
+			//导致在形成 m_Nodes 前扔出异常时发生内存泄漏。
+			for (auto& p : m_BusDict) delete p.second;
 			for (auto& item : m_Branches) delete item;
 		}
 
 		template <class TNodeQueue, class TBranchQueue>
-		PrimitiveNetwork::PrimitiveNetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches)
-			: m_Options(source->m_Options), m_SourceNetwork(source->m_SourceNetwork)
+		void PrimitiveNetwork::LoadSubnetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches)
 		{
 			assert(source != nullptr);
 			//初始化公共属性。
+			m_Options = source->m_Options;
+			m_SourceNetwork = source->m_SourceNetwork;
 			//用于将 source 中的节点映射到 this 中的对应节点。
 			unordered_map<NodeInfo*, NodeInfo*> NewNodeDict(nodes.size());
 			unordered_map<BranchInfo*, BranchInfo*> NewBranchDict(nodes.size());
-			NodeInfo* MaxActivePowerNode = nullptr;	//记录有功功率最大的节点，稍后可以作为平衡节点使用。
 			//复制节点对象模型。
 			while (!nodes.empty())
 			{
@@ -42,9 +46,6 @@ namespace PowerSolutions {
 				m_Nodes.push_back(newInst);
 				m_BusDict.emplace(newInst->Bus(), newInst);
 				NewNodeDict.emplace(oldInst, newInst);
-				if (MaxActivePowerNode == nullptr ||
-					newInst->ActivePowerInjection() > MaxActivePowerNode->ActivePowerInjection())
-					MaxActivePowerNode = newInst;
 				if (newInst->Type() == NodeType::SlackNode)
 				{
 					assert(m_SlackNode == nullptr);
@@ -67,9 +68,8 @@ namespace PowerSolutions {
 			if (m_SlackNode == nullptr)
 			{
 				//需要手动分配一个平衡节点。
-				MaxActivePowerNode->Type(NodeType::SlackNode);
-				m_SlackNode = MaxActivePowerNode;
-				swap(*find(m_Nodes.begin(), m_Nodes.end(), MaxActivePowerNode), m_Nodes.back());
+				AssignSlackNode();
+				swap(*find(m_Nodes.begin(), m_Nodes.end(), m_SlackNode), m_Nodes.back());
 			}
 			//为节点重新编号。
 			int NodeCounter1 = 0, NodeCounter2 = 0;
@@ -191,32 +191,7 @@ namespace PowerSolutions {
 				}
 			};
 			//检查是否存在平衡节点。
-			if (m_SlackNode == nullptr)
-			{
-				if ((m_Options & PrimitiveNetworkOptions::AutoSetSlackNode) == PrimitiveNetworkOptions::AutoSetSlackNode)
-				{
-					//需要手动分配一个平衡节点。
-					double MaxActivePower = 0;
-					for (auto& p : m_BusDict)
-					{
-						if (p.second->Type() == NodeType::PVNode)
-						{
-							if (p.second->ActivePowerInjection() > MaxActivePower)
-							{
-								MaxActivePower = p.second->ActivePowerInjection();
-								m_SlackNode = p.second;
-							}
-						}
-					}
-					if (m_SlackNode != nullptr) 
-						m_SlackNode->Type(NodeType::SlackNode);
-					else
-						throw Exception(ExceptionCode::SlackBus);
-					//最坏的情况：没有平衡节点和PV节点。
-				} else {
-					throw Exception(ExceptionCode::SlackBus);
-				}
-			}
+			if (m_SlackNode == nullptr) AssignSlackNode();
 			//统计PQ/PV节点数量，便于预留空间。
 			size_t PQNodeCount = 0, PVNodeCount = 0;
 			for (auto& p : m_BusDict)
@@ -499,10 +474,51 @@ namespace PowerSolutions {
 					//将当前节点标记为已访问。（染黑）
 					//NodeVisited[node0->Index()] = true;
 				}
-				rv.emplace_back(new PrimitiveNetwork(this, SubNodes, SubBranches));
+				shared_ptr<PrimitiveNetwork> newPN(new PrimitiveNetwork());
+				newPN->LoadSubnetwork(this, SubNodes, SubBranches);
+				rv.emplace_back(newPN);
 				_PS_TRACE("Emplace to " << rv.back().get());
 			}
 			return rv;
+		}
+
+		void PrimitiveNetwork::AssignSlackNode()
+		{
+			if ((m_Options & PrimitiveNetworkOptions::AutoAssignSlackNode) != PrimitiveNetworkOptions::AutoAssignSlackNode)
+				throw Exception(ExceptionCode::SlackBus);
+				//需要手动分配一个平衡节点。
+			const double NINF = -DBL_MAX * DBL_MAX;
+			double MaxPVActivePower = 0, MaxPQActivePower = NINF;
+			NodeInfo *MaxPV = nullptr, *MaxPQ = nullptr;
+			for (auto& p : m_BusDict)
+			{
+				if (p.second->Type() == NodeType::PVNode)
+				{
+					if (p.second->ActivePowerInjection() > MaxPVActivePower)
+					{
+						MaxPVActivePower = p.second->ActivePowerInjection();
+						MaxPV = p.second;
+					}
+				} else if (p.second->Type() == NodeType::PQNode)
+				{
+					if (p.second->ActivePowerInjection() > MaxPQActivePower)
+					{
+						MaxPQActivePower = p.second->ActivePowerInjection();
+						MaxPQ = p.second;
+					}
+				}
+			}
+			m_SlackNode = MaxPV;
+			if (m_SlackNode == nullptr)
+			{
+				//没有平衡节点和PV节点。
+				if ((m_Options & PrimitiveNetworkOptions::ForceSetSlackNode) != PrimitiveNetworkOptions::ForceSetSlackNode)
+					throw Exception(ExceptionCode::SlackBus);
+				//只好使用有功出力最大/有功负荷最小的PQ节点。
+				m_SlackNode = MaxPQ;
+				if (m_SlackNode == nullptr) throw Exception(ExceptionCode::SlackBus);
+			}
+			m_SlackNode->Type(NodeType::SlackNode);
 		}
 
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 

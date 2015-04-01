@@ -49,7 +49,7 @@ namespace PowerSolutions
 			: _ID(_IDCounter)
 		{
 			_IDCounter++;
-			_PS_TRACE("NO Construct #" << _ID << " @ " << this);
+			//_PS_TRACE("NO Construct #" << _ID << " @ " << this);
 		}
 #else
 		NetworkObject::NetworkObject()
@@ -58,7 +58,7 @@ namespace PowerSolutions
 
 		NetworkObject::~NetworkObject()
 		{
-			_PS_TRACE("NO Dispose #" << _ID << " @ " << this);
+			//_PS_TRACE("NO Dispose #" << _ID << " @ " << this);
 		}
 
 		void NetworkObject::Validate() const
