@@ -33,6 +33,7 @@ namespace PowerSolutions {
 			//初始化公共属性。
 			m_Options = source->m_Options;
 			m_SourceNetwork = source->m_SourceNetwork;
+			m_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
 			//用于将 source 中的节点映射到 this 中的对应节点。
 			unordered_map<NodeInfo*, NodeInfo*> NewNodeDict(nodes.size());
 			unordered_map<BranchInfo*, BranchInfo*> NewBranchDict(nodes.size());
@@ -122,6 +123,7 @@ namespace PowerSolutions {
 			_PS_TRACE("Load Network " << this << " From " << network);
 			m_SourceNetwork = network;
 			m_Options = options;
+			m_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
 			//重置局部变量
 			//m_Buses.clear();
 			//m_BusDict.clear();
@@ -190,6 +192,8 @@ namespace PowerSolutions {
 					break;
 				}
 			};
+			//很不巧，所有的节点都被删完了。
+			if (m_BusDict.empty()) return;
 			//检查是否存在平衡节点。
 			if (m_SlackNode == nullptr) AssignSlackNode();
 			//统计PQ/PV节点数量，便于预留空间。
@@ -484,6 +488,7 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::AssignSlackNode()
 		{
+			//仅在系统中无显式指定平衡节点时提供平衡节点的转换逻辑。
 			if ((m_Options & PrimitiveNetworkOptions::AutoAssignSlackNode) != PrimitiveNetworkOptions::AutoAssignSlackNode)
 				throw Exception(ExceptionCode::SlackBus);
 				//需要手动分配一个平衡节点。
@@ -509,6 +514,7 @@ namespace PowerSolutions {
 				}
 			}
 			m_SlackNode = MaxPV;
+			m_SlackNodeAssignment = SlackNodeAssignmentType::PVNode;
 			if (m_SlackNode == nullptr)
 			{
 				//没有平衡节点和PV节点。
@@ -516,6 +522,7 @@ namespace PowerSolutions {
 					throw Exception(ExceptionCode::SlackBus);
 				//只好使用有功出力最大/有功负荷最小的PQ节点。
 				m_SlackNode = MaxPQ;
+				m_SlackNodeAssignment = SlackNodeAssignmentType::PQNode;
 				if (m_SlackNode == nullptr) throw Exception(ExceptionCode::SlackBus);
 			}
 			m_SlackNode->Type(NodeType::SlackNode);

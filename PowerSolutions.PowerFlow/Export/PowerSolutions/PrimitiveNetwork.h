@@ -32,6 +32,13 @@ namespace PowerSolutions {
 			//仅保留适用于纯图论分析的网络参数（例如节点及其邻接表）。
 			PureGraphicalAnalysis = NoAdmittanceMatrix | ForceSetSlackNode,
 		};
+		//描述了 PrimitiveNetwork 中平衡节点的选取方法。
+		enum class SlackNodeAssignmentType : byte
+		{
+			SlackGenerator = 0,		//通过平衡发电机选取。
+			PVNode = 1,				//通过转换有功出力最大的PV节点选取。
+			PQNode = 2,				//通过转换PQ节点选取。
+		 };
 		class PrimitiveNetwork
 		{
 			friend class NetworkCase;
@@ -147,12 +154,13 @@ namespace PowerSolutions {
 		private:
 			NetworkCase* m_SourceNetwork;
 			PrimitiveNetworkOptions m_Options;
+			SlackNodeAssignmentType m_SlackNodeAssignment;
 			BusCollection m_Buses;
 			NodeCollection m_PQNodes;			//参与计算的母线（PQ节点）信息，按照矩阵索引排序。
 			NodeCollection m_PVNodes;			//参与计算的母线（PV节点）信息，按照矩阵索引排序。
 			//注意到在NR法中，PQ 节点和 PV 节点的顺序是可以交错的。
 			NodeCollection m_Nodes;
-			NodeDictionary m_BusDict;				//Bus --> 节点信息
+			NodeDictionary m_BusDict;			//Bus --> 节点信息
 			NodeInfo* m_SlackNode;
 			BranchCollection m_Branches;
 			BranchDictionary m_BranchDict;
@@ -160,6 +168,9 @@ namespace PowerSolutions {
 		public:
 			NetworkCase* SourceNetwork() const { return m_SourceNetwork; }
 			PrimitiveNetworkOptions Options() const { return m_Options; }
+			// 获取此网络中平衡节点的选取方式。
+			SlackNodeAssignmentType SlackNodeAssignment() const { return m_SlackNodeAssignment; }
+			bool IsEmpty() const { return m_Nodes.empty(); }
 			const BusCollection& Buses() const { return m_Buses; }
 			Eigen::SparseMatrix<complexd> Admittance;	//完整的导纳矩阵。
 			//const ComponentCollection& Components() const { return m_Components; }
