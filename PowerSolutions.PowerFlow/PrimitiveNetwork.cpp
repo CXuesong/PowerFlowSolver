@@ -528,6 +528,20 @@ namespace PowerSolutions {
 			m_SlackNode->Type(NodeType::SlackNode);
 		}
 
+		void PrimitiveNetwork::DumpGraph()
+		{
+#if _DEBUG
+			ofstream ofs("D:\\PNGraph.csv", ios::out | ios::ate);
+			ofs << "Source,Target,Type" << endl;
+			for (auto& b : m_Branches)
+			{
+				ofs << b->Nodes().first->Index() << "," <<
+					b->Nodes().second->Index() << ",Undirected" << endl;
+			}
+			ofs.close();
+#endif
+		}
+
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
 			: m_Bus(bus), m_Type(NodeType::PQNode),
 			m_Voltage(0), m_Angle(0),

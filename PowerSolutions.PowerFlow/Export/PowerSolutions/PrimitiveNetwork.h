@@ -211,6 +211,7 @@ namespace PowerSolutions {
 			}
 		public:	//Í¼ÂÛÖ§³Ö
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks();
+			void DumpGraph();
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
 			void AssignSlackNode();
