@@ -214,13 +214,13 @@ namespace PowerSolutions {
 			//调整对象引用，使其按照指定的对应关系指向原来的网络，而非网络副本。
 			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool strictMode = true);
 		public:	//图论支持
-			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks();
-			void DumpGraph();
+			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks() const;
+			void DumpGraph() const;
 		private:
 			void LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
 			void AssignSlackNode();
 			template <class TNodeQueue, class TBranchQueue>
-			void LoadSubnetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);
+			void LoadSubnetwork(const PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);
 		private:	// internal
 			PrimitiveNetwork();
 		public:

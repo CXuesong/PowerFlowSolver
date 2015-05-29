@@ -27,7 +27,7 @@ namespace PowerSolutions {
 		}
 
 		template <class TNodeQueue, class TBranchQueue>
-		void PrimitiveNetwork::LoadSubnetwork(PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches)
+		void PrimitiveNetwork::LoadSubnetwork(const PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches)
 		{
 			assert(source != nullptr);
 			//初始化公共属性。
@@ -419,7 +419,7 @@ namespace PowerSolutions {
 				node->Components().push_back(c);
 		}
 
-		vector<shared_ptr<PrimitiveNetwork>> PrimitiveNetwork::ConnectedSubnetworks()
+		vector<shared_ptr<PrimitiveNetwork>> PrimitiveNetwork::ConnectedSubnetworks() const
 		{
 			_PS_TRACE("=== BFS ConnectedSubnetworks ===");
 			vector<shared_ptr<PrimitiveNetwork>> rv;
@@ -528,7 +528,7 @@ namespace PowerSolutions {
 			m_SlackNode->Type(NodeType::SlackNode);
 		}
 
-		void PrimitiveNetwork::DumpGraph()
+		void PrimitiveNetwork::DumpGraph() const
 		{
 #if _DEBUG
 			ofstream ofs("D:\\PNGraph.csv", ios::out | ios::ate);
