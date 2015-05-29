@@ -210,6 +210,9 @@ namespace PowerSolutions {
 				if (i == m_BranchDict.end()) return nullptr;
 				return i->second;
 			}
+		public:
+			//调整对象引用，使其按照指定的对应关系指向原来的网络，而非网络副本。
+			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool strictMode = true);
 		public:	//图论支持
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks();
 			void DumpGraph();

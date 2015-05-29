@@ -542,6 +542,38 @@ namespace PowerSolutions {
 #endif
 		}
 
+		void PrimitiveNetwork::AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool strictMode /*= true*/)
+		{
+			auto PBus = [&](Bus* thisBus) {
+				auto nb = dynamic_cast<Bus*>(info.PrototypeOf(thisBus));
+				if (nb == nullptr)
+					if (strictMode)
+						throw Exception(ExceptionCode::Validation);
+				return nb;
+			};
+			auto PComponent = [&](Component* thisComponent) {
+				auto nb = dynamic_cast<Component*>(info.PrototypeOf(thisComponent));
+				if (nb == nullptr)
+					if (strictMode)
+						throw Exception(ExceptionCode::Validation);
+				return nb;
+			};
+			for (auto& b : m_Buses)
+				b = PBus(b);
+			m_BusDict.clear();
+			for (auto& n : m_Nodes)
+			{
+				n->Bus(PBus(n->Bus()));
+				for (auto& c : n->Components()) c = PComponent(c);
+				m_BusDict.emplace(n->Bus(), n);
+			}
+			for (auto& b : m_Branches)
+			{
+				for (auto& c : b->Components())
+					c = PComponent(c);
+			}
+		}
+
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
 			: m_Bus(bus), m_Type(NodeType::PQNode),
 			m_Voltage(0), m_Angle(0),
