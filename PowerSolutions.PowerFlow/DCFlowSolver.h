@@ -13,6 +13,6 @@ namespace PowerSolutions
 	{
 		class NRSolver final : public SolverImpl
 		{
-		}
+		};
 	}
 }

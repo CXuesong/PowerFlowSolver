@@ -76,6 +76,8 @@ namespace PowerSolutions {
 			static unsigned long _IDCounter;
 			unsigned long _ID;	//一个标识符，用于在调试模式下区分不同的网络对象。
 #endif
+		private:
+			static unsigned long Id;
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。
