@@ -80,8 +80,8 @@ namespace PowerSolutions
 		{
 			//约定：Clone不会复制指向父级的指针，
 			//且不在对应 caseInfo 中主动调用 Attach 以确定依存关系。
-			//但可以复制母线的引用（此处需要用到 caseInfo 参数）
-			//newInstance->m_Index = m_Index;
+			//但可以复制母线的引用（此处需要用到 context 参数）
+			newInstance->_Tag = this->_Tag;
 		}
 
 		////////// 组件 //////////
