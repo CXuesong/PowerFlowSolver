@@ -103,7 +103,7 @@ namespace PowerSolutions
 			bool IsUnconstrained() const { return m_IsUnconstrained; }
 			void IsUnconstrained(bool val) { m_IsUnconstrained = val; }
 		private:
-			ComponentFlowSolution(bool unconst)
+			explicit ComponentFlowSolution(bool unconst)
 				: m_PowerInjection(0), m_PowerShunt(0, 0), m_IsUnconstrained(unconst)
 			{ }
 		public:
@@ -111,7 +111,8 @@ namespace PowerSolutions
 			{
 				return ComponentFlowSolution(true);
 			}
-			ComponentFlowSolution(int portCount)
+
+			explicit ComponentFlowSolution(int portCount)
 				: m_PowerInjection(portCount), m_PowerShunt(0, 0), m_IsUnconstrained(false)
 			{ }
 			ComponentFlowSolution(const std::vector<complexd>&& powerInjection, complexd powerShutnt)
@@ -177,7 +178,7 @@ namespace PowerSolutions
 			void IterationCount(int val);
 			void MaxDeviation(double val) { m_MaxDeviation = val; }
 			void AddNodeFlow(ObjectModel::Bus* node, const NodeEvaluationStatus& status);
-			void AddComponentFlow(ObjectModel::Component* c, const ComponentFlowSolution& solution);
+			void AddComponentFlow(ObjectModel::Component* c, ComponentFlowSolution&& solution);
 			void AddBranchFlow(ObjectModel::Bus* node1, ObjectModel::Bus* node2, const BranchFlowSolution& solution);
 		public:
 			size_t NodeCount() const { return m_NodeCount; }

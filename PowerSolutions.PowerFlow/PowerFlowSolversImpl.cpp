@@ -86,7 +86,7 @@ namespace PowerSolutions
 				if (c != nullptr)
 				{
 					auto cflow = c->EvalComponentFlow(*PSolution);
-					s->AddComponentFlow(c, cflow);
+					s->AddComponentFlow(c, move(cflow));
 				}
 			}
 			complexd totalPowerGeneration, totalPowerConsumption,

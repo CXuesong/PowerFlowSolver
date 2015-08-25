@@ -23,9 +23,9 @@ namespace PowerSolutions
 			m_TotalPowerConsumption += result.first->second.PowerConsumption();*/
 		}
 
-		void Solution::AddComponentFlow(ObjectModel::Component* c, const ComponentFlowSolution& solution)
+		void Solution::AddComponentFlow(ObjectModel::Component* c, ComponentFlowSolution&& solution)
 		{
-			auto result = m_ComponentFlow.emplace(c, solution);
+			auto result = m_ComponentFlow.emplace(c, move(solution));
 			assert(result.second);
 			if (solution.IsUnconstrained() == false && c->PortCount() == 1)
 			{
