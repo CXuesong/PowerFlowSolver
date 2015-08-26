@@ -33,8 +33,6 @@ namespace PowerSolutions
 				_WRAP_PROPERTY_CACHE(PowerGeneration, Complex);
 				// <summary>节点的总负载。</summary>
 				_WRAP_PROPERTY_CACHE(PowerConsumption, Complex);
-				// <summary>节点的度。</summary>
-				_WRAP_PROPERTY_CACHE(Degree, int);
 			internal:
 				NodeFlowSolution(const _NATIVE_PF NodeFlowSolution& native);
 			};
@@ -73,6 +71,19 @@ namespace PowerSolutions
 				BranchFlowSolution(const _NATIVE_PF BranchFlowSolution& native);
 			};
 
+			public value struct ComponentFlowSolution
+			{
+			public:
+				/// <summary>从节点1注入的功率。</summary>
+				_WRAP_PROPERTY_CACHE(PowerInjections, cli::array<Complex>^);
+				/// <summary>从节点2注入的功率。</summary>
+				_WRAP_PROPERTY_CACHE(PowerShunt, Complex);
+				/// <summary>指示此元件自身的潮流是否为不定的。</summary>
+				_WRAP_PROPERTY_CACHE(IsUnconstrained, bool);
+			internal:
+				ComponentFlowSolution(const _NATIVE_PF ComponentFlowSolution& native);
+			};
+
 			public ref class IterationEventArgs : public System::EventArgs
 			{
 			public:
@@ -97,8 +108,8 @@ namespace PowerSolutions
 			private:
 				Dictionary<Bus, NodeFlowSolution>^ m_NodeFlow;
 				ReadOnlyDictionary<Bus, NodeFlowSolution>^ m_s_NodeFlow;
-				Dictionary<Component, BranchFlowSolution>^ m_ComponentFlow;
-				ReadOnlyDictionary<Component, BranchFlowSolution>^ m_s_ComponentFlow;
+				Dictionary<Component, ComponentFlowSolution>^ m_ComponentFlow;
+				ReadOnlyDictionary<Component, ComponentFlowSolution>^ m_s_ComponentFlow;
 				Dictionary<BusPair, BranchFlowSolution>^ m_BranchFlow;
 				ReadOnlyDictionary<BusPair, BranchFlowSolution>^ m_s_BranchFlow;
 			public:
@@ -118,9 +129,9 @@ namespace PowerSolutions
 				{
 					IDictionary<Bus, NodeFlowSolution>^ get(){ return m_s_NodeFlow; }
 				}
-				property IDictionary<Component, BranchFlowSolution>^ ComponentFlow
+				property IDictionary<Component, ComponentFlowSolution>^ ComponentFlow
 				{
-					IDictionary<Component, BranchFlowSolution>^ get(){ return m_s_ComponentFlow; }
+					IDictionary<Component, ComponentFlowSolution>^ get(){ return m_s_ComponentFlow; }
 				}
 				property IDictionary<BusPair, BranchFlowSolution>^ BranchFlow
 				{
@@ -163,7 +174,11 @@ namespace PowerSolutions
 					}
 				}
 			public:
-				_WRAP_PROPERTY(NodeReorder, bool, );
+				//_WRAP_PROPERTY(NodeReorder, bool, );
+				/// <summary>
+				/// 指示在分析网络时，是否应当启用节点重排序功能。
+				/// </summary>
+				property bool NodeReorder;
 				_WRAP_PROPERTY(MaxIterations, int, );
 				_WRAP_PROPERTY(MaxDeviationTolerance, double, );
 				_WRAP_PROPERTY(IntelliIterations, bool, );

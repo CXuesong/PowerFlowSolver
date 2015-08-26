@@ -70,6 +70,8 @@ namespace PowerSolutions
 		{
 			AfterIterations();	//收尾工作
 			//注意：下面的工作不能引发异常，否则会由s引发内存泄漏。
+			//不一定吧？
+			//注意由于 Solution 的构造函数是 protected ，因此无法使用 make_shared。
 			shared_ptr<Solution> s(new Solution());
 			s->Status(status);
 			s->IterationCount(iterCount);
@@ -85,6 +87,7 @@ namespace PowerSolutions
 				auto c = dynamic_cast<Component*>(obj);
 				if (c != nullptr)
 				{
+					//计算元件的潮流。
 					auto cflow = c->EvalComponentFlow(*PSolution);
 					s->AddComponentFlow(c, move(cflow));
 				}
@@ -100,7 +103,7 @@ namespace PowerSolutions
 			for (auto& c : s->ComponentFlow())
 			{
 				//仅适用于双端元件。
-				DoublePortComponent *dpc = dynamic_cast<DoublePortComponent*>(c.first);
+				auto dpc = dynamic_cast<DoublePortComponent*>(c.first);
 				if (dpc != nullptr)
 				{
 					BranchFlowSolution branchFlow(-c.second.PowerInjections(0),

@@ -84,6 +84,7 @@ namespace PowerSolutions
 			{ }
 		};
 
+		// 用于表示原始的潮流求解结果。
 		class PrimitiveSolution
 		{
 		public:

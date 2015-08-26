@@ -7,12 +7,13 @@ Imports System.Numerics
 
 <TestClass()> Public Class UnitTest1
 
-    <TestMethod()> Public Sub PFInteropTest()
+    Private Function GenerateDemoNetwork() As NetworkCase
         Dim nc As New NetworkCase
         Dim b1 = nc.AddBus(),
             b2 = nc.AddBus(),
             b3 = nc.AddBus(),
             b4 = nc.AddBus()
+        '检查 = 运算符重载是否正确
         Debug.Assert(b1 = b1)
         Debug.Assert(b1 <> b2)
         Console.WriteLine("b1 @ {0}", b1.GetHashCode)
@@ -29,15 +30,55 @@ Imports System.Numerics
         nc.AddLine(b1, b3, New Complex(0.130165, 0.247934), New Complex(0, 0.025864))
         'Dim twt = nc.AddThreeWindingTransformer(b1, b2, b3, 1, 2, 3, 5, 1, 0.5, 0.3)
         'Console.WriteLine(twt.CommonBus.GetHashCode.ToString)
-        Dim solver As New Solver(SolverType.NewtonRaphson)
-        solver.MaxDeviationTolerance = 0.0000000001
-        Console.WriteLine(solver.IntelliIterations)
-        Dim solution = solver.Solve(nc)
-        For Each nf In solution.NodeFlow
-            Console.WriteLine("Node:{0}" & vbTab & "Voltage:{1}∠{2}rad", nf.Key.GetHashCode, nf.Value.Voltage.Magnitude, nf.Value.Voltage.Phase)
-        Next
-        solver.Dispose()
-        nc.Dispose()
+        Return nc
+    End Function
+
+    <TestMethod()>
+    Public Sub PFInteropTest()
+        Using nc = GenerateDemoNetwork()
+            Using solver = New Solver(SolverType.NewtonRaphson)
+                solver.MaxDeviationTolerance = 0.0000000001
+                Console.WriteLine(solver.IntelliIterations)
+                Dim solution = solver.Solve(nc)
+                For Each nf In solution.NodeFlow
+                    Console.WriteLine("Node:{0}" & vbTab & "Voltage:{1}∠{2}rad",
+                                      nf.Key.GetHashCode, nf.Value.Voltage.Magnitude, nf.Value.Voltage.Phase)
+                Next
+                For Each cf In solution.ComponentFlow
+                    Console.WriteLine("Component:{0}" & vbTab & "Inj:{1}" & vbTab & "Sht:{2}",
+                                      cf.Key.GetHashCode, String.Join(";", cf.Value.PowerInjections), cf.Value.PowerShunt)
+                Next
+            End Using
+        End Using
+    End Sub
+
+    <TestMethod()>
+    Public Sub PFInteropProfiling()
+        Const Repetitions = 100
+        Dim sw As New Stopwatch
+        Using nc = GenerateDemoNetwork()
+            Using solver = New Solver(SolverType.NewtonRaphson)
+                solver.Solve(nc)
+                solver.NodeReorder = True
+                sw.Start()
+                For I = 1 To Repetitions
+                    solver.MaxDeviationTolerance = 0.0000000001
+                    Dim solution = solver.Solve(nc)
+                    Assert.IsTrue(solution.Status = SolutionStatus.Success)
+                Next
+                sw.Stop()
+                Trace.WriteLine(String.Format("NodeReorder = True, {0}ms", sw.ElapsedMilliseconds / Repetitions))
+                solver.NodeReorder = False
+                sw.Start()
+                For I = 1 To Repetitions
+                    solver.MaxDeviationTolerance = 0.0000000001
+                    Dim solution = solver.Solve(nc)
+                    Assert.IsTrue(solution.Status = SolutionStatus.Success)
+                Next
+                sw.Stop()
+                Trace.WriteLine(String.Format("NodeReorder = False, {0}ms", sw.ElapsedMilliseconds / Repetitions))
+            End Using
+        End Using
     End Sub
 
 End Class

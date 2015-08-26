@@ -5,6 +5,7 @@
 
 using namespace System::Runtime::InteropServices;
 using namespace PowerSolutions::Interop::ObjectModel;
+using namespace std;
 
 namespace PowerSolutions
 {
@@ -14,10 +15,10 @@ namespace PowerSolutions
 		{
 			Solution::Solution(const _NATIVE_PF Solution& native)
 				: m_NodeFlow(gcnew Dictionary<Bus, NodeFlowSolution>(native.NodeFlow().size())),
-				m_ComponentFlow(gcnew Dictionary<Component, BranchFlowSolution>(native.BranchFlow().size())),
+				m_ComponentFlow(gcnew Dictionary<Component, ComponentFlowSolution>(native.BranchFlow().size())),
 				m_BranchFlow(gcnew Dictionary<BusPair, BranchFlowSolution>(native.ComponentFlow().size(), BusPairUnorderedComparer::Default)),
 				m_s_NodeFlow(gcnew ReadOnlyDictionary<Bus, NodeFlowSolution>(m_NodeFlow)),
-				m_s_ComponentFlow(gcnew ReadOnlyDictionary<Component, BranchFlowSolution>(m_ComponentFlow)),
+				m_s_ComponentFlow(gcnew ReadOnlyDictionary<Component, ComponentFlowSolution>(m_ComponentFlow)),
 				m_s_BranchFlow(gcnew ReadOnlyDictionary<BusPair, BranchFlowSolution>(m_BranchFlow))
 			{
 				//将解缓存至此实例中。
@@ -34,8 +35,8 @@ namespace PowerSolutions
 				_INIT_PROPERTY_CACHE(SlackNode, Bus);
 				for (auto& item : native.NodeFlow())
 					m_NodeFlow->Add(Bus(item.first), NodeFlowSolution(item.second));
-				//for (auto& item : native.ComponentFlow())
-				//	m_ComponentFlow->Add(Component(item.first), BranchFlowSolution(item.second));
+				for (auto& item : native.ComponentFlow())
+					m_ComponentFlow->Add(Component(item.first), ComponentFlowSolution(item.second));
 				for (auto& item : native.BranchFlow())
 					m_BranchFlow->Add(BusPair(item.first), BranchFlowSolution(item.second));
 			}
@@ -47,6 +48,7 @@ namespace PowerSolutions
 
 			Solver::Solver(SolverType type)
 			{
+				NodeReorder = true;
 				switch (type)
 				{
 				case SolverType::NewtonRaphson:
@@ -81,12 +83,15 @@ namespace PowerSolutions
 
 			Solution^ Solver::Solve(NetworkCase^ network)
 			{
-				_NATIVE_PF Solution* nativeSolution;
+				shared_ptr<_NATIVE_PF Solution> nativeSolution;
 				_WRAP_EXCEPTION_BOUNDARY(
-					nativeSolution = nativeObject->Solve(network->nativeObject);
+					shared_ptr<_NATIVE_OM PrimitiveNetwork> nativePM =
+						network->nativeObject->ToPrimitive(NodeReorder
+							? _NATIVE_OM PrimitiveNetworkOptions::NodeReorder
+							: _NATIVE_OM PrimitiveNetworkOptions::None);
+					nativeSolution = nativeObject->Solve(nativePM);
 				);
 				auto solution = gcnew Solution(*nativeSolution);
-				delete nativeSolution;
 				return solution;
 			}
 
@@ -124,7 +129,8 @@ namespace PowerSolutions
 				_INIT_PROPERTY_CACHE(Voltage, MarshalComplex);
 				_INIT_PROPERTY_CACHE(PowerGeneration, MarshalComplex);
 				_INIT_PROPERTY_CACHE(PowerConsumption, MarshalComplex);
-				_INIT_PROPERTY_CACHE(Degree, );
+				//TODO Set appropriate degree
+				//_INIT_PROPERTY_CACHE(Degree, );
 			}
 
 			BranchFlowSolution::BranchFlowSolution(const _NATIVE_PF BranchFlowSolution& native)
@@ -139,6 +145,13 @@ namespace PowerSolutions
 				Power1 = power1;
 				Power2 = power2;
 				PowerShunt = powerShunt;
+			}
+
+			ComponentFlowSolution::ComponentFlowSolution(const _NATIVE_PF ComponentFlowSolution& native)
+			{
+				_INIT_PROPERTY_CACHE(PowerInjections, MarshalComplexArray);
+				_INIT_PROPERTY_CACHE(PowerShunt, MarshalComplex);
+				_INIT_PROPERTY_CACHE(IsUnconstrained, );
 			}
 
 			IterationEventArgs::IterationEventArgs(const _NATIVE_PF IterationEventArgs& native)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 using namespace System;
 using namespace System::Numerics;
 
@@ -27,6 +29,18 @@ namespace PowerSolutions
 		inline IntPtr MarshalPointer(T* ptr)
 		{
 			return IntPtr(ptr);
+		}
+
+		inline cli::array<Complex>^ MarshalComplexArray(const std::vector<complexd>& value)
+		{
+			auto arr = gcnew cli::array<Complex>(value.size());
+			int i = 0;
+			for (auto item : value)
+			{
+				arr[i] = Complex(item.real(), item.imag());
+				i++;
+			}
+			return arr;
 		}
 
 		System::Exception^ TranslateException(const std::exception& ex);

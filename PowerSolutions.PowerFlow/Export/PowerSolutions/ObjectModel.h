@@ -114,7 +114,7 @@ namespace PowerSolutions {
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。
-			NetworkObject* Clone(const NetworkCaseCorrespondenceInfo& context) const
+			Bus* Clone(const NetworkCaseCorrespondenceInfo& context) const
 			{
 				return static_cast<Bus*>(NetworkObject::Clone(context));
 			}
@@ -149,15 +149,8 @@ namespace PowerSolutions {
 			}
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) {}
-			/*
-			功率流向
-			Component -----> [node]   PowerInjection
-			            |
-						|   PowerShunt [0]
-			*/
 			//根据节点电压获取此元件注入指定母线节点的功率。
-			//index = 0 : 接地功率
-			//index > 0 : 某端口的注入母线的功率
+			//关于端口功率方向的约定，请参阅 PowerFlow::ComponentFlowSolution 的相关定义。
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const = 0;
 		protected:
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const override;

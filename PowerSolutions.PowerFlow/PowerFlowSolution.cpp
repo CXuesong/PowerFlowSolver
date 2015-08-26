@@ -14,7 +14,7 @@ namespace PowerSolutions
 		Solution::Solution()
 		{ }
 
-		void Solution::AddNodeFlow(ObjectModel::Bus* node, const NodeEvaluationStatus& status)
+		void Solution::AddNodeFlow(Bus* node, const NodeEvaluationStatus& status)
 		{
 			auto result = m_NodeFlow.emplace(node, NodeFlowSolution(status.VoltagePhasor(), status.PowerInjection()));
 			assert(result.second);
@@ -23,18 +23,20 @@ namespace PowerSolutions
 			m_TotalPowerConsumption += result.first->second.PowerConsumption();*/
 		}
 
-		void Solution::AddComponentFlow(ObjectModel::Component* c, ComponentFlowSolution&& solution)
+		void Solution::AddComponentFlow(Component* c, ComponentFlowSolution&& solution)
 		{
 			auto result = m_ComponentFlow.emplace(c, move(solution));
 			assert(result.second);
-			if (solution.IsUnconstrained() == false && c->PortCount() == 1)
+			auto& localSolution = result.first->second;
+			if (!localSolution.IsUnconstrained() && c->PortCount() == 1)
 			{
 				//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
 				// 师兄：接地补偿不应计入负荷。
-				//PQ负载相当于注入（抽出）功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
+				//PQ负载相当于注入地（抽出母线）的功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
 				//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
-				m_NodeFlow.at(c->Buses(0)).AddPowerGeneration(solution.PowerShunt() + solution.PowerInjections(0));
-				m_NodeFlow.at(c->Buses(0)).AddPowerConsumption(-solution.PowerInjections(0));
+				auto& nf = m_NodeFlow.at(c->Buses(0));
+				nf.AddPowerGeneration(localSolution.PowerShunt() + localSolution.PowerInjections(0));
+				nf.AddPowerConsumption(-localSolution.PowerInjections(0));
 			}
 		}
 

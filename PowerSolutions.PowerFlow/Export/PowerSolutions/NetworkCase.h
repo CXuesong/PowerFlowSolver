@@ -89,6 +89,7 @@ namespace PowerSolutions {
 			bool RemoveObject(NetworkObject* obj);
 			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
 			void Validate() const;				//验证整个网络实例的有效性。
+			//根据当前网络，生成一个经过初步分析的 PrimitiveNetwork。
 			std::shared_ptr<PrimitiveNetwork> ToPrimitive(PrimitiveNetworkOptions options = PrimitiveNetworkOptions::NodeReorder);
 			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
 			std::shared_ptr<NetworkCase> ShallowClone() const;

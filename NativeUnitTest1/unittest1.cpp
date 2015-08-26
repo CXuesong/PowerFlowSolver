@@ -219,7 +219,7 @@ namespace NativeUnitTest1
 			}
 			network2->RemoveObject(sg);
 			network2->AutoDeleteChildren(false);
-			auto pn = network.ToPrimitive();
+			auto pn = network.ToPrimitive(PrimitiveNetworkOptions::ForceSetSlackNode);
 			stringstream ss;
 			auto PrintNetwork = [&ss](const PrimitiveNetwork& pn)
 			{
