@@ -111,14 +111,15 @@ namespace PowerSolutions
 					//增加/追加支路潮流
 					s->AddBranchFlow(dpc->Bus1(), dpc->Bus2(), branchFlow);
 				}
-				//统计。可以考虑三绕组变压器。
+				//统计。
+				//统计过程可以包含三绕组变压器。
 				if (c.first->PortCount() > 1)
 				{
 					totalPowerShunt += c.second.PowerShunt();
 					//对于多端口元件，注入功率之和就是串联损耗。
-					//注意功率的参考方向是流入母线的。
+					//注意功率的参考方向是流入元件的。
 					for (auto& inj : c.second.PowerInjections())
-						totalPowerLoss -= inj;
+						totalPowerLoss += inj;
 				}
 			}
 			s->TotalPowerGeneration(totalPowerGeneration);

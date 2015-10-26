@@ -217,6 +217,7 @@ namespace PowerSolutions {
 				[](const NodeDictionary::value_type &item){return item.second; });
 			if ((m_Options & PrimitiveNetworkOptions::NodeReorder) == PrimitiveNetworkOptions::NodeReorder)
 			{
+				_PS_TRACE("Node Reorder = True");
 				//采用静态节点优化编号,即将节点的出线数从小到大依次排列
 				//对Nodes列表进行排序。
 				sort(m_Nodes.begin(), m_Nodes.end(),
@@ -228,10 +229,22 @@ namespace PowerSolutions {
 					return x->Degree() < y->Degree();
 				});
 			} else {
+#if _DEBUG
+				//在调试模式下，可以按照节点的 Id 为节点排序。
+				sort(m_Nodes.begin(), m_Nodes.end(),
+					[](const NodeCollection::value_type &x, const NodeCollection::value_type &y)
+				{
+					//将平衡节点放到列表的末尾
+					if (x->Type() == NodeType::SlackNode) return false;
+					if (y->Type() == NodeType::SlackNode) return true;
+					return x->Bus()->_ID < y->Bus()->_ID;
+				});
+#else
 				//不论如何，平衡节点应该在 Nodes 集合的最后面。
 				//此处考虑到性能，仅仅交换平衡节点和除平衡节点以外最后一个节点的位置。
 				swap(*find_if(m_Nodes.begin(), m_Nodes.end(), [](NodeInfo* node){return node->Type() == NodeType::SlackNode; }),
 					m_Nodes.back());
+#endif
 			}
 			//按照新的顺序重新编号
 			int IndexCounter1 = 0, IndexCounter2 = 0;

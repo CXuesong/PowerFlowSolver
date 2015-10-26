@@ -74,9 +74,13 @@ namespace PowerSolutions
 			public value struct ComponentFlowSolution
 			{
 			public:
-				/// <summary>从节点1注入的功率。</summary>
+				/// <summary>从元件端口注入元件（即流出母线方向）的功率。</summary>
 				_WRAP_PROPERTY_CACHE(PowerInjections, cli::array<Complex>^);
-				/// <summary>从节点2注入的功率。</summary>
+				/// <summary>向地注入的功率。</summary>
+				/// <remarks>
+				/// 对于接地导纳，注入元件的功率即为向地注入的功率。
+				/// 对于 PQ 负载，向地注入的功率为零。
+				///</remarks>
 				_WRAP_PROPERTY_CACHE(PowerShunt, Complex);
 				/// <summary>指示此元件自身的潮流是否为不定的。</summary>
 				_WRAP_PROPERTY_CACHE(IsUnconstrained, bool);

@@ -32,11 +32,12 @@ namespace PowerSolutions
 			{
 				//对于PV发电机/平衡发电机，无需也不要修改 PowerGeneration 和 PowerConsumption
 				// 师兄：接地补偿不应计入负荷。
-				//PQ负载相当于注入地（抽出母线）的功率，powerInjection[0] = 0, powerInjection[1] = -SLoad
-				//对于接地导纳，powerInjection[0] = Ssa, powerInjection[1] = -Ssa
+				//PQ负载相当于注入地（抽出母线）的功率，powerShunt = 0, powerInjection[0] = -SLoad
+				//对于接地导纳，powerShunt = Ssa, powerInjection[0] = -Ssa
 				auto& nf = m_NodeFlow.at(c->Buses(0));
-				nf.AddPowerGeneration(localSolution.PowerShunt() + localSolution.PowerInjections(0));
-				nf.AddPowerConsumption(-localSolution.PowerInjections(0));
+				auto powerInj = localSolution.PowerInjections(0);
+				nf.AddPowerGeneration(powerInj + localSolution.PowerShunt());
+				nf.AddPowerConsumption(powerInj);
 			}
 		}
 

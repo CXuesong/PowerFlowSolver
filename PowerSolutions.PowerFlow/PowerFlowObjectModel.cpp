@@ -176,7 +176,8 @@ namespace PowerSolutions
 
 		ComponentFlowSolution PQLoad::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			return ComponentFlowSolution({ -m_Power }, 0);
+			//流入负载端口的功率，即端口的注入功率。
+			return ComponentFlowSolution({ m_Power }, 0);
 		}
 
 		////////// 接地导纳 //////////
@@ -269,6 +270,7 @@ namespace PowerSolutions
 			//只能按照Γ型等值电路进行计算。
 			auto p = DoublePortComponent::EvalComponentFlow(solution);
 			auto v = solution.NodeStatus(Bus1()).Voltage();
+			//修正导纳功率。
 			p.PowerShunt(v * v * conj(m_Admittance));
 			return p;
 		}

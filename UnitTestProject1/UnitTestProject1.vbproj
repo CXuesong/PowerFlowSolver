@@ -165,7 +165,7 @@
   <ItemGroup>
     <ProjectReference Include="..\PowerSolutions.Interop\PowerSolutions.Interop.vcxproj">
       <Project>{3f461a67-845b-4b5b-b941-2cab22e2494c}</Project>
-      <Name>PowerSolutions.Interop</Name>
+      <Name>PowerSolutions.Interop.PowerFlow</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>

@@ -107,11 +107,11 @@ namespace PowerSolutions
 				: m_PowerInjection(0), m_PowerShunt(0, 0), m_IsUnconstrained(unconst)
 			{ }
 		public:
+			//获取一个表示功率不定的元件功率。一般用在PV元件中。
 			static ComponentFlowSolution Unconstrained()
 			{
 				return ComponentFlowSolution(true);
 			}
-
 			explicit ComponentFlowSolution(int portCount)
 				: m_PowerInjection(portCount), m_PowerShunt(0, 0), m_IsUnconstrained(false)
 			{ }

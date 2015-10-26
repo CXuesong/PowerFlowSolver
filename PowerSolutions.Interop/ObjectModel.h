@@ -108,6 +108,9 @@ namespace PowerSolutions
 				Component AddSlackGenerator(Bus bus1, Complex voltage);
 				Component AddPQLoad(Bus bus1, Complex power);
 				Component AddShuntAdmittance(Bus bus1, Complex admittance);
+				/// <param name="impedance">母线1侧串联阻抗的标幺值。</param>
+				/// <param name="admittance">母线1侧并联接地导纳的标幺值。注意励磁电纳应当为负值。</param>
+				/// <param name="tapRatio">母线1侧与母线2侧的非标准变比，以及相位移动。(相位移动未实现。)</param>
 				Component AddTransformer(Bus bus1, Bus bus2, Complex impedance, Complex admittance, Complex tapRatio);
 				Component AddTransformer(Bus bus1, Bus bus2, Complex impedance, Complex tapRatio)
 				{

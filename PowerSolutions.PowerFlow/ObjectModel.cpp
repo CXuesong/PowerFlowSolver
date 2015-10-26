@@ -27,9 +27,9 @@ namespace PowerSolutions
 #define _EvalPower(v1, a1, v2, a2, y10, z12) \
 			conj((v1)*(v1)*(y10) + (v1)*((v1) - polar((v2), (a2)-(a1)))/(z12))	//以 v1 作为参考相量
 #define _EvalShuntPower(v, y10) (v) * (v) * conj(y10)
-			s.PowerInjections(0, -_EvalPower(abs(voltage1), arg(voltage1),
+			s.PowerInjections(0, _EvalPower(abs(voltage1), arg(voltage1),
 				abs(voltage2), arg(voltage2), m_Admittance1, m_Impedance));
-			s.PowerInjections(1, -_EvalPower(abs(voltage2), arg(voltage2),
+			s.PowerInjections(1, _EvalPower(abs(voltage2), arg(voltage2),
 				abs(voltage1), arg(voltage1), m_Admittance2, m_Impedance));
 			s.PowerShunt(_EvalShuntPower(abs(voltage1), m_Admittance1) + _EvalShuntPower(abs(voltage2), m_Admittance2));
 #undef _EvalPower
