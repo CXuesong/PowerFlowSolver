@@ -44,8 +44,7 @@ namespace PowerSolutions
 			//确定雅可比矩阵每一列需要的非零元空间数量
 			//按照最不理想的情况来申请雅可比矩阵的空间
 			//具体的申请空间操作
-			vector<int> JocobianColSpace;		//雅可比矩阵中每一列的非零元素数量，用于为矩阵预留空间。
-			JocobianColSpace.resize(EquationCount());
+			vector<int> JocobianColSpace(EquationCount());		//雅可比矩阵中每一列的非零元素数量，用于为矩阵预留空间。
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
 				auto *node = PNetwork->Nodes(n);
@@ -125,37 +124,39 @@ namespace PowerSolutions
 			auto &Admittance = PNetwork->Admittance;
 			for (int m = 0; m < NodeCount; m++)
 			{
-				auto &nodeM = PSolution->NodeStatus(m);
-				double Um = NodeVoltage(m);
-				double thetaM = NodeAngle(m);
-				int subM = Block1EquationCount() + nodeM.SubIndex();
-				//计算非对角元素
+				auto &statusM = PSolution->NodeStatus(m);
+				auto Um = NodeVoltage(m);
+				auto thetaM = NodeAngle(m);
+				int subM = Block1EquationCount() + statusM.SubIndex();
+				//计算导纳矩阵中非对角元素对应的功率。
 				for (int n = m + 1; n < NodeCount; n++)
 				{
 					// 导纳矩阵是上三角矩阵，row < col
+					// TODO 取消对导纳矩阵对称的假定（移相变压器）。
 					complexd Y = Admittance.coeff(m, n);
+					complexd Y1 = Admittance.coeff(n, m);
 					//if (abs(Y) < 1e-10) continue;
-					double UmUn = Um * NodeVoltage(n);
-					double thetaMn = thetaM - NodeAngle(n);
-					double sinMn = sin(thetaMn);
-					double cosMn = cos(thetaMn);
+					auto UmUn = Um * NodeVoltage(n);
+					auto thetaMn = thetaM - NodeAngle(n);
+					auto sinMn = sin(thetaMn);
+					auto cosMn = cos(thetaMn);
 					auto &statusN = PSolution->NodeStatus(n);
 					//累计上一次迭代结果对应的注入功率
-					nodeM.AddPowerInjections(UmUn * (Y.real() * cosMn + Y.imag() * sinMn),
+					statusM.AddPowerInjections(UmUn * (Y.real() * cosMn + Y.imag() * sinMn),
 						UmUn * (Y.real() * sinMn - Y.imag() * cosMn));
-					statusN.AddPowerInjections(UmUn * (Y.real() * cosMn - Y.imag() * sinMn),
-						-UmUn * (Y.real() * sinMn + Y.imag() * cosMn));
+					statusN.AddPowerInjections(UmUn * (Y1.real() * cosMn - Y1.imag() * sinMn),
+						UmUn * (-Y1.real() * sinMn - Y1.imag() * cosMn));
 				}
-				//计算对角元素
-				double UmSqr = Um * Um;
-				complexd Y = Admittance.coeff(m, m);
-				nodeM.AddPowerInjections(UmSqr * Y.real(), -UmSqr * Y.imag());
+				//计算导纳矩阵中对角元素对应的功率。
+				auto UmSqr = Um * Um;
+				auto Y = Admittance.coeff(m, m);
+				statusM.AddPowerInjections(UmSqr * Y.real(), -UmSqr * Y.imag());
 				//生成功率偏差向量 Δy'
-				if (nodeM.Type() != NodeType::SlackNode)
+				if (statusM.Type() != NodeType::SlackNode)
 				{
-					PowerInjectionDeviation(m) -= nodeM.ActivePowerInjection();
-					if (nodeM.Type() == NodeType::PQNode)
-						PowerInjectionDeviation(subM) -= nodeM.ReactivePowerInjection();
+					PowerInjectionDeviation(m) -= statusM.ActivePowerInjection();
+					if (statusM.Type() == NodeType::PQNode)
+						PowerInjectionDeviation(subM) -= statusM.ReactivePowerInjection();
 				}
 			}
 			_PS_TRACE("平衡节点 ======");
