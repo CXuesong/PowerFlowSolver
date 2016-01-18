@@ -29,8 +29,8 @@ namespace PowerSolutions {
 			complexd Admittance() const { return m_Admittance; }	//导纳的标幺值。
 			void Admittance(complexd val) { m_Admittance = val; }
 		public:
-			virtual void Validate() const;
-			virtual PiEquivalencyParameters PiEquivalency() const;	//获取此元件π型等值电路参数。
+			virtual void Validate() const override;
+			virtual PiEquivalencyParameters PiEquivalency() const override;	//获取此元件π型等值电路参数。
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
@@ -54,10 +54,10 @@ namespace PowerSolutions {
 			double Voltage() const { return m_Voltage; }			//发电机的机端电压（标幺值）。
 			void Voltage(double val) { m_Voltage = val; }
 		public:
-			virtual void Validate() const;
+			virtual void Validate() const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一台PV发电机。
@@ -77,10 +77,10 @@ namespace PowerSolutions {
 			complexd Voltage() const { return m_Voltage; }		//发电机的机端电压（幅值：标幺值，相角：弧度）。
 			void Voltage(complexd val) { m_Voltage = val; }
 		public:
-			virtual void Validate() const;
+			virtual void Validate() const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一台平衡发电机。
@@ -100,10 +100,10 @@ namespace PowerSolutions {
 			complexd Power() const { return m_Power; }		//注入负载吸收的功率大小（标幺值）。
 			void Power(complexd val) { m_Power = val; }
 		public:
-			virtual void Validate() const;
+			virtual void Validate() const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一个PQ负载。
@@ -123,7 +123,7 @@ namespace PowerSolutions {
 			complexd Admittance() const { return m_Admittance; }	//导纳的标幺值。
 			void Admittance(complexd val) { m_Admittance = val; }
 		public:
-			virtual void Validate() const;
+			virtual void Validate() const override;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
@@ -152,7 +152,7 @@ namespace PowerSolutions {
 			complexd TapRatio() const { return m_TapRatio; }		//母线1侧与母线2侧的非标准变比，以及相位移动。
 			void TapRatio(complexd val) { m_TapRatio = val; }
 		public:
-			virtual void Validate() const;
+			virtual void Validate() const override;
 			virtual PiEquivalencyParameters PiEquivalency() const override;//获取此元件π型等值电路参数。
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
@@ -204,7 +204,7 @@ namespace PowerSolutions {
 			complexd Impedance2() const { return (m_Impedance12 + m_Impedance23 - m_Impedance13) / 2.0; }
 			complexd Impedance3() const { return (m_Impedance13 + m_Impedance23 - m_Impedance12) / 2.0; }
 		public:
-			virtual void Validate() const;
+			virtual void Validate() const override;
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;

@@ -92,7 +92,7 @@ namespace PowerSolutions
 			{
 			public:
 				/// <summary>已经完成的迭代次数。</summary>
-				_WRAP_PROPERTY_CACHE(IterationCount, double);
+				_WRAP_PROPERTY_CACHE(IterationCount, int);
 				/// <summary>此次迭代结束后的最大功率误差绝对值。</summary>
 				_WRAP_PROPERTY_CACHE(MaxDeviation, double);
 				// 获取此迭代信息的字符串表现形式。
