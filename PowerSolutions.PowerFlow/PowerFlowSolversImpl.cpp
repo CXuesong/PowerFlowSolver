@@ -103,7 +103,7 @@ namespace PowerSolutions
 			for (auto& c : s->ComponentFlow())
 			{
 				//仅适用于双端元件。
-				auto dpc = dynamic_cast<DoublePortComponent*>(c.first);
+				auto dpc = dynamic_cast<const DoublePortComponent*>(c.first);
 				if (dpc != nullptr)
 				{
 					BranchFlowSolution branchFlow(-c.second.PowerInjections(0),

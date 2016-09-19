@@ -127,19 +127,19 @@ namespace PowerSolutions {
 			Bus(IBusContainer* parent, complexd initialVoltage);
 		};
 
-		typedef std::pair<ObjectModel::Bus*, ObjectModel::Bus*> BusPair;
+		typedef std::pair<const ObjectModel::Bus*, const ObjectModel::Bus*> BusPair;
 
 		//表示与一个或多个母线相连接的元件。
 		class Component : public NetworkObject
 		{
 			friend class NetworkCase;
 		private:
-			std::vector<Bus*> m_Buses;
+			std::vector<const Bus*> m_Buses;
 		public:
 			//获取连接在指定端口处的母线索引。端口索引从0开始。
-			Bus* Buses(int index) const { return m_Buses[index]; }
+			const Bus* Buses(int index) const { return m_Buses[index]; }
 			//设置连接在指定端口处的母线索引。端口索引从0开始。
-			void Buses(int index, Bus* value) { m_Buses[index] = value; }
+			void Buses(int index, const Bus* value) { m_Buses[index] = value; }
 			//获取此元件端口的数目。
 			int PortCount() const { return m_Buses.size(); }
 			//获取此对象的一个副本。
@@ -147,8 +147,8 @@ namespace PowerSolutions {
 			{
 				return static_cast<Component*>(NetworkObject::Clone(context));
 			}
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork);
-			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) {}
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const {}
 			//根据节点电压获取此元件注入指定母线节点的功率。
 			//关于端口功率方向的约定，请参阅 PowerFlow::ComponentFlowSolution 的相关定义。
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const = 0;
@@ -161,8 +161,8 @@ namespace PowerSolutions {
 		class SinglePortComponent : public Component
 		{
 		public:
-			Bus* Bus1() const { return Buses(0); }	//此元件连接到的母线。
-			void Bus1(Bus* val) { Buses(0, val); }
+			const Bus* Bus1() const { return Buses(0); }	//此元件连接到的母线。
+			void Bus1(const Bus* val) { Buses(0, val); }
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
 		protected:
@@ -172,14 +172,14 @@ namespace PowerSolutions {
 		class DoublePortComponent : public Component
 		{
 		public:
-			Bus* Bus1() const { return Buses(0); }		//此元件连接到的母线1。
-			void Bus1(Bus* val) { Buses(0, val); }
-			Bus* Bus2() const { return Buses(1); }		//此元件连接到的母线2。
-			void Bus2(Bus* val) { Buses(1, val); }
+			const Bus* Bus1() const { return Buses(0); }		//此元件连接到的母线1。
+			void Bus1(const Bus* val) { Buses(0, val); }
+			const Bus* Bus2() const { return Buses(1); }		//此元件连接到的母线2。
+			void Bus2(const Bus* val) { Buses(1, val); }
 		public:
 			virtual PiEquivalencyParameters PiEquivalency() const = 0;//获取此元件π型等值电路参数。
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
-			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
@@ -190,12 +190,12 @@ namespace PowerSolutions {
 		class TriPortComponent : public Component
 		{
 		public:
-			Bus* Bus1() const { return Buses(0); }		//此元件连接到的母线1。
-			void Bus1(Bus* val) { Buses(0, val); }
-			Bus* Bus2() const { return Buses(1); }		//此元件连接到的母线2。
-			void Bus2(Bus* val) { Buses(1, val); }
-			Bus* Bus3() const { return Buses(2); }		//此元件连接到的母线3。
-			void Bus3(Bus* val) { Buses(2, val); }
+			const Bus* Bus1() const { return Buses(0); }		//此元件连接到的母线1。
+			void Bus1(const Bus* val) { Buses(0, val); }
+			const Bus* Bus2() const { return Buses(1); }		//此元件连接到的母线2。
+			void Bus2(const Bus* val) { Buses(1, val); }
+			const Bus* Bus3() const { return Buses(2); }		//此元件连接到的母线3。
+			void Bus3(const Bus* val) { Buses(2, val); }
 		public:	//基础结构
 			int PortCount() const = delete;					//基础结构。
 		protected:

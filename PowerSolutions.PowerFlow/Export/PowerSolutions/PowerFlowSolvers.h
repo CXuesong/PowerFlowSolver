@@ -99,7 +99,7 @@ namespace PowerSolutions
 		public:
 			const NodeStatusCollection& NodeStatus() const { return m_NodeStatus; }
 			const NodeEvaluationStatus& NodeStatus(int nodeIndex) const { return m_NodeStatus.at(nodeIndex); }
-			const NodeEvaluationStatus& NodeStatus(ObjectModel::Bus* bus) const { return m_NodeStatus.at(m_Network->Nodes(bus).Index()); }
+			const NodeEvaluationStatus& NodeStatus(const ObjectModel::Bus* bus) const { return m_NodeStatus.at(m_Network->Nodes(bus).Index()); }
 			ObjectModel::PrimitiveNetwork* Network() const { return m_Network; }
 		public:
 			PrimitiveSolution(ObjectModel::PrimitiveNetwork& network);

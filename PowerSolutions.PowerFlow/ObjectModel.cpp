@@ -90,7 +90,7 @@ namespace PowerSolutions
 			: m_Buses(portCount)
 		{ }
 
-		void Component::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		void Component::BuildNodeInfo(PrimitiveNetwork* pNetwork) const
 		{
 			for (auto& b : m_Buses)
 			{
@@ -107,7 +107,7 @@ namespace PowerSolutions
 			for (size_t i = 0; i < m_Buses.size(); i++)
 			{
 				if (m_Buses[i] != nullptr)
-					inst->Buses(i, context.CloneOf(m_Buses[i]));
+					inst->Buses(i, context.CloneOfStatic(m_Buses[i]));
 			}
 		}
 
@@ -122,7 +122,7 @@ namespace PowerSolutions
 			Buses(1, bus2);
 		}
 
-		void DoublePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		void DoublePortComponent::BuildNodeInfo(PrimitiveNetwork* pNetwork) const
 		{
 			Component::BuildNodeInfo(pNetwork);
 			pNetwork->ClaimBranch(Bus1(), Bus2(), this);
@@ -136,7 +136,7 @@ namespace PowerSolutions
 			return s;
 		}
 
-		void DoublePortComponent::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
+		void DoublePortComponent::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const
 		{
 			pNetwork->AddPi(Bus1(), Bus2(), this->PiEquivalency());
 		}

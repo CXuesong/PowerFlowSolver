@@ -57,7 +57,7 @@ namespace PowerSolutions {
 			virtual void Validate() const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一台PV发电机。
@@ -80,7 +80,7 @@ namespace PowerSolutions {
 			virtual void Validate() const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一台平衡发电机。
@@ -103,7 +103,7 @@ namespace PowerSolutions {
 			virtual void Validate() const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
 			//创建一个PQ负载。
@@ -124,7 +124,7 @@ namespace PowerSolutions {
 			void Admittance(complexd val) { m_Admittance = val; }
 		public:
 			virtual void Validate() const override;
-			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
@@ -187,26 +187,26 @@ namespace PowerSolutions {
 			//此变压器使用的一次侧内部公共母线。
 			Bus* CommonBus() const { return m_CommonBus.get(); }
 			complexd Impedance12() const { return m_Impedance12; }
-			void Impedance12(complexd val) { m_Impedance12 = val; }
+			void Impedance12(complexd val) { m_Impedance12 = val; UpdateChildren(); }
 			complexd Impedance13() const { return m_Impedance13; }
-			void Impedance13(complexd val) { m_Impedance13 = val; }
+			void Impedance13(complexd val) { m_Impedance13 = val; UpdateChildren(); }
 			complexd Impedance23() const { return m_Impedance23; }
-			void Impedance23(complexd val) { m_Impedance23 = val; }
+			void Impedance23(complexd val) { m_Impedance23 = val; UpdateChildren(); }
 			complexd Admittance() const { return m_Admittance; }
-			void Admittance(complexd val) { m_Admittance = val; }
+			void Admittance(complexd val) { m_Admittance = val; UpdateChildren(); }
 			complexd TapRatio1() const { return m_TapRatio1; }
-			void TapRatio1(complexd val) { m_TapRatio1 = val; }
+			void TapRatio1(complexd val) { m_TapRatio1 = val; UpdateChildren(); }
 			complexd TapRatio2() const { return m_TapRatio2; }
-			void TapRatio2(complexd val) { m_TapRatio2 = val; }
+			void TapRatio2(complexd val) { m_TapRatio2 = val; UpdateChildren(); }
 			complexd TapRatio3() const { return m_TapRatio3; }
-			void TapRatio3(complexd val) { m_TapRatio3 = val; }
+			void TapRatio3(complexd val) { m_TapRatio3 = val; UpdateChildren(); }
 			complexd Impedance1() const { return (m_Impedance12 + m_Impedance13 - m_Impedance23) / 2.0; }
 			complexd Impedance2() const { return (m_Impedance12 + m_Impedance23 - m_Impedance13) / 2.0; }
 			complexd Impedance3() const { return (m_Impedance13 + m_Impedance23 - m_Impedance12) / 2.0; }
 		public:
 			virtual void Validate() const override;
-			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) override;
-			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) override;
+			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
+			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		private:	//基础结构。
 			virtual int ChildBusCount() const override;

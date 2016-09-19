@@ -84,7 +84,7 @@ namespace PowerSolutions
 			return new PVGenerator(m_ActivePower, m_Voltage);
 		}
 
-		void PVGenerator::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		void PVGenerator::BuildNodeInfo(PrimitiveNetwork* pNetwork) const
 		{
 			SinglePortComponent::BuildNodeInfo(pNetwork);
 			pNetwork->AddPV(Bus1(), m_ActivePower, m_Voltage);
@@ -126,7 +126,7 @@ namespace PowerSolutions
 			return new SlackGenerator(m_Voltage);
 		}
 
-		void SlackGenerator::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		void SlackGenerator::BuildNodeInfo(PrimitiveNetwork* pNetwork) const
 		{
 			SinglePortComponent::BuildNodeInfo(pNetwork);
 			pNetwork->AddSlack(Bus1(), m_Voltage);
@@ -168,7 +168,7 @@ namespace PowerSolutions
 			return new PQLoad(m_Power);
 		}
 
-		void PQLoad::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		void PQLoad::BuildNodeInfo(PrimitiveNetwork* pNetwork) const
 		{
 			SinglePortComponent::BuildNodeInfo(pNetwork);
 			pNetwork->AddPQ(Bus1(), -m_Power);
@@ -224,7 +224,7 @@ namespace PowerSolutions
 			return ComponentFlowSolution({ -p }, p);
 		}
 
-		void ShuntAdmittance::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
+		void ShuntAdmittance::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const
 		{
 			pNetwork->AddShunt(this->Bus1(), m_Admittance);
 		}
@@ -327,7 +327,9 @@ namespace PowerSolutions
 			m_Admittance(admittance), m_TapRatio1(tapRatio1), m_TapRatio2(tapRatio2), m_TapRatio3(tapRatio3),
 			m_CommonBus(new Bus(this, 1)), m_Transformer1(new Transformer()), m_Transformer2(new Transformer()),
 			m_Transformer3(new Transformer())
-		{ }
+		{
+			UpdateChildren();
+		}
 
 		ThreeWindingTransformer* ThreeWindingTransformer::Create(Bus *bus1, Bus *bus2, Bus *bus3, complexd impedance12, complexd impedance13, complexd impedance23, complexd admittance, complexd tapRatio1, complexd tapRatio2, complexd tapRatio3)
 		{
@@ -344,6 +346,7 @@ namespace PowerSolutions
 				m_Admittance, m_TapRatio1, m_TapRatio2, m_TapRatio3);
 		}
 
+		// TODO 在某一分支参数变化时，仅更新此分支的数据。
 		void ThreeWindingTransformer::UpdateChildren()
 		{
 			//三绕组变压器模型
@@ -367,9 +370,8 @@ namespace PowerSolutions
 			m_Transformer2->Bus2(m_CommonBus.get());
 			m_Transformer3->Bus2(m_CommonBus.get());
 			//注意此处的阻值为折算至一次侧的值。
-			auto a = (m_Impedance12 + m_Impedance23 - m_Impedance13) / 2.0;
 			auto z1 = Impedance1(), z2 = Impedance2(), z3 = Impedance3();
-			//'需要将折算到一次侧的二次、三次侧绕组参数折回对应的电压等级
+			//需要将折算到一次侧的二次、三次侧绕组参数折回对应的电压等级
 			//TODO 使用更为精确的比较策略（考虑标幺值引起的缩放）
 			const auto MinImpedance = 1e-8;
 			if (abs(z1.imag()) < MinImpedance) z1.imag(MinImpedance * 10);
@@ -392,7 +394,7 @@ namespace PowerSolutions
 		{
 		}
 
-		void ThreeWindingTransformer::BuildNodeInfo(PrimitiveNetwork* pNetwork)
+		void ThreeWindingTransformer::BuildNodeInfo(PrimitiveNetwork* pNetwork) const
 		{
 			Component::BuildNodeInfo(pNetwork);
 			pNetwork->ClaimBranch(Bus1(), m_CommonBus.get(), this);
@@ -400,11 +402,9 @@ namespace PowerSolutions
 			pNetwork->ClaimBranch(Bus3(), m_CommonBus.get(), this);
 		}
 
-		void ThreeWindingTransformer::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork)
+		void ThreeWindingTransformer::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const
 		{
 			//在参与计算前，重新计算子级参数。
-			//TODO 移除子对象，直接变为纯计算。
-			UpdateChildren();
 			m_Transformer1->BuildAdmittanceInfo(pNetwork);
 			m_Transformer2->BuildAdmittanceInfo(pNetwork);
 			m_Transformer3->BuildAdmittanceInfo(pNetwork);

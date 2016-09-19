@@ -116,7 +116,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options)
+		void PrimitiveNetwork::LoadNetworkCase(const ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options)
 		{
 			//LoadNetworkCase 只能调用一次。
 			assert(_SourceNetwork == nullptr);
@@ -302,7 +302,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::AddPi(Bus* pbus1, Bus* pbus2, PiEquivalencyParameters pieqv)
+		void PrimitiveNetwork::AddPi(const Bus* pbus1, const Bus* pbus2, PiEquivalencyParameters pieqv)
 		{
 			//具有π形等值电路
 			int index1 = Nodes(pbus1).Index();
@@ -335,7 +335,7 @@ namespace PowerSolutions {
 			assert(!isnan(Admittance.coeffRef(index2, index1).imag()));
 		}
 
-		void PrimitiveNetwork::AddShunt(Bus* bus, complexd admittance)
+		void PrimitiveNetwork::AddShunt(const Bus* bus, complexd admittance)
 		{
 			if (((_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance))
 			{
@@ -349,7 +349,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::AddPQ(Bus* bus, complexd power)
+		void PrimitiveNetwork::AddPQ(const Bus* bus, complexd power)
 		{
 			auto node = TryGetNode(bus);
 			if (node != nullptr)
@@ -359,7 +359,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::AddPV(Bus* bus, double activePower, double voltage)
+		void PrimitiveNetwork::AddPV(const Bus* bus, double activePower, double voltage)
 		{
 			auto node = TryGetNode(bus);
 			if (node != nullptr)
@@ -376,7 +376,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::AddSlack(Bus* bus, complexd voltagePhasor)
+		void PrimitiveNetwork::AddSlack(const Bus* bus, complexd voltagePhasor)
 		{
 			auto node = TryGetNode(bus);
 			if (node != nullptr)
@@ -403,7 +403,7 @@ namespace PowerSolutions {
 			}
 		}
 
-		void PrimitiveNetwork::ClaimBranch(Bus* bus1, Bus* bus2, Component* c)
+		void PrimitiveNetwork::ClaimBranch(const Bus* bus1, const Bus* bus2, const Component* c)
 		{
 			assert(bus1 != bus2);	//不允许自环。
 			//加入支路-组件列表中
@@ -423,7 +423,7 @@ namespace PowerSolutions {
 			result.first->second->Components().push_back(c);
 		}
 		
-		void PrimitiveNetwork::ClaimParent(Bus* bus, Component* c)
+		void PrimitiveNetwork::ClaimParent(const Bus* bus, const Component* c)
 		{
 			//加入母线的元件列表中。
 			auto node = TryGetNode(bus);
@@ -555,19 +555,19 @@ namespace PowerSolutions {
 #endif
 		}
 
-		void PrimitiveNetwork::AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool strictMode /*= true*/)
+		void PrimitiveNetwork::AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool allowsUnmatch)
 		{
-			auto PBus = [&](Bus* thisBus) {
-				auto nb = dynamic_cast<Bus*>(info.PrototypeOf(thisBus));
+			auto PBus = [&](const Bus* thisBus) {
+				auto nb = dynamic_cast<const Bus*>(info.PrototypeOfStatic(thisBus));
 				if (nb == nullptr)
-					if (strictMode)
+					if (!allowsUnmatch)
 						throw Exception(ExceptionCode::Validation);
 				return nb;
 			};
-			auto PComponent = [&](Component* thisComponent) {
-				auto nb = dynamic_cast<Component*>(info.PrototypeOf(thisComponent));
+			auto PComponent = [&](const Component* thisComponent) {
+				auto nb = dynamic_cast<const Component*>(info.PrototypeOfStatic(thisComponent));
 				if (nb == nullptr)
-					if (strictMode)
+					if (!allowsUnmatch)
 						throw Exception(ExceptionCode::Validation);
 				return nb;
 			};
@@ -587,7 +587,12 @@ namespace PowerSolutions {
 			}
 		}
 
-		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
+		void PrimitiveNetwork::AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info)
+		{
+			PrimitiveNetwork::AdjustReferenceToPrototype(info, false);
+		}
+
+		PrimitiveNetwork::NodeInfo::NodeInfo(const ObjectModel::Bus* bus)
 			: _Bus(bus), _Type(NodeType::PQNode),
 			_Voltage(0), _Angle(0),
 			_ActivePowerInjection(0), _ReactivePowerInjection(0)

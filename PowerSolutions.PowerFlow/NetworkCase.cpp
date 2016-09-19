@@ -92,20 +92,21 @@ namespace PowerSolutions {
 			return nc;
 		}
 
-		shared_ptr<PrimitiveNetwork> NetworkCase::ToPrimitive(PrimitiveNetworkOptions options)
+		shared_ptr<PrimitiveNetwork> NetworkCase::ToPrimitive(PrimitiveNetworkOptions options) const
 		{
 			shared_ptr<PrimitiveNetwork> newInst(new PrimitiveNetwork());
 			newInst->LoadNetworkCase(this, options);
 			return newInst;
 		}
-		void NetworkCaseCorrespondenceInfo::MapObject(NetworkObject* oldObj, NetworkObject* newObj)
+
+		void NetworkCaseCorrespondenceInfo::MapObject(const NetworkObject* oldObj, const NetworkObject* newObj)
 		{
 			assert(typeid(&oldObj) == typeid(&newObj));
 			objectMapping.emplace(oldObj, MappingInfo(true, newObj));
 			objectMapping.emplace(newObj, MappingInfo(true, oldObj));
 		}
 
-		NetworkObject* NetworkCaseCorrespondenceInfo::CloneOf(NetworkObject* prototypeObj) const
+		const NetworkObject* NetworkCaseCorrespondenceInfo::CloneOf(const NetworkObject* prototypeObj) const
 		{
 			auto i = objectMapping.find(prototypeObj);
 			if (i == objectMapping.end()) throw Exception(ExceptionCode::InvalidArgument);
@@ -114,7 +115,7 @@ namespace PowerSolutions {
 			return i->second.anotherObject;
 		}
 
-		NetworkObject* NetworkCaseCorrespondenceInfo::PrototypeOf(NetworkObject* cloneObj) const
+		const NetworkObject* NetworkCaseCorrespondenceInfo::PrototypeOf(const NetworkObject* cloneObj) const
 		{
 			auto i = objectMapping.find(cloneObj);
 			if (i == objectMapping.end()) throw Exception(ExceptionCode::InvalidArgument);

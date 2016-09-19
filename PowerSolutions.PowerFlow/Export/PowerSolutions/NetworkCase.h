@@ -21,29 +21,29 @@ namespace PowerSolutions {
 			struct MappingInfo
 			{
 			public:
-				bool isPrototype;				//此元件是否来自于原型网络案例。
-				NetworkObject *anotherObject;	//如果 isPrototype = true，则保存了副本网络案例中对应的对象，反之亦然。
+				bool isPrototype;					//此元件是否来自于原型网络案例。
+				const NetworkObject *anotherObject;	//如果 isPrototype = true，则保存了副本网络案例中对应的对象，反之亦然。
 			public:
-				MappingInfo(bool _isPrototype, NetworkObject* _anotherObject)
+				MappingInfo(bool _isPrototype, const NetworkObject* _anotherObject)
 					: isPrototype(_isPrototype), anotherObject(_anotherObject)
 				{ }
 			};
-			std::unordered_map<NetworkObject*, MappingInfo> objectMapping;
+			std::unordered_map<const NetworkObject*, MappingInfo> objectMapping;
 		private:	//internal
 			friend class NetworkCase;
-			void MapObject(NetworkObject* oldObj, NetworkObject* newObj);
+			void MapObject(const NetworkObject* oldObj, const NetworkObject* newObj);
 		public:
 			// 获取原型网络案例中指定网络对象在副本网络案例中的对应对象。
-			NetworkObject* CloneOf(NetworkObject* prototypeObj) const;
+			const NetworkObject* CloneOf(const NetworkObject* prototypeObj) const;
 			// 获取副本网络案例中指定网络对象在原型网络案例中的对应对象。
-			NetworkObject* PrototypeOf(NetworkObject* cloneObj) const;
+			const NetworkObject* PrototypeOf(const NetworkObject* cloneObj) const;
 			template <class TObj>
-			TObj* CloneOf(TObj* prototypeObj) const { 
-				return static_cast<TObj*>(CloneOf(static_cast<NetworkObject*>(prototypeObj))); 
+			const TObj* CloneOfStatic(const TObj* prototypeObj) const {
+				return static_cast<const TObj*>(CloneOf(static_cast<const NetworkObject*>(prototypeObj)));
 			}
 			template <class TObj>
-			TObj* PrototypeOf(TObj* cloneObj) const {
-				return static_cast<TObj*>(PrototypeOf(static_cast<NetworkObject*>(cloneObj)));
+			const TObj* PrototypeOfStatic(const TObj* cloneObj) const {
+				return static_cast<const TObj*>(PrototypeOf(static_cast<const NetworkObject*>(cloneObj)));
 			}
 		private:	//internal
 			NetworkCaseCorrespondenceInfo(std::size_t objectCount)
@@ -90,7 +90,7 @@ namespace PowerSolutions {
 			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
 			void Validate() const;				//验证整个网络实例的有效性。
 			//根据当前网络，生成一个经过初步分析的 PrimitiveNetwork。
-			std::shared_ptr<PrimitiveNetwork> ToPrimitive(PrimitiveNetworkOptions options = PrimitiveNetworkOptions::NodeReorder);
+			std::shared_ptr<PrimitiveNetwork> ToPrimitive(PrimitiveNetworkOptions options = PrimitiveNetworkOptions::NodeReorder) const;
 			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
 			std::shared_ptr<NetworkCase> ShallowClone() const;
 			//构造此网络案例的一个副本，并获取副本和原型中所有对象的对应关系。

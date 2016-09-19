@@ -50,10 +50,11 @@ namespace PowerSolutions {
 			class NodeInfo
 			{
 			public:
-				typedef std::list<Component*> ComponentCollection;
+				// 当然，我们不应当在计算潮流时修改元件信息。
+				typedef std::list<const Component*> ComponentCollection;
 				typedef std::list<BranchInfo*> BranchInfoCollection;
 			private:
-				ObjectModel::Bus* _Bus;
+				const ObjectModel::Bus* _Bus;
 				double _Voltage;
 				double _Angle;
 				int _Index;
@@ -65,8 +66,8 @@ namespace PowerSolutions {
 				BranchInfoCollection _AdjacentBranches;
 			public:
 				//母线的组件信息。
-				ObjectModel::Bus* Bus() const { return _Bus; }
-				void Bus(ObjectModel::Bus* val) { _Bus = val; }
+				const ObjectModel::Bus* Bus() const { return _Bus; }
+				void Bus(const ObjectModel::Bus* val) { _Bus = val; }
 				//母线所连接的元件。包括单端与多端元件。
 				ComponentCollection& Components() { return _Components; }
 				//与此母线邻接的节点。
@@ -106,12 +107,13 @@ namespace PowerSolutions {
 					return ActivePowerInjection() != 0 || ReactivePowerInjection() != 0;
 				}
 			public:
-				NodeInfo(ObjectModel::Bus* bus);
+				NodeInfo(const ObjectModel::Bus* bus);
 			};
 			class BranchInfo
 			{
 			public:
-				typedef std::list<Component*> ComponentCollection;
+				// 当然，我们不应当在计算潮流时修改元件信息。
+				typedef std::list<const Component*> ComponentCollection;
 			private:
 				int _Index;
 				NodePair _Nodes;
@@ -136,24 +138,25 @@ namespace PowerSolutions {
 				{ }
 			};
 		public:
-			typedef std::list<Bus*> BusCollection;
-			typedef std::list<Component*> ComponentCollection;
+			typedef std::list<const Bus*> BusCollection;
+			typedef std::list<const Component*> ComponentCollection;
 			typedef std::vector<NodeInfo*> NodeCollection;
-			typedef std::unordered_map<ObjectModel::Bus*, NodeInfo*> NodeDictionary;
+			// 我们应该不会修改作为键而存在的Bus*的内容。就算要改，也可以用 NodeInfo::Bus
+			typedef std::unordered_map<const ObjectModel::Bus*, NodeInfo*> NodeDictionary;
 			typedef std::vector<BranchInfo*> BranchCollection;
 			typedef std::unordered_map < NodePair, BranchInfo*,
 				Utility::UnorderedPairHasher<NodeInfo*>, Utility::UnorderedPairEqualityComparer < NodeInfo* >>
 				BranchDictionary;
 		_PS_INTERNAL:
-			void AddPi(Bus* bus1, Bus* bus2, PiEquivalencyParameters pi);
-			void AddShunt(Bus* bus, complexd admittance);
-			void AddPQ(Bus* bus, complexd power);
-			void AddPV(Bus* bus, double activePower, double voltage);
-			void AddSlack(Bus* bus, complexd voltagePhasor);
-			void ClaimParent(Bus* bus, Component* c);
-			void ClaimBranch(Bus* bus1, Bus* bus2, Component* c);
+			void AddPi(const Bus* bus1, const Bus* bus2, PiEquivalencyParameters pi);
+			void AddShunt(const Bus* bus, complexd admittance);
+			void AddPQ(const Bus* bus, complexd power);
+			void AddPV(const Bus* bus, double activePower, double voltage);
+			void AddSlack(const Bus* bus, complexd voltagePhasor);
+			void ClaimParent(const Bus* bus, const Component* c);
+			void ClaimBranch(const Bus* bus1, const Bus* bus2, const Component* c);
 		private:
-			NetworkCase* _SourceNetwork;
+			const NetworkCase* _SourceNetwork;
 			PrimitiveNetworkOptions _Options;
 			SlackNodeAssignmentType _SlackNodeAssignment;
 			BusCollection _Buses;
@@ -167,7 +170,7 @@ namespace PowerSolutions {
 			BranchDictionary _BranchDict;
 			//Eigen::SparseMatrix<bool> _IncidenceMatrix;
 		public:
-			NetworkCase* SourceNetwork() const { return _SourceNetwork; }
+			const NetworkCase* SourceNetwork() const { return _SourceNetwork; }
 			PrimitiveNetworkOptions Options() const { return _Options; }
 			// 获取此网络中平衡节点的选取方式。
 			SlackNodeAssignmentType SlackNodeAssignment() const { return _SlackNodeAssignment; }
@@ -180,8 +183,8 @@ namespace PowerSolutions {
 			const NodeCollection& PVNodes() const { return _PVNodes; }
 			const NodeCollection& Nodes() const { return _Nodes; }	//参与计算的三种节点，按照矩阵索引连续排序，注意平衡节点放在最后。
 			NodeInfo& Nodes(size_t index) const { return *_Nodes.at(index); }
-			NodeInfo& Nodes(Bus* busRef) const { return *_BusDict.at(busRef); }
-			NodeInfo* TryGetNode(Bus* busRef) const
+			NodeInfo& Nodes(const Bus* busRef) const { return *_BusDict.at(busRef); }
+			NodeInfo* TryGetNode(const Bus* busRef) const
 			{
 				auto i = _BusDict.find(busRef);
 				if (i == _BusDict.end()) return nullptr;
@@ -211,13 +214,18 @@ namespace PowerSolutions {
 				return i->second;
 			}
 		public:
-			//调整对象引用，使其按照指定的对应关系指向原来的网络，而非网络副本。
-			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool strictMode = true);
+			//调整对象引用，使当前PrimitiveNetwork的母线和线路引用按照指定的对应关系指向原来的网络，而非网络副本。
+			//	allowsUnmatch: 如果为 false，则在根据info中提供的信息无法找到找到PrimitiveNetwork中对应的母线或元件时，
+			//					引发异常。否则会保留对原来母线/元件的引用。
+			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool allowsUnmatch);
+			//调整对象引用，使当前PrimitiveNetwork的母线和线路引用按照指定的对应关系指向原来的网络，而非网络副本。
+			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info);
 		public:	//图论支持
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks() const;
 			void DumpGraph() const;
 		private:
-			void LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
+			// 此函数由 NetworkCase::ToPrimitive 调用。用于加载网络案例。
+			void LoadNetworkCase(const ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
 			void AssignSlackNode();
 			template <class TNodeQueue, class TBranchQueue>
 			void LoadSubnetwork(const PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches);

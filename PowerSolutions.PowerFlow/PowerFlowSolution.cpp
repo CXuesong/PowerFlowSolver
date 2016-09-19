@@ -14,7 +14,7 @@ namespace PowerSolutions
 		Solution::Solution()
 		{ }
 
-		void Solution::AddNodeFlow(Bus* node, const NodeEvaluationStatus& status)
+		void Solution::AddNodeFlow(const Bus* node, const NodeEvaluationStatus& status)
 		{
 			auto result = m_NodeFlow.emplace(node, NodeFlowSolution(status.VoltagePhasor(), status.PowerInjection()));
 			assert(result.second);
@@ -23,7 +23,7 @@ namespace PowerSolutions
 			m_TotalPowerConsumption += result.first->second.PowerConsumption();*/
 		}
 
-		void Solution::AddComponentFlow(Component* c, ComponentFlowSolution&& solution)
+		void Solution::AddComponentFlow(const Component* c, ComponentFlowSolution&& solution)
 		{
 			auto result = m_ComponentFlow.emplace(c, move(solution));
 			assert(result.second);
@@ -41,7 +41,7 @@ namespace PowerSolutions
 			}
 		}
 
-		void Solution::AddBranchFlow(Bus* node1, Bus* node2, const BranchFlowSolution& solution)
+		void Solution::AddBranchFlow(const Bus* node1, const Bus* node2, const BranchFlowSolution& solution)
 		{
 			//‘ –Ì¿€º”
 			auto nodePair = make_pair(node1, node2);
