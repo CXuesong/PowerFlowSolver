@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "PowerFlowSolversImpl.h"
 #include "PowerFlowSolution.h"
 #include "PrimitiveNetwork.h"
@@ -35,11 +35,11 @@ namespace PowerSolutions
 			BeforeIterations();
 			for (int i = 0; i <= MaxIterations(); i++)
 			{
-				//Ò²¾ÍÊÇËµ£¬i ¾ÍÊÇ¡°ÒÑ¾­Íê³É¡±µÄµü´ú´ÎÊı
-				//¼´Êµ¼ÊÑ­»·´ÎÊı±È¡°µü´ú´ÎÊı¡±¶à1
-				_PS_TRACE("µü´ú´ÎÊı£º" << i);
+				//ä¹Ÿå°±æ˜¯è¯´ï¼Œi å°±æ˜¯â€œå·²ç»å®Œæˆâ€çš„è¿­ä»£æ¬¡æ•°
+				//å³å®é™…å¾ªç¯æ¬¡æ•°æ¯”â€œè¿­ä»£æ¬¡æ•°â€å¤š1
+				_PS_TRACE("è¿­ä»£æ¬¡æ•°ï¼š" << i);
 				double dev = abs(EvalDeviation());
-				//»Øµ÷º¯Êı
+				//å›è°ƒå‡½æ•°
 				if (IterationEvent() != nullptr)
 				{
 					IterationEventArgs e(i, dev);
@@ -47,31 +47,31 @@ namespace PowerSolutions
 				}
 				if (dev < MaxDeviationTolerance())
 					return GenerateSolution(SolutionStatus::Success, i, dev);
-				//×îºóÒ»´Î£¨¶à³öÀ´µÄÒ»´Î£©Ñ­»·½ö½ö¼ÆËãÒ»ÏÂ¹¦ÂÊÆ«²î¡£
+				//æœ€åä¸€æ¬¡ï¼ˆå¤šå‡ºæ¥çš„ä¸€æ¬¡ï¼‰å¾ªç¯ä»…ä»…è®¡ç®—ä¸€ä¸‹åŠŸç‡åå·®ã€‚
 				if (i < MaxIterations())
 				{
 					if (!OnIteration())
 						return GenerateSolution(SolutionStatus::IterationFailed, i, dev);
 					if (IntelliIterations())
 					{
-						//TODO ¸ù¾İ¶ş´ÎÊÕÁ²ÌØĞÔ½øĞĞÅĞ¶Ï
-						//Ò²¾ÍÊÇËµĞèÒªÔÚÅÉÉúÀàÖĞÅĞ¶Ï
-						//´Ë´¦Ö»ÊÇ×÷³öÒ»¸ö´ÖÂÔµÄÅĞ¶Ï¶øÒÑ
+						//TODO æ ¹æ®äºŒæ¬¡æ”¶æ•›ç‰¹æ€§è¿›è¡Œåˆ¤æ–­
+						//ä¹Ÿå°±æ˜¯è¯´éœ€è¦åœ¨æ´¾ç”Ÿç±»ä¸­åˆ¤æ–­
+						//æ­¤å¤„åªæ˜¯ä½œå‡ºä¸€ä¸ªç²—ç•¥çš„åˆ¤æ–­è€Œå·²
 						if (i > 3 && dev > 1E10)
 							return GenerateSolution(SolutionStatus::IntelliIterationAbort, i, dev);
 					}
 				}
 			}
-			//´ïµ½×î´óµü´ú´ÎÊı£¬ÇÒÎ´ÊÕÁ²¡£
+			//è¾¾åˆ°æœ€å¤§è¿­ä»£æ¬¡æ•°ï¼Œä¸”æœªæ”¶æ•›ã€‚
 			return GenerateSolution(SolutionStatus::MaxIteration, MaxIterations(), EvalDeviation());
 		}
 
 		shared_ptr<Solution> SolverImpl::GenerateSolution(SolutionStatus status, int iterCount, double maxDev)
 		{
-			AfterIterations();	//ÊÕÎ²¹¤×÷
-			//×¢Òâ£ºÏÂÃæµÄ¹¤×÷²»ÄÜÒı·¢Òì³££¬·ñÔò»áÓÉsÒı·¢ÄÚ´æĞ¹Â©¡£
-			//²»Ò»¶¨°É£¿
-			//×¢ÒâÓÉÓÚ Solution µÄ¹¹Ôìº¯ÊıÊÇ protected £¬Òò´ËÎŞ·¨Ê¹ÓÃ make_shared¡£
+			AfterIterations();	//æ”¶å°¾å·¥ä½œ
+			//æ³¨æ„ï¼šä¸‹é¢çš„å·¥ä½œä¸èƒ½å¼•å‘å¼‚å¸¸ï¼Œå¦åˆ™ä¼šç”±så¼•å‘å†…å­˜æ³„æ¼ã€‚
+			//ä¸ä¸€å®šå§ï¼Ÿ
+			//æ³¨æ„ç”±äº Solution çš„æ„é€ å‡½æ•°æ˜¯ protected ï¼Œå› æ­¤æ— æ³•ä½¿ç”¨ make_sharedã€‚
 			shared_ptr<Solution> s(new Solution());
 			s->Status(status);
 			s->IterationCount(iterCount);
@@ -80,14 +80,14 @@ namespace PowerSolutions
 			s->PQNodeCount(PNetwork->PQNodes().size());
 			s->PVNodeCount(PNetwork->PVNodes().size());
 			s->SlackNode(PNetwork->SlackNode()->Bus());
-			//¸ù¾İ×¢Èë¹¦ÂÊºÍ¸ºÔØÇé¿ö¼ÆËã½Úµã³öÁ¦ĞÅÏ¢¡£
+			//æ ¹æ®æ³¨å…¥åŠŸç‡å’Œè´Ÿè½½æƒ…å†µè®¡ç®—èŠ‚ç‚¹å‡ºåŠ›ä¿¡æ¯ã€‚
 			for (auto& node : PNetwork->Nodes()) s->AddNodeFlow(node->Bus(), PSolution->NodeStatus(node->Index()));
 			for (auto& obj : PNetwork->SourceNetwork()->Objects())
 			{
 				auto c = dynamic_cast<Component*>(obj);
 				if (c != nullptr)
 				{
-					//¼ÆËãÔª¼şµÄ³±Á÷¡£
+					//è®¡ç®—å…ƒä»¶çš„æ½®æµã€‚
 					auto cflow = c->EvalComponentFlow(*PSolution);
 					s->AddComponentFlow(c, move(cflow));
 				}
@@ -99,25 +99,25 @@ namespace PowerSolutions
 				totalPowerGeneration += node.second.PowerGeneration();
 				totalPowerConsumption += node.second.PowerConsumption();
 			}
-			//¸ù¾İ½ÚµãµçÑ¹¼ÆËãÖ§Â·¹¦ÂÊ¡£
+			//æ ¹æ®èŠ‚ç‚¹ç”µå‹è®¡ç®—æ”¯è·¯åŠŸç‡ã€‚
 			for (auto& c : s->ComponentFlow())
 			{
-				//½öÊÊÓÃÓÚË«¶ËÔª¼ş¡£
+				//ä»…é€‚ç”¨äºåŒç«¯å…ƒä»¶ã€‚
 				auto dpc = dynamic_cast<const DoublePortComponent*>(c.first);
 				if (dpc != nullptr)
 				{
 					BranchFlowSolution branchFlow(-c.second.PowerInjections(0),
 						-c.second.PowerInjections(1), c.second.PowerShunt());
-					//Ôö¼Ó/×·¼ÓÖ§Â·³±Á÷
+					//å¢åŠ /è¿½åŠ æ”¯è·¯æ½®æµ
 					s->AddBranchFlow(dpc->Bus1(), dpc->Bus2(), branchFlow);
 				}
-				//Í³¼Æ¡£
-				//Í³¼Æ¹ı³Ì¿ÉÒÔ°üº¬ÈıÈÆ×é±äÑ¹Æ÷¡£
+				//ç»Ÿè®¡ã€‚
+				//ç»Ÿè®¡è¿‡ç¨‹å¯ä»¥åŒ…å«ä¸‰ç»•ç»„å˜å‹å™¨ã€‚
 				if (c.first->PortCount() > 1)
 				{
 					totalPowerShunt += c.second.PowerShunt();
-					//¶ÔÓÚ¶à¶Ë¿ÚÔª¼ş£¬×¢Èë¹¦ÂÊÖ®ºÍ¾ÍÊÇ´®ÁªËğºÄ¡£
-					//×¢Òâ¹¦ÂÊµÄ²Î¿¼·½ÏòÊÇÁ÷ÈëÔª¼şµÄ¡£
+					//å¯¹äºå¤šç«¯å£å…ƒä»¶ï¼Œæ³¨å…¥åŠŸç‡ä¹‹å’Œå°±æ˜¯ä¸²è”æŸè€—ã€‚
+					//æ³¨æ„åŠŸç‡çš„å‚è€ƒæ–¹å‘æ˜¯æµå…¥å…ƒä»¶çš„ã€‚
 					for (auto& inj : c.second.PowerInjections())
 						totalPowerLoss += inj;
 				}

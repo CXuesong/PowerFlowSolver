@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "PowerFlowObjectModel.h"
 #include "NetworkCase.h"
 #include "PrimitiveNetwork.h"
@@ -23,9 +23,9 @@ namespace PowerSolutions
 		ComponentFlowSolution PiEquivalencyParameters::EvalComponentFlow(complexd voltage1, complexd voltage2) const
 		{
 			ComponentFlowSolution s(2);
-			//ÒÔÏÂºê¶¨ÒåÁË×¢ÈëÏßÂ·µÄ¹¦ÂÊ£¬ÒÔ¼°´ÓÏßÂ·Á÷µ½µØµÄ¹¦ÂÊ¡£
+			//ä»¥ä¸‹å®å®šä¹‰äº†æ³¨å…¥çº¿è·¯çš„åŠŸç‡ï¼Œä»¥åŠä»çº¿è·¯æµåˆ°åœ°çš„åŠŸç‡ã€‚
 #define _EvalPower(v1, a1, v2, a2, y10, z12) \
-			conj((v1)*(v1)*(y10) + (v1)*((v1) - polar((v2), (a2)-(a1)))/(z12))	//ÒÔ v1 ×÷Îª²Î¿¼ÏàÁ¿
+			conj((v1)*(v1)*(y10) + (v1)*((v1) - polar((v2), (a2)-(a1)))/(z12))	//ä»¥ v1 ä½œä¸ºå‚è€ƒç›¸é‡
 #define _EvalShuntPower(v, y10) (v) * (v) * conj(y10)
 			s.PowerInjections(0, _EvalPower(abs(voltage1), arg(voltage1),
 				abs(voltage2), arg(voltage2), m_Admittance1, m_Impedance));
@@ -41,7 +41,7 @@ namespace PowerSolutions
 			: m_Voltage(voltage), m_Power(power)
 		{ }
 
-		////////// ÍøÂç¶ÔÏó //////////
+		////////// ç½‘ç»œå¯¹è±¡ //////////
 #if _DEBUG
 		unsigned long NetworkObject::_IDCounter = 0;
 
@@ -67,24 +67,24 @@ namespace PowerSolutions
 
 		NetworkObject* NetworkObject::Clone(const NetworkCaseCorrespondenceInfo& context) const
 		{
-			//Ê¹ÓÃÖØĞ´³Ì¶È×î¸ßµÄº¯Êı¹¹ÔìĞÂÊµÀı£¬Í¬Ê±ÉèÖÃÅÉÉúÀàµÄÊôĞÔ¡£
+			//ä½¿ç”¨é‡å†™ç¨‹åº¦æœ€é«˜çš„å‡½æ•°æ„é€ æ–°å®ä¾‹ï¼ŒåŒæ—¶è®¾ç½®æ´¾ç”Ÿç±»çš„å±æ€§ã€‚
 			auto newInstance = CloneInstance();
-			//¼ì²éÅÉÉúÀàÊÇ·ñÕıÈ·Íê³ÉÁË¸´ÖÆ¹¤×÷¡£
+			//æ£€æŸ¥æ´¾ç”Ÿç±»æ˜¯å¦æ­£ç¡®å®Œæˆäº†å¤åˆ¶å·¥ä½œã€‚
 			assert(typeid(*newInstance) == typeid(*this));
-			//ÉèÖÃ»ùÀàÊôĞÔ¡£
+			//è®¾ç½®åŸºç±»å±æ€§ã€‚
 			OnCloned(newInstance, context);
 			return newInstance;
 		}
 
 		void NetworkObject::OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const
 		{
-			//Ô¼¶¨£ºClone²»»á¸´ÖÆÖ¸Ïò¸¸¼¶µÄÖ¸Õë£¬
-			//ÇÒ²»ÔÚ¶ÔÓ¦ caseInfo ÖĞÖ÷¶¯µ÷ÓÃ Attach ÒÔÈ·¶¨ÒÀ´æ¹ØÏµ¡£
-			//µ«¿ÉÒÔ¸´ÖÆÄ¸ÏßµÄÒıÓÃ£¨´Ë´¦ĞèÒªÓÃµ½ context ²ÎÊı£©
+			//çº¦å®šï¼šCloneä¸ä¼šå¤åˆ¶æŒ‡å‘çˆ¶çº§çš„æŒ‡é’ˆï¼Œ
+			//ä¸”ä¸åœ¨å¯¹åº” caseInfo ä¸­ä¸»åŠ¨è°ƒç”¨ Attach ä»¥ç¡®å®šä¾å­˜å…³ç³»ã€‚
+			//ä½†å¯ä»¥å¤åˆ¶æ¯çº¿çš„å¼•ç”¨ï¼ˆæ­¤å¤„éœ€è¦ç”¨åˆ° context å‚æ•°ï¼‰
 			newInstance->_Tag = this->_Tag;
 		}
 
-		////////// ×é¼ş //////////
+		////////// ç»„ä»¶ //////////
 
 		Component::Component(int portCount)
 			: m_Buses(portCount)
@@ -103,7 +103,7 @@ namespace PowerSolutions
 		{
 			NetworkObject::OnCloned(newInstance, context);
 			auto inst = static_cast<Component*>(newInstance);
-			//¸ù¾İË÷Òı¸´ÖÆÄ¸Ïß¡£
+			//æ ¹æ®ç´¢å¼•å¤åˆ¶æ¯çº¿ã€‚
 			for (size_t i = 0; i < m_Buses.size(); i++)
 			{
 				if (m_Buses[i] != nullptr)
@@ -148,7 +148,7 @@ namespace PowerSolutions
 			Buses(2, bus3);
 		}
 
-		////////// Ä¸Ïß //////////
+		////////// æ¯çº¿ //////////
 		Bus::Bus()
 			: Bus(nullptr, 1.0)
 		{ }

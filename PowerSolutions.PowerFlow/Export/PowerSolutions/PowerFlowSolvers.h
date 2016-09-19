@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef __POWERSOLUTIONS_POWERFLOWSOLVERS_H
 #define __POWERSOLUTIONS_POWERFLOWSOLVERS_H
 
@@ -18,28 +18,28 @@ namespace PowerSolutions
 			DcPowerFlow = 10,
 		};
 
-		// °üº¬ÁËÇó½âÆ÷´ËÊ±µÄ×´Ì¬ĞÅÏ¢¡£
+		// åŒ…å«äº†æ±‚è§£å™¨æ­¤æ—¶çš„çŠ¶æ€ä¿¡æ¯ã€‚
 		class IterationEventArgs
 		{
 		private:
 			int m_IterationCount;
 			double m_MaxDeviation;
 		public:
-			// »ñÈ¡ÒÑ¾­Íê³ÉµÄµü´ú´ÎÊı¡£0±íÊ¾µü´úÉĞÎ´¿ªÊ¼¡£
+			// è·å–å·²ç»å®Œæˆçš„è¿­ä»£æ¬¡æ•°ã€‚0è¡¨ç¤ºè¿­ä»£å°šæœªå¼€å§‹ã€‚
 			int IterationCount() const { return m_IterationCount; }
-			// ´Ë´Îµü´ú½áÊøÊ±×î´ó¹¦ÂÊÎó²îµÄ¾ø¶ÔÖµ¡£
+			// æ­¤æ¬¡è¿­ä»£ç»“æŸæ—¶æœ€å¤§åŠŸç‡è¯¯å·®çš„ç»å¯¹å€¼ã€‚
 			double MaxDeviation() const { return m_MaxDeviation; }
 		public:
-			// ³õÊ¼»¯Ò»¸ö±íÊ¾µ±Ç°ÕıÔÚ½øĞĞÇó½âµÄ SolverStatus¡£
+			// åˆå§‹åŒ–ä¸€ä¸ªè¡¨ç¤ºå½“å‰æ­£åœ¨è¿›è¡Œæ±‚è§£çš„ SolverStatusã€‚
 			IterationEventArgs(int iterationCount, double maxDeviation)
 				: m_IterationCount(iterationCount), m_MaxDeviation(maxDeviation)
 			{ }
 		};
 
-		// ÓÃÓÚÔÚµü´ú¹ı³ÌÖĞ½ÓÊÕÃ¿Ò»²½µÄµü´úĞÅÏ¢¡£
+		// ç”¨äºåœ¨è¿­ä»£è¿‡ç¨‹ä¸­æ¥æ”¶æ¯ä¸€æ­¥çš„è¿­ä»£ä¿¡æ¯ã€‚
 		typedef void(__stdcall *IterationEventHandler)(class Solver* sender, IterationEventArgs* e);
 
-		// ÓÃÓÚÔÚÔËËãÖĞ±£´æ½ÚµãµÄÔËËã×´Ì¬¡£
+		// ç”¨äºåœ¨è¿ç®—ä¸­ä¿å­˜èŠ‚ç‚¹çš„è¿ç®—çŠ¶æ€ã€‚
 		struct NodeEvaluationStatus
 		{
 		private:
@@ -85,7 +85,7 @@ namespace PowerSolutions
 			{ }
 		};
 
-		// ÓÃÓÚ±íÊ¾Ô­Ê¼µÄ³±Á÷Çó½â½á¹û¡£
+		// ç”¨äºè¡¨ç¤ºåŸå§‹çš„æ½®æµæ±‚è§£ç»“æœã€‚
 		class PrimitiveSolution
 		{
 		public:
@@ -105,14 +105,14 @@ namespace PowerSolutions
 			PrimitiveSolution(ObjectModel::PrimitiveNetwork& network);
 		};
 
-		// ³éÏóÓÃÓÚÍê³ÉÎÈÌ¬³±Á÷µÄ½â¾ö¹ı³Ì¡£
+		// æŠ½è±¡ç”¨äºå®Œæˆç¨³æ€æ½®æµçš„è§£å†³è¿‡ç¨‹ã€‚
 		class Solver
 		{
 		private:
-			int m_MaxIterations;				//×î´óµÄµü´ú´ÎÊı¡£
-			double m_MaxDeviationTolerance;		//×î´óÔÊĞíÎó²î¡£
-			bool m_IntelliIterations;			//ÔÊĞí¸ù¾İÊÕÁ²ËÙ¶ÈÀ´ÅĞ¶ÏÊÇ·ñÓĞ±ØÒª¼ÌĞøµü´ú¡£
-			IterationEventHandler m_IterationEvent;	//ÔÊĞíÔÚÃ¿Ò»²½µü´ú½áÊøÊ±½ÓÊÕµü´úµÄĞÅÏ¢¡£
+			int m_MaxIterations;				//æœ€å¤§çš„è¿­ä»£æ¬¡æ•°ã€‚
+			double m_MaxDeviationTolerance;		//æœ€å¤§å…è®¸è¯¯å·®ã€‚
+			bool m_IntelliIterations;			//å…è®¸æ ¹æ®æ”¶æ•›é€Ÿåº¦æ¥åˆ¤æ–­æ˜¯å¦æœ‰å¿…è¦ç»§ç»­è¿­ä»£ã€‚
+			IterationEventHandler m_IterationEvent;	//å…è®¸åœ¨æ¯ä¸€æ­¥è¿­ä»£ç»“æŸæ—¶æ¥æ”¶è¿­ä»£çš„ä¿¡æ¯ã€‚
 		public:
 			int MaxIterations() const { return m_MaxIterations; }
 			void MaxIterations(int val) { m_MaxIterations = val; }
@@ -123,7 +123,7 @@ namespace PowerSolutions
 			IterationEventHandler IterationEvent() const { return m_IterationEvent; }
 			void IterationEvent(IterationEventHandler val) { m_IterationEvent = val; }
 		public:
-			// Çó½âÍøÂçµÄ¹¦ÂÊ³±Á÷·Ö²¼£¬²¢Éú³ÉÒ»¸ö³±Á÷·ÖÎö±¨¸æ¡£
+			// æ±‚è§£ç½‘ç»œçš„åŠŸç‡æ½®æµåˆ†å¸ƒï¼Œå¹¶ç”Ÿæˆä¸€ä¸ªæ½®æµåˆ†ææŠ¥å‘Šã€‚
 			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) = 0;
 			std::shared_ptr<Solution> Solve(std::shared_ptr<ObjectModel::PrimitiveNetwork> network);
 			virtual std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network);

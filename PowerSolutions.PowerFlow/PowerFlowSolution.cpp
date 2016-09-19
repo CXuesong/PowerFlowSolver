@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "PowerFlowSolution.h"
 #include "ObjectModel.h"
 #include "PowerFlowSolvers.h"
@@ -30,10 +30,10 @@ namespace PowerSolutions
 			auto& localSolution = result.first->second;
 			if (!localSolution.IsUnconstrained() && c->PortCount() == 1)
 			{
-				//¶ÔÓÚPV·¢µç»ú/Æ½ºâ·¢µç»ú£¬ÎÞÐèÒ²²»ÒªÐÞ¸Ä PowerGeneration ºÍ PowerConsumption
-				// Ê¦ÐÖ£º½ÓµØ²¹³¥²»Ó¦¼ÆÈë¸ººÉ¡£
-				//PQ¸ºÔØÏàµ±ÓÚ×¢ÈëµØ£¨³é³öÄ¸Ïß£©µÄ¹¦ÂÊ£¬powerShunt = 0, powerInjection[0] = -SLoad
-				//¶ÔÓÚ½ÓµØµ¼ÄÉ£¬powerShunt = Ssa, powerInjection[0] = -Ssa
+				//å¯¹äºŽPVå‘ç”µæœº/å¹³è¡¡å‘ç”µæœºï¼Œæ— éœ€ä¹Ÿä¸è¦ä¿®æ”¹ PowerGeneration å’Œ PowerConsumption
+				// å¸ˆå…„ï¼šæŽ¥åœ°è¡¥å¿ä¸åº”è®¡å…¥è´Ÿè·ã€‚
+				//PQè´Ÿè½½ç›¸å½“äºŽæ³¨å…¥åœ°ï¼ˆæŠ½å‡ºæ¯çº¿ï¼‰çš„åŠŸçŽ‡ï¼ŒpowerShunt = 0, powerInjection[0] = -SLoad
+				//å¯¹äºŽæŽ¥åœ°å¯¼çº³ï¼ŒpowerShunt = Ssa, powerInjection[0] = -Ssa
 				auto& nf = m_NodeFlow.at(c->Buses(0));
 				auto powerInj = localSolution.PowerInjections(0);
 				nf.AddPowerGeneration(powerInj + localSolution.PowerShunt());
@@ -43,12 +43,12 @@ namespace PowerSolutions
 
 		void Solution::AddBranchFlow(const Bus* node1, const Bus* node2, const BranchFlowSolution& solution)
 		{
-			//ÔÊÐíÀÛ¼Ó
+			//å…è®¸ç´¯åŠ 
 			auto nodePair = make_pair(node1, node2);
 			auto existing = m_BranchFlow.find(nodePair);
 			if (existing != m_BranchFlow.end())
 			{
-				//ÐèÒªÀÛ¼Ó
+				//éœ€è¦ç´¯åŠ 
 				existing->second += solution;
 			} else {
 				auto result = m_BranchFlow.emplace(nodePair, solution);

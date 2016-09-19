@@ -1,11 +1,11 @@
-/*
+ï»¿/*
 PowerSolutions
-¹«¹²¶ÔÏóÄ£ĞÍ
+å…¬å…±å¯¹è±¡æ¨¡å‹
 by Chen [CXuesong.], 2015
 */
 
-//Ô¼¶¨£ºÈç¹ûÊ¹ÓÃ Attach ½«Ôª¼ş°ó¶¨µ½ NetworkCase£¬Ôò NetworkCase ½«ÓµÓĞ¶Ô´ËÔª¼şµÄ×ÊÔ´Õ¼ÓĞÈ¨¡£
-//×¢Òâ£¬ÕâÒâÎ¶×ÅÈç¹û½«Ôª¼şÍÑÀë³ö NetworkCase£¨¶ø·Ç×ªÒÆÖÁÆäËü NetworkCase£©£¬Æä×ÔÉí»á±»×Ô¶¯ delete¡£
+//çº¦å®šï¼šå¦‚æœä½¿ç”¨ Attach å°†å…ƒä»¶ç»‘å®šåˆ° NetworkCaseï¼Œåˆ™ NetworkCase å°†æ‹¥æœ‰å¯¹æ­¤å…ƒä»¶çš„èµ„æºå æœ‰æƒã€‚
+//æ³¨æ„ï¼Œè¿™æ„å‘³ç€å¦‚æœå°†å…ƒä»¶è„±ç¦»å‡º NetworkCaseï¼ˆè€Œéè½¬ç§»è‡³å…¶å®ƒ NetworkCaseï¼‰ï¼Œå…¶è‡ªèº«ä¼šè¢«è‡ªåŠ¨ deleteã€‚
 
 #ifndef __POWERSOLUTIONS_OBJECTMODEL_H
 #define __POWERSOLUTIONS_OBJECTMODEL_H
@@ -29,7 +29,7 @@ namespace PowerSolutions {
 		class Component;
 		class IBusContainer;
 
-		//ÓÃÓÚ±íÊ¾Ò»¸ö¦ĞĞÍµÈÖµ²ÎÊı¡£
+		//ç”¨äºè¡¨ç¤ºä¸€ä¸ªÏ€å‹ç­‰å€¼å‚æ•°ã€‚
 		struct PiEquivalencyParameters
 		{
 		public:
@@ -37,11 +37,11 @@ namespace PowerSolutions {
 			complexd m_Admittance1;
 			complexd m_Admittance2;
 		public:
-			complexd Impedance() const { return m_Impedance; }	//´®Áª×è¿¹¡£
+			complexd Impedance() const { return m_Impedance; }	//ä¸²è”é˜»æŠ—ã€‚
 			void Impedance(complexd val) { m_Impedance = val; }
-			complexd Admittance1() const { return m_Admittance1; }	//½Úµã1½ÓµØµ¼ÄÉ¡£
+			complexd Admittance1() const { return m_Admittance1; }	//èŠ‚ç‚¹1æ¥åœ°å¯¼çº³ã€‚
 			void Admittance1(complexd val) { m_Admittance1 = val; }
-			complexd Admittance2() const { return m_Admittance2; }	//½Úµã2½ÓµØµ¼ÄÉ¡£
+			complexd Admittance2() const { return m_Admittance2; }	//èŠ‚ç‚¹2æ¥åœ°å¯¼çº³ã€‚
 			void Admittance2(complexd val) { m_Admittance2 = val; }
 		public:
 			PowerFlow::ComponentFlowSolution EvalComponentFlow(complexd voltage1, complexd voltage2) const;
@@ -49,7 +49,7 @@ namespace PowerSolutions {
 			PiEquivalencyParameters(complexd z, complexd y1, complexd y2);
 		};
 
-		//ÓÃÓÚ±íÊ¾±êçÛÖµµÄ»ùÖµ¡£
+		//ç”¨äºè¡¨ç¤ºæ ‡å¹ºå€¼çš„åŸºå€¼ã€‚
 		struct PerUnitBase
 		{
 		private:
@@ -67,14 +67,14 @@ namespace PowerSolutions {
 			PerUnitBase(double voltage, double power);
 		};
 
-		// ÎªÍøÂç°¸ÀıÖĞµÄ¶ÔÏó£¨ÀıÈçÔª¼ş»òÄ¸Ïß£©Ìá¹©¹«¹²»ùÀà¡£
-		// ÍøÂç°¸ÀıÖĞµÄËùÓĞ¶ÔÏóÍ¨¹ıÄÚ´æµØÖ·£¨Ö¸Õë£©À´»¥ÏàÇø·Ö£¬Òò¶øÎŞĞè¶îÍâÔö¼Ó±àºÅÕâÒ»ÌØĞÔ¡£ÒòÎª¶ÔÏóÄ£ĞÍÖĞµÄ±àºÅÆäÊµºÍÊµ¼Ê¼ÆËãÊ±µÄ±àºÅÃ»ÓĞÊ²Ã´¹ØÏµ¡£
+		// ä¸ºç½‘ç»œæ¡ˆä¾‹ä¸­çš„å¯¹è±¡ï¼ˆä¾‹å¦‚å…ƒä»¶æˆ–æ¯çº¿ï¼‰æä¾›å…¬å…±åŸºç±»ã€‚
+		// ç½‘ç»œæ¡ˆä¾‹ä¸­çš„æ‰€æœ‰å¯¹è±¡é€šè¿‡å†…å­˜åœ°å€ï¼ˆæŒ‡é’ˆï¼‰æ¥äº’ç›¸åŒºåˆ†ï¼Œå› è€Œæ— éœ€é¢å¤–å¢åŠ ç¼–å·è¿™ä¸€ç‰¹æ€§ã€‚å› ä¸ºå¯¹è±¡æ¨¡å‹ä¸­çš„ç¼–å·å…¶å®å’Œå®é™…è®¡ç®—æ—¶çš„ç¼–å·æ²¡æœ‰ä»€ä¹ˆå…³ç³»ã€‚
 		class NetworkObject
 		{
 #if _DEBUG
 		public:
 			static unsigned long _IDCounter;
-			unsigned long _ID;	//Ò»¸ö±êÊ¶·û£¬ÓÃÓÚÔÚµ÷ÊÔÄ£Ê½ÏÂÇø·Ö²»Í¬µÄÍøÂç¶ÔÏó¡£
+			unsigned long _ID;	//ä¸€ä¸ªæ ‡è¯†ç¬¦ï¼Œç”¨äºåœ¨è°ƒè¯•æ¨¡å¼ä¸‹åŒºåˆ†ä¸åŒçš„ç½‘ç»œå¯¹è±¡ã€‚
 #endif
 		private:
 			void* _Tag;
@@ -83,23 +83,23 @@ namespace PowerSolutions {
 			void Tag(void* val) { _Tag = val; }
 		public:
 			virtual void Validate() const;
-			//»ñÈ¡´Ë¶ÔÏóµÄÒ»¸ö¸±±¾¡£
+			//è·å–æ­¤å¯¹è±¡çš„ä¸€ä¸ªå‰¯æœ¬ã€‚
 			NetworkObject* Clone(const NetworkCaseCorrespondenceInfo& context) const;
 		protected:
-			//ÔÚ·Ç³éÏóÅÉÉúÀàÖĞÖØĞ´£¬ÓÃÓÚ·µ»ØÒ»¸ö°üº¬ÅÉÉúÀàÊı¾İµÄÊµÀı¡£
+			//åœ¨éæŠ½è±¡æ´¾ç”Ÿç±»ä¸­é‡å†™ï¼Œç”¨äºè¿”å›ä¸€ä¸ªåŒ…å«æ´¾ç”Ÿç±»æ•°æ®çš„å®ä¾‹ã€‚
 			virtual NetworkObject* CloneInstance() const = 0;
-			//ÔÚ³éÏóÅÉÉúÀàÖĞÖØĞ´£¬ÓÃÓÚÏòÖ¸¶¨µÄ¸±±¾ÖĞÌî³ä´ËÀàµÄÊı¾İ¡£
+			//åœ¨æŠ½è±¡æ´¾ç”Ÿç±»ä¸­é‡å†™ï¼Œç”¨äºå‘æŒ‡å®šçš„å‰¯æœ¬ä¸­å¡«å……æ­¤ç±»çš„æ•°æ®ã€‚
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const;
 			NetworkObject();
 		public:
 			virtual ~NetworkObject();
 		private:
-			//²»ÔÊĞí¿½±´¹¹Ôìº¯Êı¡£
+			//ä¸å…è®¸æ‹·è´æ„é€ å‡½æ•°ã€‚
 			NetworkObject(NetworkObject&) = delete;
 			NetworkObject& operator=(NetworkObject&) = delete;
 		};
 
-		// Ä¸Ïß¡£
+		// æ¯çº¿ã€‚
 		class Bus final : public NetworkObject
 		{
 			friend class Component;
@@ -109,11 +109,11 @@ namespace PowerSolutions {
 		public:
 			IBusContainer* Parent() const { return m_Parent; }
 			void Parent(IBusContainer* val) { m_Parent = val; }
-			complexd InitialVoltage() const { return m_InitialVoltage; }	//µü´úÊ±Ä¸ÏßÊ¹ÓÃµÄ³õÊ¼µçÑ¹Öµ£¨·ùÖµ£º±êçÛÖµ£¬Ïà½Ç£º»¡¶È£©¡£
+			complexd InitialVoltage() const { return m_InitialVoltage; }	//è¿­ä»£æ—¶æ¯çº¿ä½¿ç”¨çš„åˆå§‹ç”µå‹å€¼ï¼ˆå¹…å€¼ï¼šæ ‡å¹ºå€¼ï¼Œç›¸è§’ï¼šå¼§åº¦ï¼‰ã€‚
 			void InitialVoltage(complexd val) { m_InitialVoltage = val; }
 		public:
 			virtual void Validate() const;
-			//»ñÈ¡´Ë¶ÔÏóµÄÒ»¸ö¸±±¾¡£
+			//è·å–æ­¤å¯¹è±¡çš„ä¸€ä¸ªå‰¯æœ¬ã€‚
 			Bus* Clone(const NetworkCaseCorrespondenceInfo& context) const
 			{
 				return static_cast<Bus*>(NetworkObject::Clone(context));
@@ -129,28 +129,28 @@ namespace PowerSolutions {
 
 		typedef std::pair<const ObjectModel::Bus*, const ObjectModel::Bus*> BusPair;
 
-		//±íÊ¾ÓëÒ»¸ö»ò¶à¸öÄ¸ÏßÏàÁ¬½ÓµÄÔª¼ş¡£
+		//è¡¨ç¤ºä¸ä¸€ä¸ªæˆ–å¤šä¸ªæ¯çº¿ç›¸è¿æ¥çš„å…ƒä»¶ã€‚
 		class Component : public NetworkObject
 		{
 			friend class NetworkCase;
 		private:
 			std::vector<const Bus*> m_Buses;
 		public:
-			//»ñÈ¡Á¬½ÓÔÚÖ¸¶¨¶Ë¿Ú´¦µÄÄ¸ÏßË÷Òı¡£¶Ë¿ÚË÷Òı´Ó0¿ªÊ¼¡£
+			//è·å–è¿æ¥åœ¨æŒ‡å®šç«¯å£å¤„çš„æ¯çº¿ç´¢å¼•ã€‚ç«¯å£ç´¢å¼•ä»0å¼€å§‹ã€‚
 			const Bus* Buses(int index) const { return m_Buses[index]; }
-			//ÉèÖÃÁ¬½ÓÔÚÖ¸¶¨¶Ë¿Ú´¦µÄÄ¸ÏßË÷Òı¡£¶Ë¿ÚË÷Òı´Ó0¿ªÊ¼¡£
+			//è®¾ç½®è¿æ¥åœ¨æŒ‡å®šç«¯å£å¤„çš„æ¯çº¿ç´¢å¼•ã€‚ç«¯å£ç´¢å¼•ä»0å¼€å§‹ã€‚
 			void Buses(int index, const Bus* value) { m_Buses[index] = value; }
-			//»ñÈ¡´ËÔª¼ş¶Ë¿ÚµÄÊıÄ¿¡£
+			//è·å–æ­¤å…ƒä»¶ç«¯å£çš„æ•°ç›®ã€‚
 			int PortCount() const { return m_Buses.size(); }
-			//»ñÈ¡´Ë¶ÔÏóµÄÒ»¸ö¸±±¾¡£
+			//è·å–æ­¤å¯¹è±¡çš„ä¸€ä¸ªå‰¯æœ¬ã€‚
 			NetworkObject* Clone(const NetworkCaseCorrespondenceInfo& context) const
 			{
 				return static_cast<Component*>(NetworkObject::Clone(context));
 			}
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const {}
-			//¸ù¾İ½ÚµãµçÑ¹»ñÈ¡´ËÔª¼ş×¢ÈëÖ¸¶¨Ä¸Ïß½ÚµãµÄ¹¦ÂÊ¡£
-			//¹ØÓÚ¶Ë¿Ú¹¦ÂÊ·½ÏòµÄÔ¼¶¨£¬Çë²ÎÔÄ PowerFlow::ComponentFlowSolution µÄÏà¹Ø¶¨Òå¡£
+			//æ ¹æ®èŠ‚ç‚¹ç”µå‹è·å–æ­¤å…ƒä»¶æ³¨å…¥æŒ‡å®šæ¯çº¿èŠ‚ç‚¹çš„åŠŸç‡ã€‚
+			//å…³äºç«¯å£åŠŸç‡æ–¹å‘çš„çº¦å®šï¼Œè¯·å‚é˜… PowerFlow::ComponentFlowSolution çš„ç›¸å…³å®šä¹‰ã€‚
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const = 0;
 		protected:
 			virtual void OnCloned(NetworkObject* newInstance, const NetworkCaseCorrespondenceInfo& context) const override;
@@ -161,10 +161,10 @@ namespace PowerSolutions {
 		class SinglePortComponent : public Component
 		{
 		public:
-			const Bus* Bus1() const { return Buses(0); }	//´ËÔª¼şÁ¬½Óµ½µÄÄ¸Ïß¡£
+			const Bus* Bus1() const { return Buses(0); }	//æ­¤å…ƒä»¶è¿æ¥åˆ°çš„æ¯çº¿ã€‚
 			void Bus1(const Bus* val) { Buses(0, val); }
-		public:	//»ù´¡½á¹¹
-			int PortCount() const = delete;					//»ù´¡½á¹¹¡£
+		public:	//åŸºç¡€ç»“æ„
+			int PortCount() const = delete;					//åŸºç¡€ç»“æ„ã€‚
 		protected:
 			SinglePortComponent(Bus* bus1);
 		};
@@ -172,17 +172,17 @@ namespace PowerSolutions {
 		class DoublePortComponent : public Component
 		{
 		public:
-			const Bus* Bus1() const { return Buses(0); }		//´ËÔª¼şÁ¬½Óµ½µÄÄ¸Ïß1¡£
+			const Bus* Bus1() const { return Buses(0); }		//æ­¤å…ƒä»¶è¿æ¥åˆ°çš„æ¯çº¿1ã€‚
 			void Bus1(const Bus* val) { Buses(0, val); }
-			const Bus* Bus2() const { return Buses(1); }		//´ËÔª¼şÁ¬½Óµ½µÄÄ¸Ïß2¡£
+			const Bus* Bus2() const { return Buses(1); }		//æ­¤å…ƒä»¶è¿æ¥åˆ°çš„æ¯çº¿2ã€‚
 			void Bus2(const Bus* val) { Buses(1, val); }
 		public:
-			virtual PiEquivalencyParameters PiEquivalency() const = 0;//»ñÈ¡´ËÔª¼ş¦ĞĞÍµÈÖµµçÂ·²ÎÊı¡£
+			virtual PiEquivalencyParameters PiEquivalency() const = 0;//è·å–æ­¤å…ƒä»¶Ï€å‹ç­‰å€¼ç”µè·¯å‚æ•°ã€‚
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
-		public:	//»ù´¡½á¹¹
-			int PortCount() const = delete;					//»ù´¡½á¹¹¡£
+		public:	//åŸºç¡€ç»“æ„
+			int PortCount() const = delete;					//åŸºç¡€ç»“æ„ã€‚
 		protected:
 			DoublePortComponent(Bus* bus1, Bus* bus2);
 		};
@@ -190,23 +190,23 @@ namespace PowerSolutions {
 		class TriPortComponent : public Component
 		{
 		public:
-			const Bus* Bus1() const { return Buses(0); }		//´ËÔª¼şÁ¬½Óµ½µÄÄ¸Ïß1¡£
+			const Bus* Bus1() const { return Buses(0); }		//æ­¤å…ƒä»¶è¿æ¥åˆ°çš„æ¯çº¿1ã€‚
 			void Bus1(const Bus* val) { Buses(0, val); }
-			const Bus* Bus2() const { return Buses(1); }		//´ËÔª¼şÁ¬½Óµ½µÄÄ¸Ïß2¡£
+			const Bus* Bus2() const { return Buses(1); }		//æ­¤å…ƒä»¶è¿æ¥åˆ°çš„æ¯çº¿2ã€‚
 			void Bus2(const Bus* val) { Buses(1, val); }
-			const Bus* Bus3() const { return Buses(2); }		//´ËÔª¼şÁ¬½Óµ½µÄÄ¸Ïß3¡£
+			const Bus* Bus3() const { return Buses(2); }		//æ­¤å…ƒä»¶è¿æ¥åˆ°çš„æ¯çº¿3ã€‚
 			void Bus3(const Bus* val) { Buses(2, val); }
-		public:	//»ù´¡½á¹¹
-			int PortCount() const = delete;					//»ù´¡½á¹¹¡£
+		public:	//åŸºç¡€ç»“æ„
+			int PortCount() const = delete;					//åŸºç¡€ç»“æ„ã€‚
 		protected:
 			TriPortComponent(Bus* bus1, Bus* bus2, Bus* bus3);
 		};
 
-		class IBusContainer abstract	//±íÊ¾Ôª¼şÄÚ²¿°üº¬Ò»¸ö»ò¶à¸öÄ¸Ïß¡£
+		class IBusContainer abstract	//è¡¨ç¤ºå…ƒä»¶å†…éƒ¨åŒ…å«ä¸€ä¸ªæˆ–å¤šä¸ªæ¯çº¿ã€‚
 		{
 		public:
-			virtual int ChildBusCount() const = 0;			//»ñÈ¡Ôª¼şÄÚ²¿Ä¸ÏßµÄÊıÁ¿¡£
-			virtual Bus* ChildBusAt(int index) const  = 0;	//°´ÕÕË÷Òı»ñÈ¡Ôª¼şÄÚ²¿µÄÄ¸Ïß¡£Ë÷Òı´Ó0¿ªÊ¼¡£
+			virtual int ChildBusCount() const = 0;			//è·å–å…ƒä»¶å†…éƒ¨æ¯çº¿çš„æ•°é‡ã€‚
+			virtual Bus* ChildBusAt(int index) const  = 0;	//æŒ‰ç…§ç´¢å¼•è·å–å…ƒä»¶å†…éƒ¨çš„æ¯çº¿ã€‚ç´¢å¼•ä»0å¼€å§‹ã€‚
 		};
 	}
 }

@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef __POWERSOLUTIONS_POWERFLOWSOLUTION_H
 #define __POWERSOLUTIONS_POWERFLOWSOLUTION_H
 
@@ -14,7 +14,7 @@ namespace PowerSolutions
 	{
 		struct NodeEvaluationStatus;
 
-		struct NodeFlowSolution		//½Úµã³±Á÷½á¹û
+		struct NodeFlowSolution		//èŠ‚ç‚¹æ½®æµç»“æœ
 		{
 		private:
 			complexd m_Voltage;
@@ -33,18 +33,18 @@ namespace PowerSolutions
 			{ }
 		};
 
-		struct BranchFlowSolution		//£¨Ã¿Ôª¼ş»ò½Úµã±àºÅ¶Ô£©Ö§Â·³±Á÷½á¹û
+		struct BranchFlowSolution		//ï¼ˆæ¯å…ƒä»¶æˆ–èŠ‚ç‚¹ç¼–å·å¯¹ï¼‰æ”¯è·¯æ½®æµç»“æœ
 		{
-			//½¨Òé£ºÖ§Â·±àºÅ	I²à½ÚµãÃû³Æ	J²à½ÚµãÃû³Æ		I²à×¢ÈëÓĞ¹¦	I²à×¢ÈëÎŞ¹¦	J²à×¢ÈëÓĞ¹¦	J²à×¢ÈëÎŞ¹¦	Ö§Â·ÓĞ¹¦ËğºÄ	Ö§Â·ÎŞ¹¦ËğºÄ
+			//å»ºè®®ï¼šæ”¯è·¯ç¼–å·	Iä¾§èŠ‚ç‚¹åç§°	Jä¾§èŠ‚ç‚¹åç§°		Iä¾§æ³¨å…¥æœ‰åŠŸ	Iä¾§æ³¨å…¥æ— åŠŸ	Jä¾§æ³¨å…¥æœ‰åŠŸ	Jä¾§æ³¨å…¥æ— åŠŸ	æ”¯è·¯æœ‰åŠŸæŸè€—	æ”¯è·¯æ— åŠŸæŸè€—
 			// Power1          Power2
 			// --->--------------<----
 			//       |       |
 			// S.P.1 |       | S.P.2
 			//       |       |
 		private:
-			complexd m_Power1;		//´Ó½Úµã1×¢ÈëµÄ¹¦ÂÊ
-			complexd m_Power2;		//´Ó½Úµã2×¢ÈëµÄ¹¦ÂÊ
-			complexd m_PowerShunt;	//´Ó×¢Èë½ÓµØÖ§Â·µÄ¹¦ÂÊÖ®ºÍ
+			complexd m_Power1;		//ä»èŠ‚ç‚¹1æ³¨å…¥çš„åŠŸç‡
+			complexd m_Power2;		//ä»èŠ‚ç‚¹2æ³¨å…¥çš„åŠŸç‡
+			complexd m_PowerShunt;	//ä»æ³¨å…¥æ¥åœ°æ”¯è·¯çš„åŠŸç‡ä¹‹å’Œ
 		public:
 			PowerSolutions::complexd Power1() const { return m_Power1; }
 			void Power1(PowerSolutions::complexd val) { m_Power1 = val; }
@@ -52,19 +52,19 @@ namespace PowerSolutions
 			void Power2(PowerSolutions::complexd val) { m_Power2 = val; }
 			PowerSolutions::complexd PowerShunt() const { return m_PowerShunt; }
 			void PowerShunt(PowerSolutions::complexd val) { m_PowerShunt = val; }
-			bool ReversedDirection() const	//Ö¸Ê¾¹¦ÂÊµÄÊµ¼Ê´«Êä·½ÏòÊÇ·ñÓëÔ¼¶¨µÄ·½Ïò£¨Bus1->Bus2£©Ïà·´¡£
+			bool ReversedDirection() const	//æŒ‡ç¤ºåŠŸç‡çš„å®é™…ä¼ è¾“æ–¹å‘æ˜¯å¦ä¸çº¦å®šçš„æ–¹å‘ï¼ˆBus1->Bus2ï¼‰ç›¸åã€‚
 			{
 				return m_Power1.real() < 0;
 			}
-			complexd PowerTransfer() const	//»ñÈ¡Êµ¼Ê´«ÊäµÄ¹¦ÂÊ´óĞ¡¡£
+			complexd PowerTransfer() const	//è·å–å®é™…ä¼ è¾“çš„åŠŸç‡å¤§å°ã€‚
 			{
-				//×¢Òâµ½´Ë´¦Îª×¢Èë¦ĞĞÎÍøÂçµÄ¹¦ÂÊ
-				//"´«Êä¹¦ÂÊ"ÎªÁ÷³ö¦ĞĞÎÍøÂçµÄ¹¦ÂÊ
+				//æ³¨æ„åˆ°æ­¤å¤„ä¸ºæ³¨å…¥Ï€å½¢ç½‘ç»œçš„åŠŸç‡
+				//"ä¼ è¾“åŠŸç‡"ä¸ºæµå‡ºÏ€å½¢ç½‘ç»œçš„åŠŸç‡
 				//assert((power1.real() >= 0) ^ (power2.real() > 0));
-				//ÔÚÄ³Ğ©²»ÊÕÁ²µÄÇé¿öÏÂ£¬¿ÉÄÜ»á³öÏÖÉÏÊö¶ÏÑÔÊ§°ÜµÄÇé¿ö¡£
+				//åœ¨æŸäº›ä¸æ”¶æ•›çš„æƒ…å†µä¸‹ï¼Œå¯èƒ½ä¼šå‡ºç°ä¸Šè¿°æ–­è¨€å¤±è´¥çš„æƒ…å†µã€‚
 				return m_Power1.real() > 0 ? -m_Power2 : -m_Power1;
 			}
-			complexd PowerLoss() const		//ÔÚÁ½½ÚµãÖ®¼ä´«ÊäµçÄÜÊ±ËğÊ§µÄ×Ü¹¦ÂÊ£¨°üÀ¨½ÓµØÖ§Â·£©¡£
+			complexd PowerLoss() const		//åœ¨ä¸¤èŠ‚ç‚¹ä¹‹é—´ä¼ è¾“ç”µèƒ½æ—¶æŸå¤±çš„æ€»åŠŸç‡ï¼ˆåŒ…æ‹¬æ¥åœ°æ”¯è·¯ï¼‰ã€‚
 			{
 				return m_Power1 + m_Power2;
 			}
@@ -80,7 +80,7 @@ namespace PowerSolutions
 			{ }
 		};
 
-		struct ComponentFlowSolution		//Ã¿Ôª¼ş³±Á÷½á¹û
+		struct ComponentFlowSolution		//æ¯å…ƒä»¶æ½®æµç»“æœ
 		{
 			// Power0          Power1
 			// --->--------------<----
@@ -92,14 +92,14 @@ namespace PowerSolutions
 			complexd m_PowerShunt;
 			bool m_IsUnconstrained;
 		public:
-			//´ÓÖ¸¶¨½Úµã×¢ÈëÄ¸ÏßµÄ¹¦ÂÊ¡£
+			//ä»æŒ‡å®šèŠ‚ç‚¹æ³¨å…¥æ¯çº¿çš„åŠŸç‡ã€‚
 			const std::vector<complexd>& PowerInjections() const { return m_PowerInjection; }
-			//´ÓÖ¸¶¨½Úµã×¢ÈëÄ¸ÏßµÄ¹¦ÂÊ¡£
+			//ä»æŒ‡å®šèŠ‚ç‚¹æ³¨å…¥æ¯çº¿çš„åŠŸç‡ã€‚
 			complexd PowerInjections(int portIndex) const { return m_PowerInjection[portIndex]; }
 			void PowerInjections(int portIndex, complexd v) { m_PowerInjection[portIndex] = v; }
 			PowerSolutions::complexd PowerShunt() const { return m_PowerShunt; }
 			void PowerShunt(PowerSolutions::complexd val) { m_PowerShunt = val; }
-			//Ö¸Ê¾´ËÔª¼ş×ÔÉíµÄ³±Á÷ÊÇ·ñÎª²»¶¨µÄ¡£
+			//æŒ‡ç¤ºæ­¤å…ƒä»¶è‡ªèº«çš„æ½®æµæ˜¯å¦ä¸ºä¸å®šçš„ã€‚
 			bool IsUnconstrained() const { return m_IsUnconstrained; }
 			void IsUnconstrained(bool val) { m_IsUnconstrained = val; }
 		private:
@@ -107,7 +107,7 @@ namespace PowerSolutions
 				: m_PowerInjection(0), m_PowerShunt(0, 0), m_IsUnconstrained(unconst)
 			{ }
 		public:
-			//»ñÈ¡Ò»¸ö±íÊ¾¹¦ÂÊ²»¶¨µÄÔª¼ş¹¦ÂÊ¡£Ò»°ãÓÃÔÚPVÔª¼şÖĞ¡£
+			//è·å–ä¸€ä¸ªè¡¨ç¤ºåŠŸç‡ä¸å®šçš„å…ƒä»¶åŠŸç‡ã€‚ä¸€èˆ¬ç”¨åœ¨PVå…ƒä»¶ä¸­ã€‚
 			static ComponentFlowSolution Unconstrained()
 			{
 				return ComponentFlowSolution(true);
@@ -131,16 +131,16 @@ namespace PowerSolutions
 			}
 		};
 
-		// Çó½â×îÖÕµÄ½áÂÛ
+		// æ±‚è§£æœ€ç»ˆçš„ç»“è®º
 		enum class SolutionStatus : byte
 		{
-			Success = 0x00,					//Çó½â³É¹¦½áÊø¡£
-			MaxIteration = 0x10,			//ÒÑ¾­´ïµ½×î´óÔÊĞíµÄµü´ú´ÎÊı¡£
-			IterationFailed = 0x11,			//µü´ú¹ı³Ì³öÏÖÎÊÌâ¡£
-			IntelliIterationAbort = 0x12,	//ÆôÓÃÖÇÄÜµü´úºó£¬ÓÉÓÚÔËËã¹ı³Ì²»ÊÕÁ²¶ø±»ÖĞ¶Ï¡£
+			Success = 0x00,					//æ±‚è§£æˆåŠŸç»“æŸã€‚
+			MaxIteration = 0x10,			//å·²ç»è¾¾åˆ°æœ€å¤§å…è®¸çš„è¿­ä»£æ¬¡æ•°ã€‚
+			IterationFailed = 0x11,			//è¿­ä»£è¿‡ç¨‹å‡ºç°é—®é¢˜ã€‚
+			IntelliIterationAbort = 0x12,	//å¯ç”¨æ™ºèƒ½è¿­ä»£åï¼Œç”±äºè¿ç®—è¿‡ç¨‹ä¸æ”¶æ•›è€Œè¢«ä¸­æ–­ã€‚
 		};
 
-		//°üº¬ÁËÎÈÌ¬³±Á÷µÄ·ÖÎö±¨¸æ¡£
+		//åŒ…å«äº†ç¨³æ€æ½®æµçš„åˆ†ææŠ¥å‘Šã€‚
 		class Solution
 		{
 		public:
@@ -150,9 +150,9 @@ namespace PowerSolutions
 				Utility::UnorderedPairEqualityComparer<const ObjectModel::Bus*>> BranchFlowCollection;
 			typedef std::unordered_map<const ObjectModel::Component*, ComponentFlowSolution> ComponentFlowCollection;
 		private:
-			NodeFlowCollection m_NodeFlow;				//½Úµã³±Á÷ĞÅÏ¢¡£
-			ComponentFlowCollection m_ComponentFlow;	//£¨Ã¿Ôª¼ş£©Ö§Â·³±Á÷ĞÅÏ¢¡£
-			BranchFlowCollection m_BranchFlow;			//£¨½Úµã±àºÅ¶Ô£©Ö§Â·³±Á÷ĞÅÏ¢¡£
+			NodeFlowCollection m_NodeFlow;				//èŠ‚ç‚¹æ½®æµä¿¡æ¯ã€‚
+			ComponentFlowCollection m_ComponentFlow;	//ï¼ˆæ¯å…ƒä»¶ï¼‰æ”¯è·¯æ½®æµä¿¡æ¯ã€‚
+			BranchFlowCollection m_BranchFlow;			//ï¼ˆèŠ‚ç‚¹ç¼–å·å¯¹ï¼‰æ”¯è·¯æ½®æµä¿¡æ¯ã€‚
 			size_t m_NodeCount;
 			size_t m_PQNodeCount;
 			size_t m_PVNodeCount;

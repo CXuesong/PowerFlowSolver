@@ -1,4 +1,4 @@
-#ifndef __POWERSOLUTIONS_POWERFLOW_NETWORKCASE_H
+﻿#ifndef __POWERSOLUTIONS_POWERFLOW_NETWORKCASE_H
 #define __POWERSOLUTIONS_POWERFLOW_NETWORKCASE_H
 
 #include "PowerSolutions.h"
@@ -13,16 +13,16 @@
 namespace PowerSolutions {
 	namespace ObjectModel {
 
-		// ��ִ�� NetworkCase::Clone ʱ���ڽ�ԭ�������簸����ԭ�ͣ�Prototype���е�ĳЩ�������������ĸ�ߣ�ӳ�䵽�µ����簸����������Clone���С�
-		// ��ʹ�� NetworkCase::TrackingClone ������ʵ��ԭ�����簸���͸������簸������֮��Ķ�Ӧ��
+		// 在执行 NetworkCase::Clone 时用于将原来的网络案例（原型，Prototype）中的某些网络对象（尤其是母线）映射到新的网络案例（副本，Clone）中。
+		// 在使用 NetworkCase::TrackingClone 后，用于实现原型网络案例和副本网络案例对象之间的对应。
 		class NetworkCaseCorrespondenceInfo
 		{
 		private:
 			struct MappingInfo
 			{
 			public:
-				bool isPrototype;					//��Ԫ���Ƿ�������ԭ�����簸����
-				const NetworkObject *anotherObject;	//��� isPrototype = true���򱣴��˸������簸���ж�Ӧ�Ķ��󣬷�֮��Ȼ��
+				bool isPrototype;					//此元件是否来自于原型网络案例。
+				const NetworkObject *anotherObject;	//如果 isPrototype = true，则保存了副本网络案例中对应的对象，反之亦然。
 			public:
 				MappingInfo(bool _isPrototype, const NetworkObject* _anotherObject)
 					: isPrototype(_isPrototype), anotherObject(_anotherObject)
@@ -33,9 +33,9 @@ namespace PowerSolutions {
 			friend class NetworkCase;
 			void MapObject(const NetworkObject* oldObj, const NetworkObject* newObj);
 		public:
-			// ��ȡԭ�����簸����ָ����������ڸ������簸���еĶ�Ӧ����
+			// 获取原型网络案例中指定网络对象在副本网络案例中的对应对象。
 			const NetworkObject* CloneOf(const NetworkObject* prototypeObj) const;
-			// ��ȡ�������簸����ָ�����������ԭ�����簸���еĶ�Ӧ����
+			// 获取副本网络案例中指定网络对象在原型网络案例中的对应对象。
 			const NetworkObject* PrototypeOf(const NetworkObject* cloneObj) const;
 			template <class TObj>
 			const TObj* CloneOfStatic(const TObj* prototypeObj) const {
@@ -55,12 +55,12 @@ namespace PowerSolutions {
 			{ }
 		};
 
-		// ��ʾһ�����ڷ��������簸����
-		// ע��˴��ٶ����е�Ԫ���������ǰ���õ�ԭ��
-		// �������ڲ��ļ�������У�����һ���м���̣����Խ����е�����Ԫ�����·�����չ�����ⲿ���߼����ܻ���δ�������Ż�����������ϣ�������ģ����Ϊһ�������ļ������ģ�顣
-		// ����Ҫ�����ģ���Լ���صĶ���ģ�ͣ�����ĸ�ߡ���·�ȣ������Ӹ�Ϊ���ӵ��߼�������ʹ���ֵ�/ӳ�䣨dictionary/std::map�����������Լ��ĺ��������Ӹ����߼����б�Ҫ�Ļ�����ԭ�����簸���ĸ�������ͨ���޸Ķ���ģ�͵�������ʵ�֡�
-		// ���ڶԶ�����ư���������⣺��ʱ���ϲ����Ƶļ�����̣�����ڵ����Ż��ȣ�����Ϊ�����������ģ��֮�����ϳ̶ȡ�
-		// ���Կ���δ��������ʱ��̬�������Ƶؼ�����̣�����ĳЩ�м������л��档
+		// 表示一个用于分析的网络案例。
+		// 注意此处假定所有的元件均遵从向前引用的原则。
+		// 尽管在内部的计算过程中，存在一个中间过程，用以将所有的网络元件重新分析并展开（这部分逻辑可能会在未来进行优化），但对外希望将这个模块作为一个基本的计算计算模块。
+		// 即不要在这个模块以及相关的对象模型（例如母线、线路等）中增加更为复杂的逻辑，而是使用字典/映射（dictionary/std::map），并构造自己的函数，增加附加逻辑（有必要的话构造原型网络案例的副本），通过修改对象模型的内容来实现。
+		// 关于对多个相似案例进行求解：暂时不合并相似的计算过程（例如节点编号优化等），因为这样会大大提高模块之间的耦合程度。
+		// 可以考虑未来在运行时动态发现类似地计算过程，并对某些中间结果进行缓存。
 		class NetworkCase
 		{
 			friend class NetworkObject;
@@ -72,13 +72,13 @@ namespace PowerSolutions {
 		private:	//internal
 		public:
 			const NetworkObjectCollection& Objects() const { return m_Objects; }
-			//���� Index ���Բ���һ��ĸ�ߡ�
+			//按照 Index 属性查找一个母线。
 			Bus* Buses(int index) const;
-			//�����簸���м���һ��ĸ�ߡ�
+			//向网络案例中加入一条母线。
 			Bus* CreateBus(complexd inititalVoltage);
-			//�����簸���м���һ��ĸ�ߡ�
+			//向网络案例中加入一条母线。
 			Bus* CreateBus() { return CreateBus(1); };
-			//ָʾ�Ƿ�Ӧ�ڴ�ʵ������ʱ�Զ�ɾ���Ӽ��������
+			//指示是否应在此实例析构时自动删除子级网络对象。
 			bool AutoDeleteChildren() const { return m_AutoDeleteChildren; }
 			void AutoDeleteChildren(bool val) { m_AutoDeleteChildren = val; }
 		private:
@@ -87,16 +87,16 @@ namespace PowerSolutions {
 			void AddObject(NetworkObject* obj);
 			void AddObject(std::initializer_list<NetworkObject*> init);
 			bool RemoveObject(NetworkObject* obj);
-			void DeleteChildren();				//�Ƴ���ɾ��������ʵ���е������Ӽ���
-			void Validate() const;				//��֤��������ʵ������Ч�ԡ�
-			//���ݵ�ǰ���磬����һ���������������� PrimitiveNetwork��
+			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
+			void Validate() const;				//验证整个网络实例的有效性。
+			//根据当前网络，生成一个经过初步分析的 PrimitiveNetwork。
 			std::shared_ptr<PrimitiveNetwork> ToPrimitive(PrimitiveNetworkOptions options = PrimitiveNetworkOptions::NodeReorder) const;
-			//��������簸����һ��ǳ�㸱������������˰�����ͬ�� NetworkObject ���á�
+			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
 			std::shared_ptr<NetworkCase> ShallowClone() const;
-			//��������簸����һ������������ȡ������ԭ�������ж���Ķ�Ӧ��ϵ��
+			//构造此网络案例的一个副本，并获取副本和原型中所有对象的对应关系。
 			std::pair < std::shared_ptr<NetworkCase>, std::shared_ptr<NetworkCaseCorrespondenceInfo> >
 				CorrespondenceClone();
-			//��������簸����һ��������
+			//构造此网络案例的一个副本。
 			std::shared_ptr<NetworkCase> Clone()
 			{
 				auto info = CorrespondenceClone();
@@ -105,7 +105,7 @@ namespace PowerSolutions {
 		public:
 			NetworkCase();
 			~NetworkCase();
-			//������ʹ�ø��ƹ��캯����
+			//不允许使用复制构造函数。
 			NetworkCase(const NetworkCase&) = delete;
 		};
 	}

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+﻿#include "stdafx.h"
 #include "PowerFlowObjectModel.h"
 #include "NetworkCase.h"
 #include "PrimitiveNetwork.h"
@@ -16,7 +16,7 @@ namespace PowerSolutions
 {
 	namespace ObjectModel
 	{
-		////////// ������ //////////
+		////////// 传输线 //////////
 		Line::Line()
 			: Line(nullptr, nullptr, 0, 0)
 		{ }
@@ -54,7 +54,7 @@ namespace PowerSolutions
 			return new Line(m_Impedance, m_Admittance);
 		}
 
-		////////// PV����� //////////
+		////////// PV发电机 //////////
 		PVGenerator::PVGenerator()
 			: PVGenerator(nullptr, 0, 1)
 		{ }
@@ -92,11 +92,11 @@ namespace PowerSolutions
 
 		ComponentFlowSolution PVGenerator::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			//PV������޷�ȷ�������������޹����ʵ����Ƕ��٣������ǵ�һ���ڵ��������˲�ֹһ̨�����ʱ��
+			//PV发电机无法确定自身发出的无功功率到底是多少，尤其是当一个节点上链接了不止一台发电机时。
 			return ComponentFlowSolution::Unconstrained();
 		}
 
-		////////// ƽ��ڵ㷢��� //////////
+		////////// 平衡节点发电机 //////////
 		SlackGenerator::SlackGenerator()
 			: SlackGenerator(nullptr, 1)
 		{ }
@@ -134,11 +134,11 @@ namespace PowerSolutions
 
 		ComponentFlowSolution SlackGenerator::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			//��ƾһ̨ƽ��������޷�ȷ��������
+			//仅凭一台平衡机自身无法确定出力。
 			return ComponentFlowSolution::Unconstrained();
 		}
 
-		////////// PQ���� //////////
+		////////// PQ负载 //////////
 		PQLoad::PQLoad()
 			: PQLoad(nullptr, 0)
 		{ }
@@ -176,11 +176,11 @@ namespace PowerSolutions
 
 		ComponentFlowSolution PQLoad::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			//���븺�ض˿ڵĹ��ʣ����˿ڵ�ע�빦�ʡ�
+			//流入负载端口的功率，即端口的注入功率。
 			return ComponentFlowSolution({ m_Power }, 0);
 		}
 
-		////////// �ӵص��� //////////
+		////////// 接地导纳 //////////
 		ShuntAdmittance::ShuntAdmittance()
 			: ShuntAdmittance(0)
 		{ }
@@ -212,13 +212,13 @@ namespace PowerSolutions
 
 		ComponentFlowSolution ShuntAdmittance::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			//  |   �� Bus ��� ���� [1]
+			//  |   从 Bus 抽出 功率 [1]
 			//  |
 			//  |
-			//  |   ע�� GND [0]
-			//ע��˲��ֹ��ʲ�Ӧ�ۼ�����������
+			//  |   注入 GND [0]
+			//注意此部分功率不应累加至出力功率
 			// S = U^2 * conj(Y)
-			//BUG FIXED:��ѹû��ȡƽ��
+			//BUG FIXED:电压没有取平方
 			auto v = solution.NodeStatus(Bus1()).Voltage();
 			auto p = v  * v * conj(m_Admittance);
 			return ComponentFlowSolution({ -p }, p);
@@ -229,7 +229,7 @@ namespace PowerSolutions
 			pNetwork->AddShunt(this->Bus1(), m_Admittance);
 		}
 
-		////////// ��ѹ�� //////////
+		////////// 变压器 //////////
 		Transformer::Transformer()
 			: Transformer(nullptr, nullptr, 0, 0, 1)
 		{ }
@@ -265,12 +265,12 @@ namespace PowerSolutions
 
 		PowerFlow::ComponentFlowSolution Transformer::EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const
 		{
-			//ע�⣬����֧·����ʱ
-			//���ڱ�ѹ�������ܽ����͵�ֵ��·����Ľӵص��ɲ𿪼��㡣
-			//ֻ�ܰ��զ��͵�ֵ��·���м��㡣
+			//注意，计算支路功率时
+			//对于变压器，不能将π型等值电路两侧的接地导纳拆开计算。
+			//只能按照Γ型等值电路进行计算。
 			auto p = DoublePortComponent::EvalComponentFlow(solution);
 			auto v = solution.NodeStatus(Bus1()).Voltage();
-			//�������ɹ��ʡ�
+			//修正导纳功率。
 			p.PowerShunt(v * v * conj(m_Admittance));
 			return p;
 		}
@@ -346,33 +346,33 @@ namespace PowerSolutions
 				m_Admittance, m_TapRatio1, m_TapRatio2, m_TapRatio3);
 		}
 
-		// TODO ��ĳһ��֧�����仯ʱ�������´˷�֧�����ݡ�
+		// TODO 在某一分支参数变化时，仅更新此分支的数据。
 		void ThreeWindingTransformer::UpdateChildren()
 		{
-			//�������ѹ��ģ��
+			//三绕组变压器模型
 			//                  /---1:Tap2---Z2--- 2
 			// 1 ---Z1---Tap1:1-
 			//    |             \---1:Tap3---Z3--- 3
 			//    |
 			//    Y
 			//    |
-			//˫�����ѹ��ģ��
+			//双绕组变压器模型
 			// 1 ---Z---Tap:1--- 2
 			//    |
 			//    Y
 			//    |
 			assert(Bus1() != nullptr);
-			//���ñ�ѹ��
+			//设置变压器
 			m_Transformer1->Bus1(Bus1());
 			m_Transformer2->Bus1(Bus2());
 			m_Transformer3->Bus1(Bus3());
 			m_Transformer1->Bus2(m_CommonBus.get());
 			m_Transformer2->Bus2(m_CommonBus.get());
 			m_Transformer3->Bus2(m_CommonBus.get());
-			//ע��˴�����ֵΪ������һ�β��ֵ��
+			//注意此处的阻值为折算至一次侧的值。
 			auto z1 = Impedance1(), z2 = Impedance2(), z3 = Impedance3();
-			//��Ҫ�����㵽һ�β�Ķ��Ρ����β���������ۻض�Ӧ�ĵ�ѹ�ȼ�
-			//TODO ʹ�ø�Ϊ��ȷ�ıȽϲ��ԣ����Ǳ���ֵ��������ţ�
+			//需要将折算到一次侧的二次、三次侧绕组参数折回对应的电压等级
+			//TODO 使用更为精确的比较策略（考虑标幺值引起的缩放）
 			const auto MinImpedance = 1e-8;
 			if (abs(z1.imag()) < MinImpedance) z1.imag(MinImpedance * 10);
 			if (abs(z2.imag()) < MinImpedance) z2.imag(MinImpedance * 10);
@@ -404,7 +404,7 @@ namespace PowerSolutions
 
 		void ThreeWindingTransformer::BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const
 		{
-			//�ڲ������ǰ�����¼����Ӽ�������
+			//在参与计算前，重新计算子级参数。
 			m_Transformer1->BuildAdmittanceInfo(pNetwork);
 			m_Transformer2->BuildAdmittanceInfo(pNetwork);
 			m_Transformer3->BuildAdmittanceInfo(pNetwork);
@@ -413,12 +413,12 @@ namespace PowerSolutions
 
 		ComponentFlowSolution ThreeWindingTransformer::EvalComponentFlow(const PrimitiveSolution& solution) const
 		{
-			//���� ThreeWindingTransformer::UpdateChildren �е��������ѹ��ģ�͡�
+			//参阅 ThreeWindingTransformer::UpdateChildren 中的三绕组变压器模型。
 			auto power1 = m_Transformer1->EvalComponentFlow(solution);
 			auto power2 = m_Transformer2->EvalComponentFlow(solution);
 			auto power3 = m_Transformer3->EvalComponentFlow(solution);
-			//�ӵع���Ӧ����Ҫ���ɱ�ѹ��1������
-			//���������������ߵ��ɺ�С��ʱ�����¶��Ժܿ���ʧ�ܡ�
+			//接地功率应该主要是由变压器1产生。
+			//潮流不收敛，或者导纳很小的时候，以下断言很可能失败。
 			//assert(abs(power2[0]) / abs(power1[0]) < 1e-5);
 			//assert(abs(power3[0]) / abs(power1[0]) < 1e-5);
 			return ComponentFlowSolution({ power1.PowerInjections(0), 

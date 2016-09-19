@@ -1,4 +1,4 @@
-#ifndef __POWERSOLUTIONS_H
+ï»¿#ifndef __POWERSOLUTIONS_H
 #define __POWERSOLUTIONS_H
 
 #ifdef _PS_LIB_EXPORT
@@ -12,16 +12,16 @@
 #include <memory>
 
 namespace PowerSolutions {
-	//ÀàĞÍÖØ¶¨Òå
+	//ç±»å‹é‡å®šä¹‰
 	typedef std::complex<double> complexd;
 	typedef unsigned char byte;
 	namespace PowerFlow
 	{
-		//µ÷ÊÔÖ§³Ö
+		//è°ƒè¯•æ”¯æŒ
 		void TraceFilePath(char path[]);
 	}
 
-	//Ç¿ÀàĞÍÃ¶¾ÙµÄ°´Î»ÔËËãÖ§³Ö¡£
+	//å¼ºç±»å‹æšä¸¾çš„æŒ‰ä½è¿ç®—æ”¯æŒã€‚
 	template<typename E>
 	struct enable_bitmask_operators{
 		static const bool enable = false;

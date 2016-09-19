@@ -1,6 +1,6 @@
-/*
+ï»¿/*
 PowerSolutions
-ÎÈÌ¬³±Á÷Çó½âÊµÏÖ£¨¹«¹²²¿·Ö£©¡£
+ç¨³æ€æ½®æµæ±‚è§£å®ç°ï¼ˆå…¬å…±éƒ¨åˆ†ï¼‰ã€‚
 by Chen [CXuesong.], 2015
 */
 
@@ -20,26 +20,26 @@ namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		// ³éÏóÓÃÓÚÍê³ÉÎÈÌ¬³±Á÷µÄ½â¾ö¹ı³Ì¡£
+		// æŠ½è±¡ç”¨äºå®Œæˆç¨³æ€æ½®æµçš„è§£å†³è¿‡ç¨‹ã€‚
 		class SolverImpl : public Solver
 		{
-		protected:	//ÄÚ²¿Êı¾İ
+		protected:	//å†…éƒ¨æ•°æ®
 			ObjectModel::PrimitiveNetwork* PNetwork;
-			//²Ù×÷ÃÜ¼¯ĞÍÊı¾İµÄ¾Ö²¿»º´æ¡£
-			int NodeCount;								//Êµ¼Ê²ÎÓë¼ÆËãµÄ½ÚµãÊıÁ¿¡£
-			int PQNodeCount;							//PQ½ÚµãÊıÁ¿¡£
-			int PVNodeCount;							//PV½ÚµãÊıÁ¿¡£
-			// ±£´æÁËµ±Ç°µÄÇó½â½á¹û¡£
+			//æ“ä½œå¯†é›†å‹æ•°æ®çš„å±€éƒ¨ç¼“å­˜ã€‚
+			int NodeCount;								//å®é™…å‚ä¸è®¡ç®—çš„èŠ‚ç‚¹æ•°é‡ã€‚
+			int PQNodeCount;							//PQèŠ‚ç‚¹æ•°é‡ã€‚
+			int PVNodeCount;							//PVèŠ‚ç‚¹æ•°é‡ã€‚
+			// ä¿å­˜äº†å½“å‰çš„æ±‚è§£ç»“æœã€‚
 			std::shared_ptr<PrimitiveSolution> PSolution;
 		protected:
-			//Ô¼¶¨£ºÒÔÏÂº¯Êı½«»á°´ÕÕÉùÃ÷Ë³Ğò±»ÒÀ´Îµ÷ÓÃ¡£
+			//çº¦å®šï¼šä»¥ä¸‹å‡½æ•°å°†ä¼šæŒ‰ç…§å£°æ˜é¡ºåºè¢«ä¾æ¬¡è°ƒç”¨ã€‚
 			virtual void BeforeIterations() = 0;
-			virtual double EvalDeviation() = 0;		//¼ÆËãµ±Ç°½á¹ûµÄµü´úÎó²î¡£
+			virtual double EvalDeviation() = 0;		//è®¡ç®—å½“å‰ç»“æœçš„è¿­ä»£è¯¯å·®ã€‚
 			virtual bool OnIteration() = 0;
 			virtual void AfterIterations() = 0;
 			std::shared_ptr<Solution> GenerateSolution(SolutionStatus status, int iterCount, double maxDev);
 		public:
-			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) override;		// Çó½âÍøÂçµÄ¹¦ÂÊ³±Á÷·Ö²¼¡£·µ»ØÖµ±íÊ¾ÊÇ·ñ³É¹¦ÊÕÁ²¡£
+			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) override;		// æ±‚è§£ç½‘ç»œçš„åŠŸç‡æ½®æµåˆ†å¸ƒã€‚è¿”å›å€¼è¡¨ç¤ºæ˜¯å¦æˆåŠŸæ”¶æ•›ã€‚
 			SolverImpl();
 			virtual ~SolverImpl();
 		};

@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "PowerFlowSolvers.h"
 #include "NRSolver.h"
 #include "Exceptions.h"
@@ -43,7 +43,7 @@ namespace PowerSolutions
 
 		shared_ptr<Solution> Solver::Solve(shared_ptr<PrimitiveNetwork> network)
 		{
-			//´Ëº¯Êı½öÎªÁË±£³Ö´«Èë shared_ptr µÄÒıÓÃ²»Ê§Ğ§¡£
+			//æ­¤å‡½æ•°ä»…ä¸ºäº†ä¿æŒä¼ å…¥ shared_ptr çš„å¼•ç”¨ä¸å¤±æ•ˆã€‚
 			return Solve(*network);
 		}
 

@@ -1,8 +1,8 @@
-//ÍøÂçÄ£ĞÍ
-//Ô¼¶¨£ºËùÓĞµÄÔª¼şÖ»±£´æÓëÔª¼ş±¾ÉíÓĞ¹ØµÄĞÅÏ¢£¬¶ø²»·´Ó³¸¸¼¶¡£
-//Ô¼¶¨£ºÄÜ²»Ê¹ÓÃ¶àÌ¬ĞÔÍê³ÉµÄ¹¦ÄÜ£¬¾Í²»Ê¹ÓÃ¶àÌ¬ĞÔÍê³É¡£
-//TODO ¿¼ÂÇÊÇ·ñÒÆ³ı Tag¡£¿ÉÒÔÍ¨¹ıCLR¼¯ºÏÀ´¿ØÖÆCLR·â×°£¬Í¬Ê±ÔÚCLR·â×°ÖĞÊ¹ÓÃ shared_ptr¡£
-//TODO ¿¼ÂÇÊÇ·ñÒÆ³ı Bus µÄ Index ÊôĞÔ£¨²»ÄÜÒÆ³ı£¬ÀıÈç³±Á÷·ÖÎö±¨¸æÖĞĞèÒª´ËÊôĞÔ£¬µ«Ô¼Êø¿ÉÒÔÈõÒ»Ğ©£©
+ï»¿//ç½‘ç»œæ¨¡å‹
+//çº¦å®šï¼šæ‰€æœ‰çš„å…ƒä»¶åªä¿å­˜ä¸å…ƒä»¶æœ¬èº«æœ‰å…³çš„ä¿¡æ¯ï¼Œè€Œä¸åæ˜ çˆ¶çº§ã€‚
+//çº¦å®šï¼šèƒ½ä¸ä½¿ç”¨å¤šæ€æ€§å®Œæˆçš„åŠŸèƒ½ï¼Œå°±ä¸ä½¿ç”¨å¤šæ€æ€§å®Œæˆã€‚
+//TODO è€ƒè™‘æ˜¯å¦ç§»é™¤ Tagã€‚å¯ä»¥é€šè¿‡CLRé›†åˆæ¥æ§åˆ¶CLRå°è£…ï¼ŒåŒæ—¶åœ¨CLRå°è£…ä¸­ä½¿ç”¨ shared_ptrã€‚
+//TODO è€ƒè™‘æ˜¯å¦ç§»é™¤ Bus çš„ Index å±æ€§ï¼ˆä¸èƒ½ç§»é™¤ï¼Œä¾‹å¦‚æ½®æµåˆ†ææŠ¥å‘Šä¸­éœ€è¦æ­¤å±æ€§ï¼Œä½†çº¦æŸå¯ä»¥å¼±ä¸€äº›ï¼‰
 
 #ifndef __POWERSOLUTIONS_POWERFLOW_OBJECTMODEL_H
 #define __POWERSOLUTIONS_POWERFLOW_OBJECTMODEL_H
@@ -17,24 +17,24 @@
 namespace PowerSolutions {
 	namespace ObjectModel
 	{
-		// ¦ĞĞÎµÈĞ§´«ÊäÏß¡£
+		// Ï€å½¢ç­‰æ•ˆä¼ è¾“çº¿ã€‚
 		class Line final : public DoublePortComponent
 		{
 		private:
 			complexd m_Impedance;
 			complexd m_Admittance;
 		public:
-			complexd Impedance() const { return m_Impedance; }		//×è¿¹µÄ±êçÛÖµ¡£
+			complexd Impedance() const { return m_Impedance; }		//é˜»æŠ—çš„æ ‡å¹ºå€¼ã€‚
 			void Impedance(complexd val) { m_Impedance = val; }
-			complexd Admittance() const { return m_Admittance; }	//µ¼ÄÉµÄ±êçÛÖµ¡£
+			complexd Admittance() const { return m_Admittance; }	//å¯¼çº³çš„æ ‡å¹ºå€¼ã€‚
 			void Admittance(complexd val) { m_Admittance = val; }
 		public:
 			virtual void Validate() const override;
-			virtual PiEquivalencyParameters PiEquivalency() const override;	//»ñÈ¡´ËÔª¼ş¦ĞĞÍµÈÖµµçÂ·²ÎÊı¡£
+			virtual PiEquivalencyParameters PiEquivalency() const override;	//è·å–æ­¤å…ƒä»¶Ï€å‹ç­‰å€¼ç”µè·¯å‚æ•°ã€‚
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»Ìõ´«ÊäÏß¡£
+			//åˆ›å»ºä¸€æ¡ä¼ è¾“çº¿ã€‚
 			static Line* Create(Bus *bus1, Bus *bus2, complexd impedance, complexd admittance);
 		public:
 			Line();
@@ -42,16 +42,16 @@ namespace PowerSolutions {
 			Line(Bus *bus1, Bus *bus2, complexd impedance, complexd admittance);
 		};
 
-		// PV ·¢µç»ú¡£
+		// PV å‘ç”µæœºã€‚
 		class PVGenerator final : public SinglePortComponent
 		{
 		private:
 			double m_ActivePower;
 			double m_Voltage;
 		public:
-			double ActivePower() const { return m_ActivePower; }	//·¢µç»ú·¢³öÓĞ¹¦¹¦ÂÊµÄ´óĞ¡£¨±êçÛÖµ£©¡£
+			double ActivePower() const { return m_ActivePower; }	//å‘ç”µæœºå‘å‡ºæœ‰åŠŸåŠŸç‡çš„å¤§å°ï¼ˆæ ‡å¹ºå€¼ï¼‰ã€‚
 			void ActivePower(double val) { m_ActivePower = val; }
-			double Voltage() const { return m_Voltage; }			//·¢µç»úµÄ»ú¶ËµçÑ¹£¨±êçÛÖµ£©¡£
+			double Voltage() const { return m_Voltage; }			//å‘ç”µæœºçš„æœºç«¯ç”µå‹ï¼ˆæ ‡å¹ºå€¼ï¼‰ã€‚
 			void Voltage(double val) { m_Voltage = val; }
 		public:
 			virtual void Validate() const override;
@@ -60,7 +60,7 @@ namespace PowerSolutions {
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»Ì¨PV·¢µç»ú¡£
+			//åˆ›å»ºä¸€å°PVå‘ç”µæœºã€‚
 			static PVGenerator* Create(Bus *bus1, double activePower, double voltage);
 		public:
 			PVGenerator();
@@ -68,13 +68,13 @@ namespace PowerSolutions {
 			PVGenerator(Bus *bus1, double activePower, double voltage);
 		};
 
-		// Æ½ºâ½Úµã·¢µç»ú¡£
+		// å¹³è¡¡èŠ‚ç‚¹å‘ç”µæœºã€‚
 		class SlackGenerator final : public SinglePortComponent
 		{
 		private:
 			complexd m_Voltage;
 		public:
-			complexd Voltage() const { return m_Voltage; }		//·¢µç»úµÄ»ú¶ËµçÑ¹£¨·ùÖµ£º±êçÛÖµ£¬Ïà½Ç£º»¡¶È£©¡£
+			complexd Voltage() const { return m_Voltage; }		//å‘ç”µæœºçš„æœºç«¯ç”µå‹ï¼ˆå¹…å€¼ï¼šæ ‡å¹ºå€¼ï¼Œç›¸è§’ï¼šå¼§åº¦ï¼‰ã€‚
 			void Voltage(complexd val) { m_Voltage = val; }
 		public:
 			virtual void Validate() const override;
@@ -83,7 +83,7 @@ namespace PowerSolutions {
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»Ì¨Æ½ºâ·¢µç»ú¡£
+			//åˆ›å»ºä¸€å°å¹³è¡¡å‘ç”µæœºã€‚
 			static SlackGenerator* Create(Bus *bus1, complexd voltage);
 		public:
 			SlackGenerator();
@@ -91,13 +91,13 @@ namespace PowerSolutions {
 			SlackGenerator(Bus *bus1, complexd voltage);
 		};
 
-		// PQ ¸ºÔØ¡£
+		// PQ è´Ÿè½½ã€‚
 		class PQLoad final : public SinglePortComponent
 		{
 		private:
 			complexd m_Power;
 		public:
-			complexd Power() const { return m_Power; }		//×¢Èë¸ºÔØÎüÊÕµÄ¹¦ÂÊ´óĞ¡£¨±êçÛÖµ£©¡£
+			complexd Power() const { return m_Power; }		//æ³¨å…¥è´Ÿè½½å¸æ”¶çš„åŠŸç‡å¤§å°ï¼ˆæ ‡å¹ºå€¼ï¼‰ã€‚
 			void Power(complexd val) { m_Power = val; }
 		public:
 			virtual void Validate() const override;
@@ -106,7 +106,7 @@ namespace PowerSolutions {
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»¸öPQ¸ºÔØ¡£
+			//åˆ›å»ºä¸€ä¸ªPQè´Ÿè½½ã€‚
 			static PQLoad* Create(Bus *bus1, complexd power);
 		public:
 			PQLoad();
@@ -114,13 +114,13 @@ namespace PowerSolutions {
 			PQLoad(Bus *bus1, complexd power);
 		};
 
-		//²¢Áª½ÓµØµ¼ÄÉ¡£
+		//å¹¶è”æ¥åœ°å¯¼çº³ã€‚
 		class ShuntAdmittance final : public SinglePortComponent
 		{
 		private:
 			complexd m_Admittance;
 		public:
-			complexd Admittance() const { return m_Admittance; }	//µ¼ÄÉµÄ±êçÛÖµ¡£
+			complexd Admittance() const { return m_Admittance; }	//å¯¼çº³çš„æ ‡å¹ºå€¼ã€‚
 			void Admittance(complexd val) { m_Admittance = val; }
 		public:
 			virtual void Validate() const override;
@@ -129,7 +129,7 @@ namespace PowerSolutions {
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»¸ö²¢Áª½ÓµØµ¼ÄÉ¡£
+			//åˆ›å»ºä¸€ä¸ªå¹¶è”æ¥åœ°å¯¼çº³ã€‚
 			static ShuntAdmittance* Create(Bus *bus1, complexd admittance);
 		public:
 			ShuntAdmittance();
@@ -137,7 +137,7 @@ namespace PowerSolutions {
 			ShuntAdmittance(Bus *bus1, complexd admittance);
 		};
 
-		// º¬ÓĞ·Ç±ê×¼±ä±ÈµÄ¡¢¿É¼ÆÈëÌúËğµÄ±äÑ¹Æ÷¡£
+		// å«æœ‰éæ ‡å‡†å˜æ¯”çš„ã€å¯è®¡å…¥é“æŸçš„å˜å‹å™¨ã€‚
 		class Transformer final : public DoublePortComponent
 		{
 		private:
@@ -145,22 +145,22 @@ namespace PowerSolutions {
 			complexd m_Admittance;
 			complexd m_TapRatio;
 		public:
-			complexd Impedance() const { return m_Impedance; }		//Ä¸Ïß1²à´®Áª×è¿¹µÄ±êçÛÖµ¡£
+			complexd Impedance() const { return m_Impedance; }		//æ¯çº¿1ä¾§ä¸²è”é˜»æŠ—çš„æ ‡å¹ºå€¼ã€‚
 			void Impedance(complexd val) { m_Impedance = val; }
-			complexd Admittance() const { return m_Admittance; }	//Ä¸Ïß1²à²¢Áª½ÓµØµ¼ÄÉµÄ±êçÛÖµ¡£×¢ÒâÀø´ÅµçÄÉÓ¦µ±Îª¸ºÖµ¡£
+			complexd Admittance() const { return m_Admittance; }	//æ¯çº¿1ä¾§å¹¶è”æ¥åœ°å¯¼çº³çš„æ ‡å¹ºå€¼ã€‚æ³¨æ„åŠ±ç£ç”µçº³åº”å½“ä¸ºè´Ÿå€¼ã€‚
 			void Admittance(complexd val) { m_Admittance = val; }
-			complexd TapRatio() const { return m_TapRatio; }		//Ä¸Ïß1²àÓëÄ¸Ïß2²àµÄ·Ç±ê×¼±ä±È£¬ÒÔ¼°ÏàÎ»ÒÆ¶¯¡£
+			complexd TapRatio() const { return m_TapRatio; }		//æ¯çº¿1ä¾§ä¸æ¯çº¿2ä¾§çš„éæ ‡å‡†å˜æ¯”ï¼Œä»¥åŠç›¸ä½ç§»åŠ¨ã€‚
 			void TapRatio(complexd val) { m_TapRatio = val; }
 		public:
 			virtual void Validate() const override;
-			virtual PiEquivalencyParameters PiEquivalency() const override;//»ñÈ¡´ËÔª¼ş¦ĞĞÍµÈÖµµçÂ·²ÎÊı¡£
+			virtual PiEquivalencyParameters PiEquivalency() const override;//è·å–æ­¤å…ƒä»¶Ï€å‹ç­‰å€¼ç”µè·¯å‚æ•°ã€‚
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»¸ö±äÑ¹Æ÷¡£
+			//åˆ›å»ºä¸€ä¸ªå˜å‹å™¨ã€‚
 			static Transformer* Create(Bus *bus1, Bus *bus2, complexd impedance, complexd admittance, complexd tapRatio);
-			//´´½¨Ò»¸ö²»¼ÆÌúËğµÄ±äÑ¹Æ÷¡£
+			//åˆ›å»ºä¸€ä¸ªä¸è®¡é“æŸçš„å˜å‹å™¨ã€‚
 			static Transformer* Create(Bus *bus1, Bus *bus2, complexd impedance, complexd tapRatio)
 			{
 				return Create(bus1, bus2, impedance, 0, tapRatio);
@@ -172,7 +172,7 @@ namespace PowerSolutions {
 			Transformer(Bus *bus1, Bus *bus2, complexd impedance, complexd admittance, complexd tapRatio);
 		};
 
-		//º¬ÓĞ·Ç±ê×¼±ä±ÈµÄÎŞÌúËğÈıÈÆ×é±äÑ¹Æ÷¡£
+		//å«æœ‰éæ ‡å‡†å˜æ¯”çš„æ— é“æŸä¸‰ç»•ç»„å˜å‹å™¨ã€‚
 		class ThreeWindingTransformer final : public TriPortComponent, public IBusContainer
 		{
 		private:
@@ -181,10 +181,10 @@ namespace PowerSolutions {
 			complexd m_Impedance12, m_Impedance13, m_Impedance23, m_Admittance;
 			complexd m_TapRatio1, m_TapRatio2, m_TapRatio3;
 		private:
-			//¸üĞÂ×Ó¼¶µÄ²ÎÊı¡£
+			//æ›´æ–°å­çº§çš„å‚æ•°ã€‚
 			void UpdateChildren();
 		public:
-			//´Ë±äÑ¹Æ÷Ê¹ÓÃµÄÒ»´Î²àÄÚ²¿¹«¹²Ä¸Ïß¡£
+			//æ­¤å˜å‹å™¨ä½¿ç”¨çš„ä¸€æ¬¡ä¾§å†…éƒ¨å…¬å…±æ¯çº¿ã€‚
 			Bus* CommonBus() const { return m_CommonBus.get(); }
 			complexd Impedance12() const { return m_Impedance12; }
 			void Impedance12(complexd val) { m_Impedance12 = val; UpdateChildren(); }
@@ -208,13 +208,13 @@ namespace PowerSolutions {
 			virtual void BuildNodeInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual void BuildAdmittanceInfo(PrimitiveNetwork* pNetwork) const override;
 			virtual PowerFlow::ComponentFlowSolution EvalComponentFlow(const PowerFlow::PrimitiveSolution& solution) const override;
-		private:	//»ù´¡½á¹¹¡£
+		private:	//åŸºç¡€ç»“æ„ã€‚
 			virtual int ChildBusCount() const override;
 			virtual Bus* ChildBusAt(int index) const override;
 		protected:
 			virtual NetworkObject* CloneInstance() const override;
 		public:
-			//´´½¨Ò»¸öÈıÈÆ×é±äÑ¹Æ÷¡£
+			//åˆ›å»ºä¸€ä¸ªä¸‰ç»•ç»„å˜å‹å™¨ã€‚
 			static ThreeWindingTransformer* Create(Bus *bus1, Bus *bus2, Bus *bus3,
 				complexd impedance12, complexd impedance13, complexd impedance23,
 				complexd admittance, complexd tapRatio1, complexd tapRatio2, complexd tapRatio3);

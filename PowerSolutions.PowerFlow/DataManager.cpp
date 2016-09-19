@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "Application.h"
 #include "ObjectModel.h"
 #include "NetworkCase.h"
@@ -32,7 +32,7 @@ void DataManager::Load(const tstring &fileName)
 		throw IOException(Format(ERROR_FILE_OPEN, fileName.c_str()));
 	try
 	{
-		//ÉèÖÃ´úÂëÒ³ÎªÏµÍ³Ä¬ÈÏÖµ
+		//è®¾ç½®ä»£ç é¡µä¸ºç³»ç»Ÿé»˜è®¤å€¼
 		dataFile.imbue(locale(""));
 		Load(dataFile, false);
 	}
@@ -47,12 +47,12 @@ void DataManager::Load(const tstring &fileName)
 
 void DataManager::Load(tistream &source, bool interactive)
 {
-	//×´Ì¬±äÁ¿
+	//çŠ¶æ€å˜é‡
 	tstring buffer;
 	size_t pos;
 	int LineCounter = 0;
 	int NextIndex = NullIndex;
-	//³õÊ¼»¯
+	//åˆå§‹åŒ–
 	assert(m_CaseInfo);
 	m_CaseInfo->Clear();
 	if (m_Solver != NULL)
@@ -60,21 +60,21 @@ void DataManager::Load(tistream &source, bool interactive)
 		delete m_Solver;
 		m_Solver = NULL;
 	}
-	//ÔØÈëÊı¾İ
+	//è½½å…¥æ•°æ®
 	while (interactive || !source.eof())
 	{
 		if (interactive) Console::WriteKeyword(Console::Keyword::InputCase);
 		getline(source, buffer, _T('\n'));
-		if (interactive && buffer == _T("##")) break;	//½»»¥Ä£Ê½ÏÂ##±íÊ¾½áÊø
+		if (interactive && buffer == _T("##")) break;	//äº¤äº’æ¨¡å¼ä¸‹##è¡¨ç¤ºç»“æŸ
 		LineCounter++;
 		assert(LineCounter > 0);
 		Trim(buffer);
 		if (buffer.empty() || buffer[0] == '#')
 		{
-			//¿ÕĞĞ»òĞĞ×¢ÊÍ
+			//ç©ºè¡Œæˆ–è¡Œæ³¨é‡Š
 		} else {
-			//½âÎöĞĞ
-			//Ê¾Àı£º
+			//è§£æè¡Œ
+			//ç¤ºä¾‹ï¼š
 			//Attribute: Name, Test1
 			//Bus: 1, Test Bus, 1.05
 			pos = find_if(buffer.begin(), buffer.end(), ptr_fun(_istspace)) - buffer.begin();
@@ -84,12 +84,12 @@ void DataManager::Load(tistream &source, bool interactive)
 			}
 			else
 			{
-				//ÌáÈ¡Ö¸Áî
+				//æå–æŒ‡ä»¤
 				tstring InstructionName = Trim(buffer.substr(0, pos));
-				//½«Ê£ÏÂµÄ²¿·Ö×÷Îª²ÎÊı
+				//å°†å‰©ä¸‹çš„éƒ¨åˆ†ä½œä¸ºå‚æ•°
 				buffer.erase(0, pos + 1);
 				Trim(buffer);
-				//½âÎöÖ¸Áî
+				//è§£ææŒ‡ä»¤
 #define _CheckKeyword(expression, keyword) else if (Compare(expression, _T(#keyword)) == 0)
 				if (InstructionName.empty())
 					throw ValidationException(EXCEPTION_MISSING_INSTRUCTION);
@@ -98,32 +98,32 @@ void DataManager::Load(tistream &source, bool interactive)
 					if (false) {}
 					_CheckKeyword(InstructionName, Attribute.Locale)
 					{
-						//ÉèÖÃÎÄ¼ş±àÂë
+						//è®¾ç½®æ–‡ä»¶ç¼–ç 
 						source.imbue(locale(_t2s(buffer).c_str()));
 					}
 					_CheckKeyword(InstructionName, Attribute.Version)
 					{
 						vector <tstring> versionParts;
-						//ÉèÖÃ°¸ÀıÎÄ¼ş°æ±¾
+						//è®¾ç½®æ¡ˆä¾‹æ–‡ä»¶ç‰ˆæœ¬
 						m_CaseInfo->Version = Version(buffer);
 						if (m_CaseInfo->Version.Major > Application::DataFileVersion.Major)
 							throw ValidationException(EXCEPTION_DATA_VERSION);
 					}
 					_CheckKeyword(InstructionName, Attribute.Name)
 					{
-						//ÉèÖÃ°¸ÀıÃû³Æ
+						//è®¾ç½®æ¡ˆä¾‹åç§°
 						m_CaseInfo->Name = Trim(buffer);
 					}
 					_CheckKeyword(InstructionName, Attribute.Annotation)
 					{
-						//Ôö¼ÓÒ»ĞĞ×¢ÊÍ
+						//å¢åŠ ä¸€è¡Œæ³¨é‡Š
 						if (!m_CaseInfo->Annotation.empty()) m_CaseInfo->Annotation += '\n';
 						m_CaseInfo->Annotation += buffer;
 						Console::WritePrompt(Format(PROMPT_ANNOTATION, buffer.c_str()));
 					}
 					_CheckKeyword(InstructionName, Attribute.BusListCapacity)
 					{
-						//ÉèÖÃ×ÜÏßÁĞ±íÈİÁ¿£¬·½±ãÔ¤ÁôÄÚ´æ¿Õ¼ä
+						//è®¾ç½®æ€»çº¿åˆ—è¡¨å®¹é‡ï¼Œæ–¹ä¾¿é¢„ç•™å†…å­˜ç©ºé—´
 						//if (!buffer.empty())
 							//_CaseInfo->Buses.reserve(stoi(buffer));
 					} 
@@ -153,7 +153,7 @@ void DataManager::Load(tistream &source, bool interactive)
 					}
 					_CheckKeyword(InstructionName, NextIndex)
 					{
-						//ÊÔÍ¼ÎªÏÂÒ»¸öÔª¼şÖ¸¶¨Ë÷Òı
+						//è¯•å›¾ä¸ºä¸‹ä¸€ä¸ªå…ƒä»¶æŒ‡å®šç´¢å¼•
 						NextIndex = stoi(buffer);
 					}
 					else 
@@ -165,7 +165,7 @@ void DataManager::Load(tistream &source, bool interactive)
 						c = NetworkObject::Create(InstructionName);
 						if (c == NULL)
 						{
-							//Î´ÖªµÄÖ¸Áî
+							//æœªçŸ¥çš„æŒ‡ä»¤
 							Console::WritePrompt(Format(WARNING_INVALID_INSTRUCTION, LineCounter, InstructionName.c_str()));
 						} else {
 							c->LoadData(params);

@@ -1,4 +1,4 @@
-#ifndef __POWERSOLUTIONS_POWERFLOW_H
+﻿#ifndef __POWERSOLUTIONS_POWERFLOW_H
 #define __POWERSOLUTIONS_POWERFLOW_H
 
 #include "PowerFlowObjectModel.h"

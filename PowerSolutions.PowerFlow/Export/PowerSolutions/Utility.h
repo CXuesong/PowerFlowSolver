@@ -1,4 +1,4 @@
-
+ï»¿
 #ifndef __POWERSOLUTIONS_UTILITY
 #define __POWERSOLUTIONS_UTILITY
 
@@ -9,7 +9,7 @@ namespace PowerSolutions
 {
 	namespace Utility
 	{
-		//Ìá¹©ÁËÒ»¸öÓëË³ĞòÎŞ¹ØµÄ pair µÄ¹şÏ£º¯Êı¡£
+		//æä¾›äº†ä¸€ä¸ªä¸é¡ºåºæ— å…³çš„ pair çš„å“ˆå¸Œå‡½æ•°ã€‚
 		template<class T>
 		struct UnorderedPairHasher
 			: public std::unary_function < std::pair<T, T>, size_t >
@@ -21,7 +21,7 @@ namespace PowerSolutions
 			}
 		};
 
-		//Ìá¹©ÁËÒ»¸öÓëË³ĞòÎŞ¹ØµÄ pair µÄÏàµÈĞÔ±È½Ïº¯Êı¡£
+		//æä¾›äº†ä¸€ä¸ªä¸é¡ºåºæ— å…³çš„ pair çš„ç›¸ç­‰æ€§æ¯”è¾ƒå‡½æ•°ã€‚
 		template<class T>
 		struct UnorderedPairEqualityComparer
 			: public std::binary_function < const std::pair<T, T>, const std::pair<T, T>, bool >
@@ -33,7 +33,7 @@ namespace PowerSolutions
 			}
 		};
 
-		//Ìá¹©ÁËÒ»¸öÓëË³ĞòÏà¹ØµÄ pair µÄ¹şÏ£º¯Êı¡£
+		//æä¾›äº†ä¸€ä¸ªä¸é¡ºåºç›¸å…³çš„ pair çš„å“ˆå¸Œå‡½æ•°ã€‚
 		template<class T>
 		struct OrderedPairHasher
 			: public std::unary_function < const std::pair<T, T>, size_t >
@@ -45,7 +45,7 @@ namespace PowerSolutions
 			}
 		};
 
-		//Ìá¹©ÁËÒ»¸öÓëË³ĞòÏà¹ØµÄ pair µÄÏàµÈĞÔ±È½Ïº¯Êı¡£
+		//æä¾›äº†ä¸€ä¸ªä¸é¡ºåºç›¸å…³çš„ pair çš„ç›¸ç­‰æ€§æ¯”è¾ƒå‡½æ•°ã€‚
 		template<class T>
 		struct OrderedPairEqualityComparer
 			: public std::binary_function < const std::pair<T, T>, const std::pair<T, T>, bool >

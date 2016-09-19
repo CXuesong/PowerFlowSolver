@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "NRSolver.h"
 #include "PrimitiveNetwork.h"
 #include "Exceptions.h"
@@ -27,24 +27,24 @@ namespace PowerSolutions
 		{
 			assert(Block1EquationCount() == PQNodeCount + PVNodeCount);
 			assert(EquationCount() == PQNodeCount * 2 + PVNodeCount);
-			//PQ½Úµã£º[dP dQ] = J * [V theta]
-			//PV½Úµã£º[dP] = J * [theta]
+			//PQèŠ‚ç‚¹ï¼š[dP dQ] = J * [V theta]
+			//PVèŠ‚ç‚¹ï¼š[dP] = J * [theta]
 			//       PQ/PV    |   PQ
-			//¦¤y = [dP ... dP | dQ ... dQ] = ConstraintPower - CurrentPower
-			//¦¤x = [theta ... theta | V ... V]
-			// ·Ö½çÏß/ÆğÊ¼Ë÷Òı£º
+			//Î”y = [dP ... dP | dQ ... dQ] = ConstraintPower - CurrentPower
+			//Î”x = [theta ... theta | V ... V]
+			// åˆ†ç•Œçº¿/èµ·å§‹ç´¢å¼•ï¼š
 			// H[0,0], N[NodeCount - 1, 0]
-			//³õÊ¼»¯¾ØÕóÎ¬Êı
-			//×¢ÒâÏòÁ¿ĞèÒªÊÖ¶¯ÇåÁã
+			//åˆå§‹åŒ–çŸ©é˜µç»´æ•°
+			//æ³¨æ„å‘é‡éœ€è¦æ‰‹åŠ¨æ¸…é›¶
 			ConstraintPowerInjection.resize(EquationCount());
 			CurrentAnswer.resize(EquationCount());
 			CorrectionAnswer.resize(EquationCount());
 			PowerInjectionDeviation.resize(EquationCount());
 
-			//È·¶¨ÑÅ¿É±È¾ØÕóÃ¿Ò»ÁĞĞèÒªµÄ·ÇÁãÔª¿Õ¼äÊıÁ¿
-			//°´ÕÕ×î²»ÀíÏëµÄÇé¿öÀ´ÉêÇëÑÅ¿É±È¾ØÕóµÄ¿Õ¼ä
-			//¾ßÌåµÄÉêÇë¿Õ¼ä²Ù×÷
-			vector<int> JocobianColSpace(EquationCount());		//ÑÅ¿É±È¾ØÕóÖĞÃ¿Ò»ÁĞµÄ·ÇÁãÔªËØÊıÁ¿£¬ÓÃÓÚÎª¾ØÕóÔ¤Áô¿Õ¼ä¡£
+			//ç¡®å®šé›…å¯æ¯”çŸ©é˜µæ¯ä¸€åˆ—éœ€è¦çš„éé›¶å…ƒç©ºé—´æ•°é‡
+			//æŒ‰ç…§æœ€ä¸ç†æƒ³çš„æƒ…å†µæ¥ç”³è¯·é›…å¯æ¯”çŸ©é˜µçš„ç©ºé—´
+			//å…·ä½“çš„ç”³è¯·ç©ºé—´æ“ä½œ
+			vector<int> JocobianColSpace(EquationCount());		//é›…å¯æ¯”çŸ©é˜µä¸­æ¯ä¸€åˆ—çš„éé›¶å…ƒç´ æ•°é‡ï¼Œç”¨äºä¸ºçŸ©é˜µé¢„ç•™ç©ºé—´ã€‚
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
 				auto& node = PNetwork->Nodes(n);
@@ -57,7 +57,7 @@ namespace PowerSolutions
 			Jocobian.resize(EquationCount(), EquationCount());
 			Jocobian.reserve(JocobianColSpace);
 
-			//Éú³ÉÄ¿±ê×¢Èë¹¦ÂÊÏòÁ¿ y£¬ÒÔ¼°µü´ú³õÖµÏòÁ¿¡£
+			//ç”Ÿæˆç›®æ ‡æ³¨å…¥åŠŸç‡å‘é‡ yï¼Œä»¥åŠè¿­ä»£åˆå€¼å‘é‡ã€‚
 			for (auto& node : PNetwork->Nodes())
 			{
 				if (node->Type() != NodeType::SlackNode)
@@ -72,7 +72,7 @@ namespace PowerSolutions
 					}
 				}
 			}
-			_PS_TRACE("Ä¿±êº¯ÊıÖµ Y ==========");
+			_PS_TRACE("ç›®æ ‡å‡½æ•°å€¼ Y ==========");
 			_PS_TRACE(ConstraintPowerInjection);
 		}
 
@@ -80,7 +80,7 @@ namespace PowerSolutions
 		{
 			EvalPowerInjection();
 			//BUG CLOSED
-			//×îĞ¡ÏµÊı²»Ò»¶¨ÊÇ¾ø¶ÔÖµ×îĞ¡µÄÏµÊı
+			//æœ€å°ç³»æ•°ä¸ä¸€å®šæ˜¯ç»å¯¹å€¼æœ€å°çš„ç³»æ•°
 			return PowerInjectionDeviation.cwiseAbs().maxCoeff();
 		}
 
@@ -109,18 +109,18 @@ namespace PowerSolutions
 		inline double NRSolver::NodeAngle(int NodeIndex)
 		{
 			assert(NodeIndex < NodeCount);
-			//×¢Òâ´Ë´¦Çø·ÖÆ½ºâ½Úµã¡£
+			//æ³¨æ„æ­¤å¤„åŒºåˆ†å¹³è¡¡èŠ‚ç‚¹ã€‚
 			return NodeIndex < NodeCount - 1 ? CurrentAnswer(NodeIndex) : 0;
 		}
 
 		void NRSolver::EvalPowerInjection()
 		{
-			//TODO ¼ÆÈëµ¼ÄÉ¾ØÕó¿ÉÄÜµÄ²»¶Ô³ÆĞÔ
-			//¼ÆËã¸÷½ÚµãµÄÊµ¼Ê×¢Èë¹¦ÂÊ£¬ÒÔ¼°¹¦ÂÊÆ«²î PowerInjectionDeviation
+			//TODO è®¡å…¥å¯¼çº³çŸ©é˜µå¯èƒ½çš„ä¸å¯¹ç§°æ€§
+			//è®¡ç®—å„èŠ‚ç‚¹çš„å®é™…æ³¨å…¥åŠŸç‡ï¼Œä»¥åŠåŠŸç‡åå·® PowerInjectionDeviation
 			PowerInjectionDeviation = ConstraintPowerInjection;
 			for (auto& node : PSolution->NodeStatus()) node.ClearPowerInjection();
-			//±éÀúËùÓĞ½Úµã£¬°üÀ¨Æ½ºâ½Úµã
-			//´Ë´¦Ê¹ÓÃ for ¶ø·Ç for-each ÊÇÎªÁËÓëÊıÑ§±í´ï±£³ÖÒ»ÖÂ
+			//éå†æ‰€æœ‰èŠ‚ç‚¹ï¼ŒåŒ…æ‹¬å¹³è¡¡èŠ‚ç‚¹
+			//æ­¤å¤„ä½¿ç”¨ for è€Œé for-each æ˜¯ä¸ºäº†ä¸æ•°å­¦è¡¨è¾¾ä¿æŒä¸€è‡´
 			auto &Admittance = PNetwork->Admittance;
 			for (int m = 0; m < NodeCount; m++)
 			{
@@ -128,11 +128,11 @@ namespace PowerSolutions
 				auto Um = NodeVoltage(m);
 				auto thetaM = NodeAngle(m);
 				int subM = Block1EquationCount() + statusM.SubIndex();
-				//¼ÆËãµ¼ÄÉ¾ØÕóÖĞ·Ç¶Ô½ÇÔªËØ¶ÔÓ¦µÄ¹¦ÂÊ¡£
+				//è®¡ç®—å¯¼çº³çŸ©é˜µä¸­éå¯¹è§’å…ƒç´ å¯¹åº”çš„åŠŸç‡ã€‚
 				for (int n = m + 1; n < NodeCount; n++)
 				{
-					// µ¼ÄÉ¾ØÕóÊÇÉÏÈı½Ç¾ØÕó£¬row < col
-					// TODO È¡Ïû¶Ôµ¼ÄÉ¾ØÕó¶Ô³ÆµÄ¼Ù¶¨£¨ÒÆÏà±äÑ¹Æ÷£©¡£
+					// å¯¼çº³çŸ©é˜µæ˜¯ä¸Šä¸‰è§’çŸ©é˜µï¼Œrow < col
+					// TODO å–æ¶ˆå¯¹å¯¼çº³çŸ©é˜µå¯¹ç§°çš„å‡å®šï¼ˆç§»ç›¸å˜å‹å™¨ï¼‰ã€‚
 					complexd Y = Admittance.coeff(m, n);
 					complexd Y1 = Admittance.coeff(n, m);
 					//if (abs(Y) < 1e-10) continue;
@@ -141,17 +141,17 @@ namespace PowerSolutions
 					auto sinMn = sin(thetaMn);
 					auto cosMn = cos(thetaMn);
 					auto &statusN = PSolution->NodeStatus(n);
-					//ÀÛ¼ÆÉÏÒ»´Îµü´ú½á¹û¶ÔÓ¦µÄ×¢Èë¹¦ÂÊ
+					//ç´¯è®¡ä¸Šä¸€æ¬¡è¿­ä»£ç»“æœå¯¹åº”çš„æ³¨å…¥åŠŸç‡
 					statusM.AddPowerInjections(UmUn * (Y.real() * cosMn + Y.imag() * sinMn),
 						UmUn * (Y.real() * sinMn - Y.imag() * cosMn));
 					statusN.AddPowerInjections(UmUn * (Y1.real() * cosMn - Y1.imag() * sinMn),
 						UmUn * (-Y1.real() * sinMn - Y1.imag() * cosMn));
 				}
-				//¼ÆËãµ¼ÄÉ¾ØÕóÖĞ¶Ô½ÇÔªËØ¶ÔÓ¦µÄ¹¦ÂÊ¡£
+				//è®¡ç®—å¯¼çº³çŸ©é˜µä¸­å¯¹è§’å…ƒç´ å¯¹åº”çš„åŠŸç‡ã€‚
 				auto UmSqr = Um * Um;
 				auto Y = Admittance.coeff(m, m);
 				statusM.AddPowerInjections(UmSqr * Y.real(), -UmSqr * Y.imag());
-				//Éú³É¹¦ÂÊÆ«²îÏòÁ¿ ¦¤y'
+				//ç”ŸæˆåŠŸç‡åå·®å‘é‡ Î”y'
 				if (statusM.Type() != NodeType::SlackNode)
 				{
 					PowerInjectionDeviation(m) -= statusM.ActivePowerInjection();
@@ -159,28 +159,28 @@ namespace PowerSolutions
 						PowerInjectionDeviation(subM) -= statusM.ReactivePowerInjection();
 				}
 			}
-			_PS_TRACE("Æ½ºâ½Úµã ======");
-			_PS_TRACE("ÓĞ¹¦×¢Èë£º" << PSolution->NodeStatus(NodeCount - 1).ActivePowerInjection());
-			_PS_TRACE("ÎŞ¹¦×¢Èë£º" << PSolution->NodeStatus(NodeCount - 1).ReactivePowerInjection());
-			_PS_TRACE("Æ«²î deltaY ==========");
+			_PS_TRACE("å¹³è¡¡èŠ‚ç‚¹ ======");
+			_PS_TRACE("æœ‰åŠŸæ³¨å…¥ï¼š" << PSolution->NodeStatus(NodeCount - 1).ActivePowerInjection());
+			_PS_TRACE("æ— åŠŸæ³¨å…¥ï¼š" << PSolution->NodeStatus(NodeCount - 1).ReactivePowerInjection());
+			_PS_TRACE("åå·® deltaY ==========");
 			_PS_TRACE(PowerInjectionDeviation);
 		}
 		
 		void NRSolver::GenerateJacobian()
 		{
 			Jocobian.setZero();
-			//PQ½Úµã£º[dP dQ] = J * [V theta]
-			//PV½Úµã£º[dP] = J * [theta]
+			//PQèŠ‚ç‚¹ï¼š[dP dQ] = J * [V theta]
+			//PVèŠ‚ç‚¹ï¼š[dP] = J * [theta]
 			//       PQ/PV        PQ
-			//¦¤y = [dP ... dP dQ ... dQ]
-			//¦¤x = [theta ... theta V ... V]
+			//Î”y = [dP ... dP dQ ... dQ]
+			//Î”x = [theta ... theta V ... V]
 			//    / H | N \
 			//J = | --+-- |
 			//    \ M | L /
-			// ÆğÊ¼Ë÷Òı£º£¨×¢ÒâÅÅ³ıÆ½ºâ½Úµã£©
+			// èµ·å§‹ç´¢å¼•ï¼šï¼ˆæ³¨æ„æ’é™¤å¹³è¡¡èŠ‚ç‚¹ï¼‰
 			// H[0,0], N[NodeCount - 1, 0]
 			// M[NodeCount - 1, 0], L[..., ...]
-			// ¶Ô·Ç¶Ô½ÇÔªÓĞ
+			// å¯¹éå¯¹è§’å…ƒæœ‰
 			// H =  L
 			// N = -M
 			auto& Admittance = PNetwork->Admittance;
@@ -190,12 +190,12 @@ namespace PowerSolutions
 				double Um = NodeVoltage(m);
 				double thetaM = NodeAngle(m);
 				int subM = Block1EquationCount() + nodeM.SubIndex();
-				//¼ÆËã·Ç¶Ô½ÇÔªËØ
+				//è®¡ç®—éå¯¹è§’å…ƒç´ 
 				for (int n = m + 1; n < NodeCount - 1; n++)
 				{
 					complexd Ymn = Admittance.coeff(m, n);
 					complexd Ynm = Admittance.coeff(m, n);
-					//TODO ¸ÄÎª¸ù¾İ¾ØÕóÄÚ²¿±£´æµÄË÷ÒıÀ´½øĞĞÑ¡ÔñĞÔÑ­»·¡£
+					//TODO æ”¹ä¸ºæ ¹æ®çŸ©é˜µå†…éƒ¨ä¿å­˜çš„ç´¢å¼•æ¥è¿›è¡Œé€‰æ‹©æ€§å¾ªç¯ã€‚
 					if (abs(Ymn) < 1e-20 && abs(Ynm) < 1e-20) continue;
 					double UmUn = Um * NodeVoltage(n);
 					double thetaMn = thetaM - NodeAngle(n);
@@ -216,7 +216,7 @@ namespace PowerSolutions
 					{
 						if (nodeN.Type() == NodeType::PQNode)
 						{
-							//PQ-PQ£¬×ÓÕó¾ßÓĞ¶Ô³ÆĞÔ
+							//PQ-PQï¼Œå­é˜µå…·æœ‰å¯¹ç§°æ€§
 							// N
 							Jocobian.coeffRef(m, subN) = N;
 							Jocobian.coeffRef(n, subM) = Np;
@@ -224,27 +224,27 @@ namespace PowerSolutions
 							Jocobian.coeffRef(subM, n) = -N;
 							//BUG CLOSED
 							//Jocobian.coeffRef(subM, n) = -Np;
-							//²»ÕıÈ·µÄÑÅ¿É±È¾ØÕóÔªËØÉú³É
-							//Ìì¿Ó¡£
+							//ä¸æ­£ç¡®çš„é›…å¯æ¯”çŸ©é˜µå…ƒç´ ç”Ÿæˆ
+							//å¤©å‘ã€‚
 							Jocobian.coeffRef(subN, m) = -Np;
 							// L = H
 							Jocobian.coeffRef(subM, subN) = H;
 							Jocobian.coeffRef(subN, subM) = Hp;
 						} else {
-							//PQ-PV£¨m,n£©
+							//PQ-PVï¼ˆm,nï¼‰
 							// M = -N
 							Jocobian.coeffRef(subM, n) = -N;
-							//PV-PQ£¨n,m£©
+							//PV-PQï¼ˆn,mï¼‰
 							// N
 							Jocobian.coeffRef(n, subM) = Np;
 						}
 					} else {
 						if (nodeN.Type() == NodeType::PQNode)
 						{
-							//PV-PQ£¨m,n£©
+							//PV-PQï¼ˆm,nï¼‰
 							// N
 							Jocobian.coeffRef(m, subN) = N;
-							//PQ-PV£¨n,m£©
+							//PQ-PVï¼ˆn,mï¼‰
 							// M
 							Jocobian.coeffRef(subN, m) = -Np;
 						}
@@ -252,7 +252,7 @@ namespace PowerSolutions
 				}
 				complexd Y = Admittance.coeffRef(m, m);
 				double UmSqr = Um * Um;
-				//¼ÆËã¶Ô½ÇÔªËØ
+				//è®¡ç®—å¯¹è§’å…ƒç´ 
 				//H
 				Jocobian.coeffRef(m, m) = UmSqr * Y.imag() + nodeM.ReactivePowerInjection();
 				if (nodeM.Type() == NodeType::PQNode)
@@ -265,27 +265,27 @@ namespace PowerSolutions
 					Jocobian.coeffRef(subM, subM) = UmSqr * Y.imag() - nodeM.ReactivePowerInjection();
 				}
 			}
-			_PS_TRACE("ÑÅ¿É±È¾ØÕó ==========");
+			_PS_TRACE("é›…å¯æ¯”çŸ©é˜µ ==========");
 			_PS_TRACE(Jocobian);
 		}
 
 		bool NRSolver::GenerateNextAnswer()
 		{
 			SparseLU<SparseMatrix<double>> solver;
-			//Çó½â¾ØÕó·½³Ì
+			//æ±‚è§£çŸ©é˜µæ–¹ç¨‹
 			Jocobian.makeCompressed();
 			solver.compute(Jocobian);
 			if (solver.info() != Eigen::Success) return false;
 			CorrectionAnswer = solver.solve(PowerInjectionDeviation);
 			if (solver.info() != Eigen::Success) return false;
-			//¼ÆËãĞÂµÄ½á¹û
-			//×¢Òâµ½ ¦¤y = -J ¦¤x
-			//¶ø´Ë´¦Êµ¼Ê½âµÄ·½³Ì×éÎª ¦¤y' = J ¦¤x
-			//Ò²¾ÍÊÇËµ£¬¦¤y = -¦¤y'
-			//¦¤x = [theta ... theta V ... V]
+			//è®¡ç®—æ–°çš„ç»“æœ
+			//æ³¨æ„åˆ° Î”y = -J Î”x
+			//è€Œæ­¤å¤„å®é™…è§£çš„æ–¹ç¨‹ç»„ä¸º Î”y' = J Î”x
+			//ä¹Ÿå°±æ˜¯è¯´ï¼ŒÎ”y = -Î”y'
+			//Î”x = [theta ... theta V ... V]
 			CurrentAnswer.head(Block1EquationCount()) -= CorrectionAnswer.head(Block1EquationCount());
 			CurrentAnswer.tail(Block2EquationCount()) -= CurrentAnswer.tail(Block2EquationCount()).cwiseProduct(CorrectionAnswer.tail(Block2EquationCount()));
-			_PS_TRACE("µ±Ç°½âÏòÁ¿ ==========");
+			_PS_TRACE("å½“å‰è§£å‘é‡ ==========");
 			_PS_TRACE(CurrentAnswer);
 			return true;
 		}

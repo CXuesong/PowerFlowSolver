@@ -1,6 +1,6 @@
-/*
+ï»¿/*
 PowerSolutions
-ÎÈÌ¬³±Á÷Çó½âÊµÏÖ²¿·Ö£¨NR·¨£©¡£
+ç¨³æ€æ½®æµæ±‚è§£å®ç°éƒ¨åˆ†ï¼ˆNRæ³•ï¼‰ã€‚
 by Chen [CXuesong.], 2015
 */
 
@@ -14,24 +14,24 @@ namespace PowerSolutions
 		class NRSolver final : public SolverImpl
 		{
 		private:
-			//¶¨Î»µã¡£
-			int Block1EquationCount() { return NodeCount - 1; }		//¾ØÕó×Ó¿é H µÄ½×Êı¡£
-			int Block2EquationCount() { return PQNodeCount; }		//¾ØÕó×Ó¿é L µÄ½×Êı¡£
-			int EquationCount()										//ĞèÒªÇó½âµÄ·½³Ì×éµÄÎ¬Êı¡£
+			//å®šä½ç‚¹ã€‚
+			int Block1EquationCount() { return NodeCount - 1; }		//çŸ©é˜µå­å— H çš„é˜¶æ•°ã€‚
+			int Block2EquationCount() { return PQNodeCount; }		//çŸ©é˜µå­å— L çš„é˜¶æ•°ã€‚
+			int EquationCount()										//éœ€è¦æ±‚è§£çš„æ–¹ç¨‹ç»„çš„ç»´æ•°ã€‚
 			{
 				return Block1EquationCount() + Block2EquationCount();
 			}
-			// ¦¤y = -J ¦¤x
+			// Î”y = -J Î”x
 			// ConstraintPower - CurrentPower = - Jocobian * CorrectionAnswer
-			Eigen::SparseMatrix<double> Jocobian;		//ÑÅ¿É±È¾ØÕó¡£
+			Eigen::SparseMatrix<double> Jocobian;		//é›…å¯æ¯”çŸ©é˜µã€‚
 			Eigen::VectorXd ConstraintPowerInjection;
 			Eigen::VectorXd PowerInjectionDeviation;
 			Eigen::VectorXd CorrectionAnswer;
 			Eigen::VectorXd CurrentAnswer;
 		private:
 			void EvalPowerInjection();
-			void GenerateJacobian();			//ĞÎ³ÉÑÅ¿É±È¾ØÕó¡£
-			bool GenerateNextAnswer();			//½â³öµü´úµÄµ±Ç°½á¹û¡£
+			void GenerateJacobian();			//å½¢æˆé›…å¯æ¯”çŸ©é˜µã€‚
+			bool GenerateNextAnswer();			//è§£å‡ºè¿­ä»£çš„å½“å‰ç»“æœã€‚
 			double NodeVoltage(int NodeIndex);
 			double NodeAngle(int NodeIndex);
 			void UpdateNodeStatus(int nodeIndex)

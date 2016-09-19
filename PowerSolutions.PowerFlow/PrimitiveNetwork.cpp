@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "PrimitiveNetwork.h"
 #include "Exceptions.h"
 #include "NetworkCase.h"
@@ -20,8 +20,8 @@ namespace PowerSolutions {
 		PrimitiveNetwork::~PrimitiveNetwork()
 		{
 			_PS_TRACE("PN Dispose " << this);
-			//BUG FIXED Ê¹ÓÃ _Nodes ×÷Îª±éÀúÉ¾³ıµÄ¶ÔÏó
-			//µ¼ÖÂÔÚĞÎ³É _Nodes Ç°ÈÓ³öÒì³£Ê±·¢ÉúÄÚ´æĞ¹Â©¡£
+			//BUG FIXED ä½¿ç”¨ _Nodes ä½œä¸ºéå†åˆ é™¤çš„å¯¹è±¡
+			//å¯¼è‡´åœ¨å½¢æˆ _Nodes å‰æ‰”å‡ºå¼‚å¸¸æ—¶å‘ç”Ÿå†…å­˜æ³„æ¼ã€‚
 			for (auto& p : _BusDict) delete p.second;
 			for (auto& item : _Branches) delete item;
 		}
@@ -30,20 +30,20 @@ namespace PowerSolutions {
 		void PrimitiveNetwork::LoadSubnetwork(const PrimitiveNetwork* source, TNodeQueue& nodes, TBranchQueue& branches)
 		{
 			assert(source != nullptr);
-			//³õÊ¼»¯¹«¹²ÊôĞÔ¡£
+			//åˆå§‹åŒ–å…¬å…±å±æ€§ã€‚
 			_Options = source->_Options;
 			_SourceNetwork = source->_SourceNetwork;
 			_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
-			//ÓÃÓÚ½« source ÖĞµÄ½ÚµãÓ³Éäµ½ this ÖĞµÄ¶ÔÓ¦½Úµã¡£
+			//ç”¨äºå°† source ä¸­çš„èŠ‚ç‚¹æ˜ å°„åˆ° this ä¸­çš„å¯¹åº”èŠ‚ç‚¹ã€‚
 			unordered_map<NodeInfo*, NodeInfo*> NewNodeDict(nodes.size());
 			unordered_map<BranchInfo*, BranchInfo*> NewBranchDict(nodes.size());
-			//¸´ÖÆ½Úµã¶ÔÏóÄ£ĞÍ¡£
+			//å¤åˆ¶èŠ‚ç‚¹å¯¹è±¡æ¨¡å‹ã€‚
 			while (!nodes.empty())
 			{
 				auto oldInst = nodes.top();
 				auto newInst = new NodeInfo(*oldInst);
 				nodes.pop();
-				//ÔÚºóÃæµÄ´úÂëÖĞÖØĞÂ½øĞĞ±àºÅ¡£
+				//åœ¨åé¢çš„ä»£ç ä¸­é‡æ–°è¿›è¡Œç¼–å·ã€‚
 				_Nodes.push_back(newInst);
 				_BusDict.emplace(newInst->Bus(), newInst);
 				NewNodeDict.emplace(oldInst, newInst);
@@ -54,7 +54,7 @@ namespace PowerSolutions {
 					_SlackNode = newInst;
 				}
 			}
-			//¸´ÖÆ±ß¶ÔÏóÄ£ĞÍ¡£
+			//å¤åˆ¶è¾¹å¯¹è±¡æ¨¡å‹ã€‚
 			while (!branches.empty())
 			{
 				BranchInfo* oldInst = branches.top();
@@ -68,11 +68,11 @@ namespace PowerSolutions {
 			}
 			if (_SlackNode == nullptr)
 			{
-				//ĞèÒªÊÖ¶¯·ÖÅäÒ»¸öÆ½ºâ½Úµã¡£
+				//éœ€è¦æ‰‹åŠ¨åˆ†é…ä¸€ä¸ªå¹³è¡¡èŠ‚ç‚¹ã€‚
 				AssignSlackNode();
 				swap(*find(_Nodes.begin(), _Nodes.end(), _SlackNode), _Nodes.back());
 			}
-			//Îª½ÚµãÖØĞÂ±àºÅ¡£
+			//ä¸ºèŠ‚ç‚¹é‡æ–°ç¼–å·ã€‚
 			int NodeCounter1 = 0, NodeCounter2 = 0;
 			vector<int> AdmittanceColSpace;
 			AdmittanceColSpace.reserve(_Nodes.size());
@@ -97,7 +97,7 @@ namespace PowerSolutions {
 			_SlackNode->SubIndex(_Nodes.size() - 1);
 			Admittance.resize(_Nodes.size(), _Nodes.size());
 			Admittance.reserve(AdmittanceColSpace);
-			//ĞŞÕı¾ÉµÄ½ÚµãÒıÓÃ¡£
+			//ä¿®æ­£æ—§çš„èŠ‚ç‚¹å¼•ç”¨ã€‚
 			for (auto& nodeP : NewNodeDict)
 			{
 				auto& oldNode = nodeP.first;
@@ -106,7 +106,7 @@ namespace PowerSolutions {
 				Admittance.coeffRef(m, m) = source->Admittance.coeff(m0, m0);
 				for (auto& abranch : newNode->AdjacentBranches())
 				{
-					//×¢ÒâÏÂÃæÁ½ĞĞË³Ğò²»ÄÜ·´¡£
+					//æ³¨æ„ä¸‹é¢ä¸¤è¡Œé¡ºåºä¸èƒ½åã€‚
 					auto n0 = abranch->AnotherNode(oldNode)->Index();
 					abranch = NewBranchDict.at(abranch);
 					auto n = abranch->AnotherNode(newNode)->Index();
@@ -118,13 +118,13 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::LoadNetworkCase(const ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options)
 		{
-			//LoadNetworkCase Ö»ÄÜµ÷ÓÃÒ»´Î¡£
+			//LoadNetworkCase åªèƒ½è°ƒç”¨ä¸€æ¬¡ã€‚
 			assert(_SourceNetwork == nullptr);
 			_PS_TRACE("Load Network " << this << " From " << network);
 			_SourceNetwork = network;
 			_Options = options;
 			_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
-			//ÖØÖÃ¾Ö²¿±äÁ¿
+			//é‡ç½®å±€éƒ¨å˜é‡
 			//_Buses.clear();
 			//_BusDict.clear();
 			//_Branches.clear();
@@ -133,7 +133,7 @@ namespace PowerSolutions {
 			//_PVNodes.clear();
 			//_SlackNode = nullptr;
 			assert(_SlackNode == nullptr);
-			//ÔØÈëÄ¸Ïß
+			//è½½å…¥æ¯çº¿
 			for (auto& obj : network->Objects())
 			{
 				auto b = dynamic_cast<Bus*>(obj);
@@ -157,24 +157,24 @@ namespace PowerSolutions {
 			_BusDict.reserve(_Buses.size());
 			for (auto &obj : _Buses)
 			{
-				//Ä¬ÈÏPQ½Úµã
+				//é»˜è®¤PQèŠ‚ç‚¹
 				_BusDict.emplace(obj, new NodeInfo(obj));
 			}
-			//Èç¹ûËùÓĞµÄ½Úµã¾ùÓĞÁ¬½Ó£¬ÔòÖ§Â·ÊıÁ¿Îª n(n-1)/2
-			//´Ë´¦¼ÙÉèÃ¿¸öÄ¸ÏßÉÏ¾ùÓĞ6»Ø½ÓÏß
+			//å¦‚æœæ‰€æœ‰çš„èŠ‚ç‚¹å‡æœ‰è¿æ¥ï¼Œåˆ™æ”¯è·¯æ•°é‡ä¸º n(n-1)/2
+			//æ­¤å¤„å‡è®¾æ¯ä¸ªæ¯çº¿ä¸Šå‡æœ‰6å›æ¥çº¿
 			_Branches.reserve(_Buses.size() * 3);
-			//ÔØÈëÔª¼şĞÅÏ¢
+			//è½½å…¥å…ƒä»¶ä¿¡æ¯
 			for (auto& obj : network->Objects())
 			{
 				auto* c = dynamic_cast<Component*>(obj);
 				if (c != nullptr)
 				{
-					//²¹³ä½ÚµãĞÅÏ¢ÒÔ¼°Ö§Â·Á¬½ÓĞÅÏ¢¡£
+					//è¡¥å……èŠ‚ç‚¹ä¿¡æ¯ä»¥åŠæ”¯è·¯è¿æ¥ä¿¡æ¯ã€‚
 					c->BuildNodeInfo(this);
 				}
 			}
-			//×¢Òâ£¬´ËÊ±µÄÍ³¼ÆµÄPQ½ÚµãÊıÁ¿ÖĞ»¹°üº¬ÁË¹ÂÁ¢µÄ½Úµã
-			//´Ó BusMapping ÖĞÒÆ³ıÎ´±»ÒıÓÃµÄ½Úµã¡£
+			//æ³¨æ„ï¼Œæ­¤æ—¶çš„ç»Ÿè®¡çš„PQèŠ‚ç‚¹æ•°é‡ä¸­è¿˜åŒ…å«äº†å­¤ç«‹çš„èŠ‚ç‚¹
+			//ä» BusMapping ä¸­ç§»é™¤æœªè¢«å¼•ç”¨çš„èŠ‚ç‚¹ã€‚
 			assert(_BusDict.size() == _Buses.size());
 			while (true)
 			{
@@ -182,8 +182,8 @@ namespace PowerSolutions {
 					[](NodeDictionary::value_type &item){return item.second->Degree() == 0; });
 				if (i != _BusDict.end())
 				{
-					//BUG FIXED ´Ë´¦Î´ delete Ôì³ÉÄÚ´æĞ¹Â©¡£
-					//BUG FIXED ÒÆ³ı¹ÂÁ¢µÄÆ½ºâ½Úµã¡£
+					//BUG FIXED æ­¤å¤„æœª delete é€ æˆå†…å­˜æ³„æ¼ã€‚
+					//BUG FIXED ç§»é™¤å­¤ç«‹çš„å¹³è¡¡èŠ‚ç‚¹ã€‚
 					if (i->second->Type() == NodeType::SlackNode)
 						_SlackNode = nullptr;
 					delete i->second;
@@ -192,11 +192,11 @@ namespace PowerSolutions {
 					break;
 				}
 			};
-			//ºÜ²»ÇÉ£¬ËùÓĞµÄ½Úµã¶¼±»É¾ÍêÁË¡£
+			//å¾ˆä¸å·§ï¼Œæ‰€æœ‰çš„èŠ‚ç‚¹éƒ½è¢«åˆ å®Œäº†ã€‚
 			if (_BusDict.empty()) return;
-			//¼ì²éÊÇ·ñ´æÔÚÆ½ºâ½Úµã¡£
+			//æ£€æŸ¥æ˜¯å¦å­˜åœ¨å¹³è¡¡èŠ‚ç‚¹ã€‚
 			if (_SlackNode == nullptr) AssignSlackNode();
-			//Í³¼ÆPQ/PV½ÚµãÊıÁ¿£¬±ãÓÚÔ¤Áô¿Õ¼ä¡£
+			//ç»Ÿè®¡PQ/PVèŠ‚ç‚¹æ•°é‡ï¼Œä¾¿äºé¢„ç•™ç©ºé—´ã€‚
 			size_t PQNodeCount = 0, PVNodeCount = 0;
 			for (auto& p : _BusDict)
 			{
@@ -210,7 +210,7 @@ namespace PowerSolutions {
 					break;
 				}
 			}
-			//¸´ÖÆ½ÚµãÁĞ±í¡£
+			//å¤åˆ¶èŠ‚ç‚¹åˆ—è¡¨ã€‚
 			_Nodes.resize(PQNodeCount + PVNodeCount + 1);
 			assert(_Nodes.size() == _BusDict.size());
 			transform(_BusDict.cbegin(), _BusDict.cend(), _Nodes.begin(),
@@ -218,43 +218,43 @@ namespace PowerSolutions {
 			if ((_Options & PrimitiveNetworkOptions::NodeReorder) == PrimitiveNetworkOptions::NodeReorder)
 			{
 				_PS_TRACE("Node Reorder = True");
-				//²ÉÓÃ¾²Ì¬½ÚµãÓÅ»¯±àºÅ,¼´½«½ÚµãµÄ³öÏßÊı´ÓĞ¡µ½´óÒÀ´ÎÅÅÁĞ
-				//¶ÔNodesÁĞ±í½øĞĞÅÅĞò¡£
+				//é‡‡ç”¨é™æ€èŠ‚ç‚¹ä¼˜åŒ–ç¼–å·,å³å°†èŠ‚ç‚¹çš„å‡ºçº¿æ•°ä»å°åˆ°å¤§ä¾æ¬¡æ’åˆ—
+				//å¯¹Nodesåˆ—è¡¨è¿›è¡Œæ’åºã€‚
 				sort(_Nodes.begin(), _Nodes.end(),
 					[](const NodeCollection::value_type &x, const NodeCollection::value_type &y)
 				{
-					//½«Æ½ºâ½Úµã·Åµ½ÁĞ±íµÄÄ©Î²
+					//å°†å¹³è¡¡èŠ‚ç‚¹æ”¾åˆ°åˆ—è¡¨çš„æœ«å°¾
 					if (x->Type() == NodeType::SlackNode) return false;
 					if (y->Type() == NodeType::SlackNode) return true;
 					return x->Degree() < y->Degree();
 				});
 			} else {
 #if _DEBUG
-				//ÔÚµ÷ÊÔÄ£Ê½ÏÂ£¬¿ÉÒÔ°´ÕÕ½ÚµãµÄ Id Îª½ÚµãÅÅĞò¡£
+				//åœ¨è°ƒè¯•æ¨¡å¼ä¸‹ï¼Œå¯ä»¥æŒ‰ç…§èŠ‚ç‚¹çš„ Id ä¸ºèŠ‚ç‚¹æ’åºã€‚
 				sort(_Nodes.begin(), _Nodes.end(),
 					[](const NodeCollection::value_type &x, const NodeCollection::value_type &y)
 				{
-					//½«Æ½ºâ½Úµã·Åµ½ÁĞ±íµÄÄ©Î²
+					//å°†å¹³è¡¡èŠ‚ç‚¹æ”¾åˆ°åˆ—è¡¨çš„æœ«å°¾
 					if (x->Type() == NodeType::SlackNode) return false;
 					if (y->Type() == NodeType::SlackNode) return true;
 					return x->Bus()->_ID < y->Bus()->_ID;
 				});
 #else
-				//²»ÂÛÈçºÎ£¬Æ½ºâ½ÚµãÓ¦¸ÃÔÚ Nodes ¼¯ºÏµÄ×îºóÃæ¡£
-				//´Ë´¦¿¼ÂÇµ½ĞÔÄÜ£¬½ö½ö½»»»Æ½ºâ½ÚµãºÍ³ıÆ½ºâ½ÚµãÒÔÍâ×îºóÒ»¸ö½ÚµãµÄÎ»ÖÃ¡£
+				//ä¸è®ºå¦‚ä½•ï¼Œå¹³è¡¡èŠ‚ç‚¹åº”è¯¥åœ¨ Nodes é›†åˆçš„æœ€åé¢ã€‚
+				//æ­¤å¤„è€ƒè™‘åˆ°æ€§èƒ½ï¼Œä»…ä»…äº¤æ¢å¹³è¡¡èŠ‚ç‚¹å’Œé™¤å¹³è¡¡èŠ‚ç‚¹ä»¥å¤–æœ€åä¸€ä¸ªèŠ‚ç‚¹çš„ä½ç½®ã€‚
 				swap(*find_if(_Nodes.begin(), _Nodes.end(), [](NodeInfo* node){return node->Type() == NodeType::SlackNode; }),
 					_Nodes.back());
 #endif
 			}
-			//°´ÕÕĞÂµÄË³ĞòÖØĞÂ±àºÅ
+			//æŒ‰ç…§æ–°çš„é¡ºåºé‡æ–°ç¼–å·
 			int IndexCounter1 = 0, IndexCounter2 = 0;
 			_PQNodes.reserve(PQNodeCount);
 			_PVNodes.reserve(PVNodeCount);
-			//CASE Èç¹ûÃ»ÓĞPV½Úµã£¬»áµ¼ÖÂÒì³£
+			//CASE å¦‚æœæ²¡æœ‰PVèŠ‚ç‚¹ï¼Œä¼šå¯¼è‡´å¼‚å¸¸
 			for (auto node : _Nodes)
 			{
 				assert(node->Degree() > 0);
-				//Îª½Úµã±àºÅ¡£
+				//ä¸ºèŠ‚ç‚¹ç¼–å·ã€‚
 				node->Index(IndexCounter1 + IndexCounter2);
 				if (node->Type() == NodeType::PQNode)
 				{
@@ -268,7 +268,7 @@ namespace PowerSolutions {
 					_PVNodes.push_back(node);
 				}
 			}
-			//Æ½ºâ½Úµã±àºÅ·ÅÔÚ×îºóÃæ¡£
+			//å¹³è¡¡èŠ‚ç‚¹ç¼–å·æ”¾åœ¨æœ€åé¢ã€‚
 			_SlackNode->Index(IndexCounter1 + IndexCounter2);
 			_SlackNode->SubIndex(0);
 
@@ -278,18 +278,18 @@ namespace PowerSolutions {
 				_PS_TRACE(node->Bus()->_ID << "\t" << node->Index() << "\t" << (int)node->Type());
 			}
 
-			//Éú³Éµ¼ÄÉ¾ØÕó¡£
+			//ç”Ÿæˆå¯¼çº³çŸ©é˜µã€‚
 			Admittance.resize(_Nodes.size(), _Nodes.size());
 			if ((_Options & PrimitiveNetworkOptions::NoAdmittanceMatrix) != PrimitiveNetworkOptions::NoAdmittanceMatrix)
 			{
-				//Îªµ¼ÄÉÏ¡Êè¾ØÕóÔ¤Áô¿Õ¼ä
+				//ä¸ºå¯¼çº³ç¨€ç–çŸ©é˜µé¢„ç•™ç©ºé—´
 				vector<int> ColSpace;
 				ColSpace.resize(_Nodes.size());
-				//½«½Úµã±í¸ñÓ³ÉäÎª¶ÔÓ¦½ÚµãµÄÖ§Â·ÊıÁ¿
+				//å°†èŠ‚ç‚¹è¡¨æ ¼æ˜ å°„ä¸ºå¯¹åº”èŠ‚ç‚¹çš„æ”¯è·¯æ•°é‡
 				transform(_Nodes.begin(), _Nodes.end(), ColSpace.begin(),
 					[](NodeInfo *node){ return node->Degree() * 2 + 1; });
 				Admittance.reserve(ColSpace);
-				//Éú³Éµ¼ÄÉ¾ØÕó
+				//ç”Ÿæˆå¯¼çº³çŸ©é˜µ
 				_PS_TRACE("Bus1 -- Bus2\tY12\tY1\tY2");
 				for (auto& obj : network->Objects())
 				{
@@ -298,34 +298,34 @@ namespace PowerSolutions {
 						c->BuildAdmittanceInfo(this);
 				}
 				Admittance.makeCompressed();
-				_PS_TRACE("\nµ¼ÄÉ¾ØÕó ==========\n" << Admittance);
+				_PS_TRACE("\nå¯¼çº³çŸ©é˜µ ==========\n" << Admittance);
 			}
 		}
 
 		void PrimitiveNetwork::AddPi(const Bus* pbus1, const Bus* pbus2, PiEquivalencyParameters pieqv)
 		{
-			//¾ßÓĞ¦ĞĞÎµÈÖµµçÂ·
+			//å…·æœ‰Ï€å½¢ç­‰å€¼ç”µè·¯
 			int index1 = Nodes(pbus1).Index();
 			int index2 = Nodes(pbus2).Index();
 			//BUG CLOSED
-			//µ±ÏµÊı¾ØÕó·ÇÁãÔªËØÊıÁ¿Ôö¼ÓÊ±£¬
-			//¿ÉÄÜ»áµ¼ÖÂÔ¤ÏÈ»ñÈ¡µÄÁãÔªËØ¶ÔÓ¦µØÖ·±»¸²¸Ç£¬
-			//Òò´Ë²»ÄÜÌáÇ°Ê¹ÓÃÒıÓÃ±äÁ¿±£´æÎ»ÖÃ¡£
-			//Èç¹û´ËÊ±ÖØĞÂÊ¹ÓÃ coeffRef ¼´¿ÉµÃµ½ÕıÈ·µÄ½á¹û¡£
+			//å½“ç³»æ•°çŸ©é˜µéé›¶å…ƒç´ æ•°é‡å¢åŠ æ—¶ï¼Œ
+			//å¯èƒ½ä¼šå¯¼è‡´é¢„å…ˆè·å–çš„é›¶å…ƒç´ å¯¹åº”åœ°å€è¢«è¦†ç›–ï¼Œ
+			//å› æ­¤ä¸èƒ½æå‰ä½¿ç”¨å¼•ç”¨å˜é‡ä¿å­˜ä½ç½®ã€‚
+			//å¦‚æœæ­¤æ—¶é‡æ–°ä½¿ç”¨ coeffRef å³å¯å¾—åˆ°æ­£ç¡®çš„ç»“æœã€‚
 			complexd transAdmittance = 1.0 / pieqv.Impedance();
 			_PS_TRACE(index1 << " -- " << index2 << "\t" << transAdmittance << "\t" << pieqv.Admittance1() << "\t" << pieqv.Admittance2());
-			//×Ôµ¼ÄÉÊÇÕıµÄ
+			//è‡ªå¯¼çº³æ˜¯æ­£çš„
 			if ((_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance)
 			{
-				//¼ÆÈë½ÓµØµ¼ÄÉ¡£
+				//è®¡å…¥æ¥åœ°å¯¼çº³ã€‚
 				Admittance.coeffRef(index1, index1) += transAdmittance + pieqv.Admittance1();
 				Admittance.coeffRef(index2, index2) += transAdmittance + pieqv.Admittance2();
 			} else {
-				//²»¼Æ½ÓµØµ¼ÄÉ¡£
+				//ä¸è®¡æ¥åœ°å¯¼çº³ã€‚
 				Admittance.coeffRef(index1, index1) += transAdmittance;
 				Admittance.coeffRef(index2, index2) += transAdmittance;
 			}
-			//»¥µ¼ÄÉÊÇ¸ºµÄ¡£
+			//äº’å¯¼çº³æ˜¯è´Ÿçš„ã€‚
 			Admittance.coeffRef(index1, index2) -= transAdmittance;
 			Admittance.coeffRef(index2, index1) -= transAdmittance;
 			//TraceFile << pieqv->PiAdmittance1() << " /- " << transAdmittance << " -\\ " << pieqv->PiAdmittance2() << endl;
@@ -340,7 +340,7 @@ namespace PowerSolutions {
 			if (((_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance))
 			{
 				auto node = TryGetNode(bus);
-				//Èç¹û node == nullptr£¬ËµÃ÷½ÚµãÊÇ¹ÂÁ¢µÄ£¬ÒÑ¾­±»ÓÅ»¯µôÁË¡£
+				//å¦‚æœ node == nullptrï¼Œè¯´æ˜èŠ‚ç‚¹æ˜¯å­¤ç«‹çš„ï¼Œå·²ç»è¢«ä¼˜åŒ–æ‰äº†ã€‚
 				if (node != nullptr)
 				{
 					auto index = node->Index();
@@ -364,7 +364,7 @@ namespace PowerSolutions {
 			auto node = TryGetNode(bus);
 			if (node != nullptr)
 			{
-				//false ±íÊ¾ÕâÖÖÇé¿öÊÇ²»¿ÉÒÔµÄ£¬ĞèÒªÒı·¢Òì³£¡£
+				//false è¡¨ç¤ºè¿™ç§æƒ…å†µæ˜¯ä¸å¯ä»¥çš„ï¼Œéœ€è¦å¼•å‘å¼‚å¸¸ã€‚
 				if (node->Type() != NodeType::PQNode && abs(node->Voltage() - voltage) > 1e-10)
 					throw Exception(ExceptionCode::VoltageMismatch);
 				if (node->Type() != NodeType::SlackNode)
@@ -383,7 +383,7 @@ namespace PowerSolutions {
 			{
 				if (_SlackNode == nullptr)
 				{
-					//ÉèÖÃÆ½ºâ»ú
+					//è®¾ç½®å¹³è¡¡æœº
 					if (node->Type() != NodeType::PQNode && abs(node->Voltage() - abs(voltagePhasor)) > 1e-10)
 						throw Exception(ExceptionCode::VoltageMismatch);
 					node->Voltage(abs(voltagePhasor));
@@ -392,12 +392,12 @@ namespace PowerSolutions {
 					_SlackNode = node;
 				} else if (_SlackNode == node)
 				{
-					//ÔÚÍ¬Ò»¸öÄ¸ÏßÉÏ·ÅÖÃÁË¶àÌ¨Æ½ºâ·¢µç»ú
-					//¼ì²éÆ½ºâ»úµçÑ¹
+					//åœ¨åŒä¸€ä¸ªæ¯çº¿ä¸Šæ”¾ç½®äº†å¤šå°å¹³è¡¡å‘ç”µæœº
+					//æ£€æŸ¥å¹³è¡¡æœºç”µå‹
 					if (abs(node->Voltage() - abs(voltagePhasor)) > 1e-10)
 						throw Exception(ExceptionCode::VoltageMismatch);
 				} else {
-					//´æÔÚ¶àÓÚÒ»Ì¨Æ½ºâ·¢µç»ú
+					//å­˜åœ¨å¤šäºä¸€å°å¹³è¡¡å‘ç”µæœº
 					throw Exception(ExceptionCode::SlackBus);
 				}
 			}
@@ -405,29 +405,29 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::ClaimBranch(const Bus* bus1, const Bus* bus2, const Component* c)
 		{
-			assert(bus1 != bus2);	//²»ÔÊĞí×Ô»·¡£
-			//¼ÓÈëÖ§Â·-×é¼şÁĞ±íÖĞ
+			assert(bus1 != bus2);	//ä¸å…è®¸è‡ªç¯ã€‚
+			//åŠ å…¥æ”¯è·¯-ç»„ä»¶åˆ—è¡¨ä¸­
 			auto& node1 = Nodes(bus1);
 			auto& node2 = Nodes(bus2);
 			auto result = _BranchDict.emplace(make_pair(&node1, &node2), nullptr);
 			if (result.second)
 			{
-				//³É¹¦ÏòÖ§Â·ÁĞ±íÖĞ¼ÓÈëÁËĞÂÏî£¬ËµÃ÷³öÏÖÁËĞÂÖ§Â·¡£
+				//æˆåŠŸå‘æ”¯è·¯åˆ—è¡¨ä¸­åŠ å…¥äº†æ–°é¡¹ï¼Œè¯´æ˜å‡ºç°äº†æ–°æ”¯è·¯ã€‚
 				auto newBranch = new BranchInfo(_Branches.size(), &node1, &node2);
 				_Branches.push_back(newBranch);
 				result.first->second = newBranch;
 				node1.AdjacentBranches().push_back(newBranch);
 				node2.AdjacentBranches().push_back(newBranch);
 			}
-			//ÎªÖ§Â·Ôö¼ÓÒ»¸öÔª¼ş¡£
+			//ä¸ºæ”¯è·¯å¢åŠ ä¸€ä¸ªå…ƒä»¶ã€‚
 			result.first->second->Components().push_back(c);
 		}
 		
 		void PrimitiveNetwork::ClaimParent(const Bus* bus, const Component* c)
 		{
-			//¼ÓÈëÄ¸ÏßµÄÔª¼şÁĞ±íÖĞ¡£
+			//åŠ å…¥æ¯çº¿çš„å…ƒä»¶åˆ—è¡¨ä¸­ã€‚
 			auto node = TryGetNode(bus);
-			//Èç¹û node == nullptr£¬ËµÃ÷½ÚµãÊÇ¹ÂÁ¢µÄ£¬ÒÑ¾­±»ÓÅ»¯µôÁË¡£
+			//å¦‚æœ node == nullptrï¼Œè¯´æ˜èŠ‚ç‚¹æ˜¯å­¤ç«‹çš„ï¼Œå·²ç»è¢«ä¼˜åŒ–æ‰äº†ã€‚
 			if (node != nullptr)
 				node->Components().push_back(c);
 		}
@@ -436,8 +436,8 @@ namespace PowerSolutions {
 		{
 			_PS_TRACE("=== BFS ConnectedSubnetworks ===");
 			vector<shared_ptr<PrimitiveNetwork>> rv;
-			// ½øĞĞ¹ã¶ÈÓÅÏÈËÑË÷£¨BFS£©¡£
-			vector<bool> NodeDiscovered(_Nodes.size());	//ºÚÉ«½Úµã
+			// è¿›è¡Œå¹¿åº¦ä¼˜å…ˆæœç´¢ï¼ˆBFSï¼‰ã€‚
+			vector<bool> NodeDiscovered(_Nodes.size());	//é»‘è‰²èŠ‚ç‚¹
 			vector<bool> BranchVisited(_Branches.size());
 			queue<NodeInfo*> NodeQueue;
 			struct NodeInfoComparer {
@@ -457,7 +457,7 @@ namespace PowerSolutions {
 			while (true)
 			{
 				auto i = find(NodeDiscovered.begin(), NodeDiscovered.end(), false);
-				if (i == NodeDiscovered.end()) break;	//ËùÓĞÁ¬Í¨×ÓÍ¼ÒÑ¾­±éÀúÍê±Ï¡£
+				if (i == NodeDiscovered.end()) break;	//æ‰€æœ‰è¿é€šå­å›¾å·²ç»éå†å®Œæ¯•ã€‚
 				assert(NodeQueue.empty() && SubNodes.empty() && SubBranches.empty());
 				auto startingIndex = distance(NodeDiscovered.begin(), i);
 				NodeQueue.push(_Nodes[startingIndex]);
@@ -466,29 +466,29 @@ namespace PowerSolutions {
 				{
 					auto node0 = NodeQueue.front();
 					NodeQueue.pop();
-					//¼ÇÂ¼»ÒÉ«½Úµã¡£
+					//è®°å½•ç°è‰²èŠ‚ç‚¹ã€‚
 					_PS_TRACE("node " << node0->Bus()->_ID);
-					//½«¸Õ¸Õ·¢ÏÖµÄ»ÒÉ«½Úµã¼ÓÈëÁĞ±í¡£
+					//å°†åˆšåˆšå‘ç°çš„ç°è‰²èŠ‚ç‚¹åŠ å…¥åˆ—è¡¨ã€‚
 					SubNodes.push(node0);
 					for (auto& ab : node0->AdjacentBranches())
 					{
 						auto node = ab->AnotherNode(node0);
 						if (node0 > node)
 						{
-							//Èç¹û²»´æÔÚ node0 > node µÄÅĞ¶Ï
-							//ÔòÃ¿Ìõ±ßÇ¡ºÃ±»±éÀúÁ½´Î¡£
+							//å¦‚æœä¸å­˜åœ¨ node0 > node çš„åˆ¤æ–­
+							//åˆ™æ¯æ¡è¾¹æ°å¥½è¢«éå†ä¸¤æ¬¡ã€‚
 							_PS_TRACE("branch " << node0->Bus()->_ID << "\t" << node->Bus()->_ID);
 							SubBranches.push(_BranchDict.at(NodePair(node0, node)));
 						}
 						if (!NodeDiscovered[node->Index()])
 						{
-							//½«½ÚµãÈ¾»Ò¡£
+							//å°†èŠ‚ç‚¹æŸ“ç°ã€‚
 							NodeDiscovered[node->Index()] = true;
-							//½ÓÈë´ıÌ½Ë÷ÁĞ±í¡£
+							//æ¥å…¥å¾…æ¢ç´¢åˆ—è¡¨ã€‚
 							NodeQueue.push(node);
 						}
 					}
-					//½«µ±Ç°½Úµã±ê¼ÇÎªÒÑ·ÃÎÊ¡££¨È¾ºÚ£©
+					//å°†å½“å‰èŠ‚ç‚¹æ ‡è®°ä¸ºå·²è®¿é—®ã€‚ï¼ˆæŸ“é»‘ï¼‰
 					//NodeVisited[node0->Index()] = true;
 				}
 				shared_ptr<PrimitiveNetwork> newPN(new PrimitiveNetwork());
@@ -501,10 +501,10 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::AssignSlackNode()
 		{
-			//½öÔÚÏµÍ³ÖĞÎŞÏÔÊ½Ö¸¶¨Æ½ºâ½ÚµãÊ±Ìá¹©Æ½ºâ½ÚµãµÄ×ª»»Âß¼­¡£
+			//ä»…åœ¨ç³»ç»Ÿä¸­æ— æ˜¾å¼æŒ‡å®šå¹³è¡¡èŠ‚ç‚¹æ—¶æä¾›å¹³è¡¡èŠ‚ç‚¹çš„è½¬æ¢é€»è¾‘ã€‚
 			if ((_Options & PrimitiveNetworkOptions::AutoAssignSlackNode) != PrimitiveNetworkOptions::AutoAssignSlackNode)
 				throw Exception(ExceptionCode::SlackBus);
-				//ĞèÒªÊÖ¶¯·ÖÅäÒ»¸öÆ½ºâ½Úµã¡£
+				//éœ€è¦æ‰‹åŠ¨åˆ†é…ä¸€ä¸ªå¹³è¡¡èŠ‚ç‚¹ã€‚
 			const double NINF = -DBL_MAX * DBL_MAX;
 			double MaxPVActivePower = 0, MaxPQActivePower = NINF;
 			NodeInfo *MaxPV = nullptr, *MaxPQ = nullptr;
@@ -530,10 +530,10 @@ namespace PowerSolutions {
 			_SlackNodeAssignment = SlackNodeAssignmentType::PVNode;
 			if (_SlackNode == nullptr)
 			{
-				//Ã»ÓĞÆ½ºâ½ÚµãºÍPV½Úµã¡£
+				//æ²¡æœ‰å¹³è¡¡èŠ‚ç‚¹å’ŒPVèŠ‚ç‚¹ã€‚
 				if ((_Options & PrimitiveNetworkOptions::ForceSetSlackNode) != PrimitiveNetworkOptions::ForceSetSlackNode)
 					throw Exception(ExceptionCode::SlackBus);
-				//Ö»ºÃÊ¹ÓÃÓĞ¹¦³öÁ¦×î´ó/ÓĞ¹¦¸ººÉ×îĞ¡µÄPQ½Úµã¡£
+				//åªå¥½ä½¿ç”¨æœ‰åŠŸå‡ºåŠ›æœ€å¤§/æœ‰åŠŸè´Ÿè·æœ€å°çš„PQèŠ‚ç‚¹ã€‚
 				_SlackNode = MaxPQ;
 				_SlackNodeAssignment = SlackNodeAssignmentType::PQNode;
 				if (_SlackNode == nullptr) throw Exception(ExceptionCode::SlackBus);

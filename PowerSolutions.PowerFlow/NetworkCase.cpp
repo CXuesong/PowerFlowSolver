@@ -1,4 +1,4 @@
-#include "stdafx.h"
+ï»¿#include "stdafx.h"
 #include "ObjectModel.h"
 #include "NetworkCase.h"
 #include "Exceptions.h"
@@ -11,7 +11,7 @@ using namespace std;
 
 namespace PowerSolutions {
 	namespace ObjectModel {
-		////////// °¸Àı //////////
+		////////// æ¡ˆä¾‹ //////////
 		NetworkCase::NetworkCase()
 			: m_AutoDeleteChildren(true)
 		{
@@ -28,14 +28,14 @@ namespace PowerSolutions {
 		{
 			for (auto &obj : m_Objects)
 				delete obj;
-			//ÒÆ³ıËùÓĞ³ÉÔ±
+			//ç§»é™¤æ‰€æœ‰æˆå‘˜
 			m_Objects.clear();
 		}
 
 		void NetworkCase::AddObject(NetworkObject* obj)
 		{
 			assert(obj);
-			//·ÅÈëÁĞ±í
+			//æ”¾å…¥åˆ—è¡¨
 			m_Objects.push_back(obj);
 		}
 
@@ -65,16 +65,16 @@ namespace PowerSolutions {
 
 		pair < shared_ptr<NetworkCase>, shared_ptr<NetworkCaseCorrespondenceInfo> > NetworkCase::CorrespondenceClone()
 		{
-			//×¢ÒâÄÚ´æÎÊÌâ£º´Ë´¦·ÖÅäÁËÄÚ´æ£¬µ«Ã»ÓĞÊÍ·Å
-			// delete ÔËËã·ûÒªÇóÄÚ´æµÄ·ÖÅä·½ºÍÊÍ·Å·½±ØĞëÊÇÍ¬Ò»¸ö¶Ñ
-			// ¼´±ØĞëÊÇÍ¬Ò»¸ö Dll ÖĞ¡£
-			//¸´ÖÆ×ÔÉí
+			//æ³¨æ„å†…å­˜é—®é¢˜ï¼šæ­¤å¤„åˆ†é…äº†å†…å­˜ï¼Œä½†æ²¡æœ‰é‡Šæ”¾
+			// delete è¿ç®—ç¬¦è¦æ±‚å†…å­˜çš„åˆ†é…æ–¹å’Œé‡Šæ”¾æ–¹å¿…é¡»æ˜¯åŒä¸€ä¸ªå †
+			// å³å¿…é¡»æ˜¯åŒä¸€ä¸ª Dll ä¸­ã€‚
+			//å¤åˆ¶è‡ªèº«
 			auto nc = make_shared<NetworkCase>();
 			shared_ptr<NetworkCaseCorrespondenceInfo> 
 				context(new NetworkCaseCorrespondenceInfo(m_Objects.size()));
 			nc->m_AutoDeleteChildren = m_AutoDeleteChildren;
-			//¸´ÖÆÄ¸ÏßºÍÔª¼ş
-			//×¢Òâ´Ë´¦¼Ù¶¨ËùÓĞµÄÔª¼ş¾ù×ñ´ÓÏòÇ°ÒıÓÃµÄÔ­Ôò
+			//å¤åˆ¶æ¯çº¿å’Œå…ƒä»¶
+			//æ³¨æ„æ­¤å¤„å‡å®šæ‰€æœ‰çš„å…ƒä»¶å‡éµä»å‘å‰å¼•ç”¨çš„åŸåˆ™
 			for (auto& obj : m_Objects)
 			{
 				auto newObj = obj->Clone(*context);
@@ -110,7 +110,7 @@ namespace PowerSolutions {
 		{
 			auto i = objectMapping.find(prototypeObj);
 			if (i == objectMapping.end()) throw Exception(ExceptionCode::InvalidArgument);
-			//Èç¹û´«ÈëµÄÒÑ¾­ÊÇ¸±±¾ÁË£¬¿ÉÒÔ¿¼ÂÇÊÇ·ñ²»Òı·¢Òì³££¬¶øÖ±½Ó·µ»Øµ±Ç°²ÎÊıÖ¸¶¨µÄÄÇ¸ö¸±±¾¡£
+			//å¦‚æœä¼ å…¥çš„å·²ç»æ˜¯å‰¯æœ¬äº†ï¼Œå¯ä»¥è€ƒè™‘æ˜¯å¦ä¸å¼•å‘å¼‚å¸¸ï¼Œè€Œç›´æ¥è¿”å›å½“å‰å‚æ•°æŒ‡å®šçš„é‚£ä¸ªå‰¯æœ¬ã€‚
 			if (!i->second.isPrototype) throw Exception(ExceptionCode::InvalidOperation);
 			return i->second.anotherObject;
 		}

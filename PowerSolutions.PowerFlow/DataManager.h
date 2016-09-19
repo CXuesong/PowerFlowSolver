@@ -1,22 +1,22 @@
-//¹ÜÀíÊı¾İµÄÊäÈë
+ï»¿//ç®¡ç†æ•°æ®çš„è¾“å…¥
 #pragma once
 
 namespace AppNamespace {
-	//ÒıÓÃÀà
+	//å¼•ç”¨ç±»
 	class NetworkCase;
 	namespace Solvers
 	{
 		class SSSolver;
 	}
 	using Solvers::SSSolver;
-	//¹ÜÀíÊı¾İµÄÊäÈë¡£
+	//ç®¡ç†æ•°æ®çš„è¾“å…¥ã€‚
 	class DataManager
 	{
 	private:
 		NetworkCase *m_CaseInfo;
-		SSSolver *m_Solver = NULL;			//Ê¹ÓÃµÄÇó½âÆ÷¡£
+		SSSolver *m_Solver = NULL;			//ä½¿ç”¨çš„æ±‚è§£å™¨ã€‚
 	public:
-		inline NetworkCase* CaseInfo()		//ÍøÂç°¸ÀıĞÅÏ¢£¬Êı¾İ½«±»¼ÓÔØÖÁ´Ë´¦¡£
+		inline NetworkCase* CaseInfo()		//ç½‘ç»œæ¡ˆä¾‹ä¿¡æ¯ï¼Œæ•°æ®å°†è¢«åŠ è½½è‡³æ­¤å¤„ã€‚
 		{
 			return m_CaseInfo;
 		}
@@ -25,10 +25,10 @@ namespace AppNamespace {
 			return m_Solver;
 		}
 	public:
-		void Load(const tstring &fileName);					//´ÓÖ¸¶¨µÄÎÄ¼şÖĞ¼ÓÔØÊı¾İ¡£
-		void Load(tistream &source, bool interactive);		//´ÓÖ¸¶¨µÄÁ÷ÖĞ¼ÓÔØÊı¾İ¡£
+		void Load(const tstring &fileName);					//ä»æŒ‡å®šçš„æ–‡ä»¶ä¸­åŠ è½½æ•°æ®ã€‚
+		void Load(tistream &source, bool interactive);		//ä»æŒ‡å®šçš„æµä¸­åŠ è½½æ•°æ®ã€‚
 		void WriteReport(const tstring &fileName, bool plainReport);
-		void WriteReport(tostream &dest, bool plainReport);	//ÏòÖ¸¶¨µÄÁ÷Ğ´Èë·ÖÎö±¨¸æ¡£
+		void WriteReport(tostream &dest, bool plainReport);	//å‘æŒ‡å®šçš„æµå†™å…¥åˆ†ææŠ¥å‘Šã€‚
 	public:
 		~DataManager();
 		DataManager();

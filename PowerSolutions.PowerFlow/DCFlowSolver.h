@@ -1,6 +1,6 @@
-/*
+ï»¿/*
 PowerSolutions
-ÎÈÌ¬³±Á÷Çó½âÊµÏÖ²¿·Ö£¨Ö±Á÷³±Á÷·¨£©¡£
+ç¨³æ€æ½®æµæ±‚è§£å®ç°éƒ¨åˆ†ï¼ˆç›´æµæ½®æµæ³•ï¼‰ã€‚
 by Chen [CXuesong.], 2015
 */
 
@@ -11,7 +11,7 @@ namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		// ÎÈÌ¬³±Á÷Çó½âÊµÏÖ²¿·Ö£¨Ö±Á÷·¨£©¡£
+		// ç¨³æ€æ½®æµæ±‚è§£å®ç°éƒ¨åˆ†ï¼ˆç›´æµæ³•ï¼‰ã€‚
 		class DCFlowSolver : public Solver
 		{
 		public:

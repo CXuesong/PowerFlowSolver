@@ -1,4 +1,4 @@
-#ifndef __POWERSOLUTIONS_POWERFLOW_EXCEPTIONS_H
+ï»¿#ifndef __POWERSOLUTIONS_POWERFLOW_EXCEPTIONS_H
 #define __POWERSOLUTIONS_POWERFLOW_EXCEPTIONS_H
 
 #include <stdexcept>
@@ -7,7 +7,7 @@ namespace PowerSolutions {
 	enum class ExceptionCode : unsigned int
 	{
 		None = 0x00000000,
-		ExceptionClassMask = 0xFFFF0000,			//ÓÃÓÚÓëÒì³£´úÂëÊ¹ÓÃ°´Î»¡°Óë¡±²Ù×÷·ûÀ´¼ì²éÒì³£µÄ´ó·ÖÀà¡£
+		ExceptionClassMask = 0xFFFF0000,			//ç”¨äºä¸å¼‚å¸¸ä»£ç ä½¿ç”¨æŒ‰ä½â€œä¸â€æ“ä½œç¬¦æ¥æ£€æŸ¥å¼‚å¸¸çš„å¤§åˆ†ç±»ã€‚
 		InvalidArgument = 0x00010000,
 		ArgumentNull = InvalidArgument + 1,
 		ArgumentOutOfRange = InvalidArgument + 2,

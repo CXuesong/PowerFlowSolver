@@ -1,4 +1,4 @@
-#ifndef __POWERSOLUTIONS_POWERFLOW_PRIMITIVENETWORK_H
+ï»¿#ifndef __POWERSOLUTIONS_POWERFLOW_PRIMITIVENETWORK_H
 #define __POWERSOLUTIONS_POWERFLOW_PRIMITIVENETWORK_H
 
 #include "PowerSolutions.h"
@@ -12,33 +12,33 @@
 
 namespace PowerSolutions {
 	namespace ObjectModel {
-		// ½ÚµãµÄÀàĞÍ¡£
+		// èŠ‚ç‚¹çš„ç±»å‹ã€‚
 		enum class NodeType : byte
 		{
-			PQNode = 0,		//PQ½Úµã¡£
-			PVNode,			//PV½Úµã¡£
-			SlackNode,		//Æ½ºâ½Úµã¡£
+			PQNode = 0,		//PQèŠ‚ç‚¹ã€‚
+			PVNode,			//PVèŠ‚ç‚¹ã€‚
+			SlackNode,		//å¹³è¡¡èŠ‚ç‚¹ã€‚
 		};
 		enum class PrimitiveNetworkOptions : byte
 		{
 			None = 0,
-			NodeReorder = 1,			//½øĞĞ½Úµã±àºÅÓÅ»¯¡£
-			IgnoreShuntAdmittance = 2,	//ºöÂÔ½ÓµØµ¼ÄÉ£¬ÓÃÓÚÖ±Á÷³±Á÷¼ÆËã¡£×¢Òâ´ËÑ¡Ïî²»»á¸Ä±ä NodeInfo::Components µÄĞĞÎª¡£
-			NoAdmittanceMatrix = 4,		//²»Éú³Éµ¼ÄÉ¾ØÕó£¬Ò»°ãÓÃÓÚ´¿Í¼ÂÛ·ÖÎö¡£
-			//Èç¹ûÍøÂçÖĞ²»´æÔÚÆ½ºâ½Úµã£¬Ôò½«·¢µçÈİÁ¿×î´óµÄPV½Úµã×÷ÎªÆ½ºâ½Úµã¡£
+			NodeReorder = 1,			//è¿›è¡ŒèŠ‚ç‚¹ç¼–å·ä¼˜åŒ–ã€‚
+			IgnoreShuntAdmittance = 2,	//å¿½ç•¥æ¥åœ°å¯¼çº³ï¼Œç”¨äºç›´æµæ½®æµè®¡ç®—ã€‚æ³¨æ„æ­¤é€‰é¡¹ä¸ä¼šæ”¹å˜ NodeInfo::Components çš„è¡Œä¸ºã€‚
+			NoAdmittanceMatrix = 4,		//ä¸ç”Ÿæˆå¯¼çº³çŸ©é˜µï¼Œä¸€èˆ¬ç”¨äºçº¯å›¾è®ºåˆ†æã€‚
+			//å¦‚æœç½‘ç»œä¸­ä¸å­˜åœ¨å¹³è¡¡èŠ‚ç‚¹ï¼Œåˆ™å°†å‘ç”µå®¹é‡æœ€å¤§çš„PVèŠ‚ç‚¹ä½œä¸ºå¹³è¡¡èŠ‚ç‚¹ã€‚
 			AutoAssignSlackNode = 8,
-			//±£Ö¤ÍøÂçÖĞ´æÔÚÆ½ºâ½Úµã¡£
-			//Èç¹ûÍøÂçÖĞ¼È²»´æÔÚÆ½ºâ½Úµã£¬Ò²²»´æÔÚPV½Úµã£¬ÔòÑ¡ÔñÒ»PQ½Úµã×÷ÎªÆ½ºâ½Úµã¡£
+			//ä¿è¯ç½‘ç»œä¸­å­˜åœ¨å¹³è¡¡èŠ‚ç‚¹ã€‚
+			//å¦‚æœç½‘ç»œä¸­æ—¢ä¸å­˜åœ¨å¹³è¡¡èŠ‚ç‚¹ï¼Œä¹Ÿä¸å­˜åœ¨PVèŠ‚ç‚¹ï¼Œåˆ™é€‰æ‹©ä¸€PQèŠ‚ç‚¹ä½œä¸ºå¹³è¡¡èŠ‚ç‚¹ã€‚
 			ForceSetSlackNode = AutoAssignSlackNode | 16,
-			//½ö±£ÁôÊÊÓÃÓÚ´¿Í¼ÂÛ·ÖÎöµÄÍøÂç²ÎÊı£¨ÀıÈç½Úµã¼°ÆäÁÚ½Ó±í£©¡£
+			//ä»…ä¿ç•™é€‚ç”¨äºçº¯å›¾è®ºåˆ†æçš„ç½‘ç»œå‚æ•°ï¼ˆä¾‹å¦‚èŠ‚ç‚¹åŠå…¶é‚»æ¥è¡¨ï¼‰ã€‚
 			PureGraphicalAnalysis = NoAdmittanceMatrix | ForceSetSlackNode,
 		};
-		//ÃèÊöÁË PrimitiveNetwork ÖĞÆ½ºâ½ÚµãµÄÑ¡È¡·½·¨¡£
+		//æè¿°äº† PrimitiveNetwork ä¸­å¹³è¡¡èŠ‚ç‚¹çš„é€‰å–æ–¹æ³•ã€‚
 		enum class SlackNodeAssignmentType : byte
 		{
-			SlackGenerator = 0,		//Í¨¹ıÆ½ºâ·¢µç»úÑ¡È¡¡£
-			PVNode = 1,				//Í¨¹ı×ª»»ÓĞ¹¦³öÁ¦×î´óµÄPV½ÚµãÑ¡È¡¡£
-			PQNode = 2,				//Í¨¹ı×ª»»PQ½ÚµãÑ¡È¡¡£
+			SlackGenerator = 0,		//é€šè¿‡å¹³è¡¡å‘ç”µæœºé€‰å–ã€‚
+			PVNode = 1,				//é€šè¿‡è½¬æ¢æœ‰åŠŸå‡ºåŠ›æœ€å¤§çš„PVèŠ‚ç‚¹é€‰å–ã€‚
+			PQNode = 2,				//é€šè¿‡è½¬æ¢PQèŠ‚ç‚¹é€‰å–ã€‚
 		 };
 		class PrimitiveNetwork
 		{
@@ -50,7 +50,7 @@ namespace PowerSolutions {
 			class NodeInfo
 			{
 			public:
-				// µ±È»£¬ÎÒÃÇ²»Ó¦µ±ÔÚ¼ÆËã³±Á÷Ê±ĞŞ¸ÄÔª¼şĞÅÏ¢¡£
+				// å½“ç„¶ï¼Œæˆ‘ä»¬ä¸åº”å½“åœ¨è®¡ç®—æ½®æµæ—¶ä¿®æ”¹å…ƒä»¶ä¿¡æ¯ã€‚
 				typedef std::list<const Component*> ComponentCollection;
 				typedef std::list<BranchInfo*> BranchInfoCollection;
 			private:
@@ -65,45 +65,45 @@ namespace PowerSolutions {
 				ComponentCollection _Components;
 				BranchInfoCollection _AdjacentBranches;
 			public:
-				//Ä¸ÏßµÄ×é¼şĞÅÏ¢¡£
+				//æ¯çº¿çš„ç»„ä»¶ä¿¡æ¯ã€‚
 				const ObjectModel::Bus* Bus() const { return _Bus; }
 				void Bus(const ObjectModel::Bus* val) { _Bus = val; }
-				//Ä¸ÏßËùÁ¬½ÓµÄÔª¼ş¡£°üÀ¨µ¥¶ËÓë¶à¶ËÔª¼ş¡£
+				//æ¯çº¿æ‰€è¿æ¥çš„å…ƒä»¶ã€‚åŒ…æ‹¬å•ç«¯ä¸å¤šç«¯å…ƒä»¶ã€‚
 				ComponentCollection& Components() { return _Components; }
-				//Óë´ËÄ¸ÏßÁÚ½ÓµÄ½Úµã¡£
+				//ä¸æ­¤æ¯çº¿é‚»æ¥çš„èŠ‚ç‚¹ã€‚
 				BranchInfoCollection& AdjacentBranches() { return _AdjacentBranches; }
-				//½ÚµãË÷Òı£¨Nodes£©¡£
+				//èŠ‚ç‚¹ç´¢å¼•ï¼ˆNodesï¼‰ã€‚
 				int Index() const { return _Index; }
 				void Index(int val) { _Index = val; }
-				//½ÚµãÔÚÏàÓ¦ÀàĞÍµÄ½ÚµãÁĞ±í£¨PQNodes/PVNodes£©ÖĞµÄË÷Òı¡£
+				//èŠ‚ç‚¹åœ¨ç›¸åº”ç±»å‹çš„èŠ‚ç‚¹åˆ—è¡¨ï¼ˆPQNodes/PVNodesï¼‰ä¸­çš„ç´¢å¼•ã€‚
 				int SubIndex() const { return _SubIndex; }
 				void SubIndex(int val) { _SubIndex = val; }
 				double Voltage() const { return _Voltage; }
 				void Voltage(double val) { _Voltage = val; }
-				double Angle() const { return _Angle; }		//»¡¶È
+				double Angle() const { return _Angle; }		//å¼§åº¦
 				void Angle(double val) { _Angle = val; }
-				int Degree() const { return _AdjacentBranches.size(); }		//Ä¸ÏßÁ¬½á³öÀ´µÄ·ÖÖ§ÊıÁ¿¡£
-				NodeType Type() const { return _Type; }		//Ä¸ÏßµÄÀàĞÍ¡£
+				int Degree() const { return _AdjacentBranches.size(); }		//æ¯çº¿è¿ç»“å‡ºæ¥çš„åˆ†æ”¯æ•°é‡ã€‚
+				NodeType Type() const { return _Type; }		//æ¯çº¿çš„ç±»å‹ã€‚
 				void Type(NodeType val) { _Type = val; }
-				//¶ÔÓÚPQ½Úµã£¬±£´æÒÑÖªµÄP¡¢Q£»
-				//¶ÔÓÚPV½Úµã£¬±£´æÒÑÖªµÄP¡¢V¡£
+				//å¯¹äºPQèŠ‚ç‚¹ï¼Œä¿å­˜å·²çŸ¥çš„Pã€Qï¼›
+				//å¯¹äºPVèŠ‚ç‚¹ï¼Œä¿å­˜å·²çŸ¥çš„Pã€Vã€‚
 				double ActivePowerInjection() const { return _ActivePowerInjection; }
 				void AddActivePowerInjection(double val) { _ActivePowerInjection += val; }
 				double ReactivePowerInjection() const { return _ReactivePowerInjection; }
 				void AddReactivePowerInjection(double val) { _ReactivePowerInjection += val; }
-				//´ËÄÚÁªº¯ÊıÎŞ·¨·ÅÖÃÔÚcppÖĞ,ÒòÎªÆä±» Solver µÄÅÉÉúÀàËùµ÷ÓÃ£¬
-				//¿ÉÄÜÒı·¢²»¿ÉÊ¶±ğµÄÍâ²¿º¯ÊıµÄ´íÎó¡£
+				//æ­¤å†…è”å‡½æ•°æ— æ³•æ”¾ç½®åœ¨cppä¸­,å› ä¸ºå…¶è¢« Solver çš„æ´¾ç”Ÿç±»æ‰€è°ƒç”¨ï¼Œ
+				//å¯èƒ½å¼•å‘ä¸å¯è¯†åˆ«çš„å¤–éƒ¨å‡½æ•°çš„é”™è¯¯ã€‚
 				void ClearPowerInjections()
 				{
 					_ActivePowerInjection = _ReactivePowerInjection = 0;
 				}
-				complexd VoltagePhasor()		//¸´ÊıĞÎÊ½µÄµçÑ¹ÏàÁ¿
+				complexd VoltagePhasor()		//å¤æ•°å½¢å¼çš„ç”µå‹ç›¸é‡
 				{
 					return std::polar(_Voltage, _Angle);
 				}
-				bool HasPowerInjection()		//»ñÈ¡Ò»¸öÖµ£¬Ö¸Ê¾´Ë½ÚµãÊÇ·ñ´æÔÚ×¢Èë¹¦ÂÊ¡£
+				bool HasPowerInjection()		//è·å–ä¸€ä¸ªå€¼ï¼ŒæŒ‡ç¤ºæ­¤èŠ‚ç‚¹æ˜¯å¦å­˜åœ¨æ³¨å…¥åŠŸç‡ã€‚
 				{
-					//Èç¹ûÒÔºó·¢ÏÖ´Ë·½·¨ÅĞ¶Ï²»ÑÏ¸ñ£¬¿ÉÒÔĞŞ¸Ä¡£
+					//å¦‚æœä»¥åå‘ç°æ­¤æ–¹æ³•åˆ¤æ–­ä¸ä¸¥æ ¼ï¼Œå¯ä»¥ä¿®æ”¹ã€‚
 					return ActivePowerInjection() != 0 || ReactivePowerInjection() != 0;
 				}
 			public:
@@ -112,7 +112,7 @@ namespace PowerSolutions {
 			class BranchInfo
 			{
 			public:
-				// µ±È»£¬ÎÒÃÇ²»Ó¦µ±ÔÚ¼ÆËã³±Á÷Ê±ĞŞ¸ÄÔª¼şĞÅÏ¢¡£
+				// å½“ç„¶ï¼Œæˆ‘ä»¬ä¸åº”å½“åœ¨è®¡ç®—æ½®æµæ—¶ä¿®æ”¹å…ƒä»¶ä¿¡æ¯ã€‚
 				typedef std::list<const Component*> ComponentCollection;
 			private:
 				int _Index;
@@ -141,7 +141,7 @@ namespace PowerSolutions {
 			typedef std::list<const Bus*> BusCollection;
 			typedef std::list<const Component*> ComponentCollection;
 			typedef std::vector<NodeInfo*> NodeCollection;
-			// ÎÒÃÇÓ¦¸Ã²»»áĞŞ¸Ä×÷Îª¼ü¶ø´æÔÚµÄBus*µÄÄÚÈİ¡£¾ÍËãÒª¸Ä£¬Ò²¿ÉÒÔÓÃ NodeInfo::Bus
+			// æˆ‘ä»¬åº”è¯¥ä¸ä¼šä¿®æ”¹ä½œä¸ºé”®è€Œå­˜åœ¨çš„Bus*çš„å†…å®¹ã€‚å°±ç®—è¦æ”¹ï¼Œä¹Ÿå¯ä»¥ç”¨ NodeInfo::Bus
 			typedef std::unordered_map<const ObjectModel::Bus*, NodeInfo*> NodeDictionary;
 			typedef std::vector<BranchInfo*> BranchCollection;
 			typedef std::unordered_map < NodePair, BranchInfo*,
@@ -160,11 +160,11 @@ namespace PowerSolutions {
 			PrimitiveNetworkOptions _Options;
 			SlackNodeAssignmentType _SlackNodeAssignment;
 			BusCollection _Buses;
-			NodeCollection _PQNodes;			//²ÎÓë¼ÆËãµÄÄ¸Ïß£¨PQ½Úµã£©ĞÅÏ¢£¬°´ÕÕ¾ØÕóË÷ÒıÅÅĞò¡£
-			NodeCollection _PVNodes;			//²ÎÓë¼ÆËãµÄÄ¸Ïß£¨PV½Úµã£©ĞÅÏ¢£¬°´ÕÕ¾ØÕóË÷ÒıÅÅĞò¡£
-			//×¢Òâµ½ÔÚNR·¨ÖĞ£¬PQ ½ÚµãºÍ PV ½ÚµãµÄË³ĞòÊÇ¿ÉÒÔ½»´íµÄ¡£
+			NodeCollection _PQNodes;			//å‚ä¸è®¡ç®—çš„æ¯çº¿ï¼ˆPQèŠ‚ç‚¹ï¼‰ä¿¡æ¯ï¼ŒæŒ‰ç…§çŸ©é˜µç´¢å¼•æ’åºã€‚
+			NodeCollection _PVNodes;			//å‚ä¸è®¡ç®—çš„æ¯çº¿ï¼ˆPVèŠ‚ç‚¹ï¼‰ä¿¡æ¯ï¼ŒæŒ‰ç…§çŸ©é˜µç´¢å¼•æ’åºã€‚
+			//æ³¨æ„åˆ°åœ¨NRæ³•ä¸­ï¼ŒPQ èŠ‚ç‚¹å’Œ PV èŠ‚ç‚¹çš„é¡ºåºæ˜¯å¯ä»¥äº¤é”™çš„ã€‚
 			NodeCollection _Nodes;
-			NodeDictionary _BusDict;			//Bus --> ½ÚµãĞÅÏ¢
+			NodeDictionary _BusDict;			//Bus --> èŠ‚ç‚¹ä¿¡æ¯
 			NodeInfo* _SlackNode;
 			BranchCollection _Branches;
 			BranchDictionary _BranchDict;
@@ -172,16 +172,16 @@ namespace PowerSolutions {
 		public:
 			const NetworkCase* SourceNetwork() const { return _SourceNetwork; }
 			PrimitiveNetworkOptions Options() const { return _Options; }
-			// »ñÈ¡´ËÍøÂçÖĞÆ½ºâ½ÚµãµÄÑ¡È¡·½Ê½¡£
+			// è·å–æ­¤ç½‘ç»œä¸­å¹³è¡¡èŠ‚ç‚¹çš„é€‰å–æ–¹å¼ã€‚
 			SlackNodeAssignmentType SlackNodeAssignment() const { return _SlackNodeAssignment; }
 			bool IsEmpty() const { return _Nodes.empty(); }
 			const BusCollection& Buses() const { return _Buses; }
-			Eigen::SparseMatrix<complexd> Admittance;	//ÍêÕûµÄµ¼ÄÉ¾ØÕó¡£
+			Eigen::SparseMatrix<complexd> Admittance;	//å®Œæ•´çš„å¯¼çº³çŸ©é˜µã€‚
 			//const ComponentCollection& Components() const { return _Components; }
 			//const BusComponentCollection& BusComponents() const { return _BusComponents; }
 			const NodeCollection& PQNodes() const { return _PQNodes; }
 			const NodeCollection& PVNodes() const { return _PVNodes; }
-			const NodeCollection& Nodes() const { return _Nodes; }	//²ÎÓë¼ÆËãµÄÈıÖÖ½Úµã£¬°´ÕÕ¾ØÕóË÷ÒıÁ¬ĞøÅÅĞò£¬×¢ÒâÆ½ºâ½Úµã·ÅÔÚ×îºó¡£
+			const NodeCollection& Nodes() const { return _Nodes; }	//å‚ä¸è®¡ç®—çš„ä¸‰ç§èŠ‚ç‚¹ï¼ŒæŒ‰ç…§çŸ©é˜µç´¢å¼•è¿ç»­æ’åºï¼Œæ³¨æ„å¹³è¡¡èŠ‚ç‚¹æ”¾åœ¨æœ€åã€‚
 			NodeInfo& Nodes(size_t index) const { return *_Nodes.at(index); }
 			NodeInfo& Nodes(const Bus* busRef) const { return *_BusDict.at(busRef); }
 			NodeInfo* TryGetNode(const Bus* busRef) const
@@ -190,8 +190,8 @@ namespace PowerSolutions {
 				if (i == _BusDict.end()) return nullptr;
 				return i->second;
 			}
-			NodeInfo* SlackNode() const { return _SlackNode; }				//Æ½ºâ½ÚµãµÄĞÅÏ¢¡£
-			const BranchCollection& Branches() const { return _Branches; }	//¼ÇÂ¼½ÚµãÁ¬½Ó£¨Ö§Â·£©(m,n)
+			NodeInfo* SlackNode() const { return _SlackNode; }				//å¹³è¡¡èŠ‚ç‚¹çš„ä¿¡æ¯ã€‚
+			const BranchCollection& Branches() const { return _Branches; }	//è®°å½•èŠ‚ç‚¹è¿æ¥ï¼ˆæ”¯è·¯ï¼‰(m,n)
 			BranchInfo* Branches(size_t index) const { return _Branches.at(index); }
 			BranchInfo* Branches(NodePair branchRef) const
 			{
@@ -214,17 +214,17 @@ namespace PowerSolutions {
 				return i->second;
 			}
 		public:
-			//µ÷Õû¶ÔÏóÒıÓÃ£¬Ê¹µ±Ç°PrimitiveNetworkµÄÄ¸ÏßºÍÏßÂ·ÒıÓÃ°´ÕÕÖ¸¶¨µÄ¶ÔÓ¦¹ØÏµÖ¸ÏòÔ­À´µÄÍøÂç£¬¶ø·ÇÍøÂç¸±±¾¡£
-			//	allowsUnmatch: Èç¹ûÎª false£¬ÔòÔÚ¸ù¾İinfoÖĞÌá¹©µÄĞÅÏ¢ÎŞ·¨ÕÒµ½ÕÒµ½PrimitiveNetworkÖĞ¶ÔÓ¦µÄÄ¸Ïß»òÔª¼şÊ±£¬
-			//					Òı·¢Òì³£¡£·ñÔò»á±£Áô¶ÔÔ­À´Ä¸Ïß/Ôª¼şµÄÒıÓÃ¡£
+			//è°ƒæ•´å¯¹è±¡å¼•ç”¨ï¼Œä½¿å½“å‰PrimitiveNetworkçš„æ¯çº¿å’Œçº¿è·¯å¼•ç”¨æŒ‰ç…§æŒ‡å®šçš„å¯¹åº”å…³ç³»æŒ‡å‘åŸæ¥çš„ç½‘ç»œï¼Œè€Œéç½‘ç»œå‰¯æœ¬ã€‚
+			//	allowsUnmatch: å¦‚æœä¸º falseï¼Œåˆ™åœ¨æ ¹æ®infoä¸­æä¾›çš„ä¿¡æ¯æ— æ³•æ‰¾åˆ°æ‰¾åˆ°PrimitiveNetworkä¸­å¯¹åº”çš„æ¯çº¿æˆ–å…ƒä»¶æ—¶ï¼Œ
+			//					å¼•å‘å¼‚å¸¸ã€‚å¦åˆ™ä¼šä¿ç•™å¯¹åŸæ¥æ¯çº¿/å…ƒä»¶çš„å¼•ç”¨ã€‚
 			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info, bool allowsUnmatch);
-			//µ÷Õû¶ÔÏóÒıÓÃ£¬Ê¹µ±Ç°PrimitiveNetworkµÄÄ¸ÏßºÍÏßÂ·ÒıÓÃ°´ÕÕÖ¸¶¨µÄ¶ÔÓ¦¹ØÏµÖ¸ÏòÔ­À´µÄÍøÂç£¬¶ø·ÇÍøÂç¸±±¾¡£
+			//è°ƒæ•´å¯¹è±¡å¼•ç”¨ï¼Œä½¿å½“å‰PrimitiveNetworkçš„æ¯çº¿å’Œçº¿è·¯å¼•ç”¨æŒ‰ç…§æŒ‡å®šçš„å¯¹åº”å…³ç³»æŒ‡å‘åŸæ¥çš„ç½‘ç»œï¼Œè€Œéç½‘ç»œå‰¯æœ¬ã€‚
 			void AdjustReferenceToPrototype(const NetworkCaseCorrespondenceInfo& info);
-		public:	//Í¼ÂÛÖ§³Ö
+		public:	//å›¾è®ºæ”¯æŒ
 			std::vector<std::shared_ptr<PrimitiveNetwork>> ConnectedSubnetworks() const;
 			void DumpGraph() const;
 		private:
-			// ´Ëº¯ÊıÓÉ NetworkCase::ToPrimitive µ÷ÓÃ¡£ÓÃÓÚ¼ÓÔØÍøÂç°¸Àı¡£
+			// æ­¤å‡½æ•°ç”± NetworkCase::ToPrimitive è°ƒç”¨ã€‚ç”¨äºåŠ è½½ç½‘ç»œæ¡ˆä¾‹ã€‚
 			void LoadNetworkCase(const ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options);
 			void AssignSlackNode();
 			template <class TNodeQueue, class TBranchQueue>
