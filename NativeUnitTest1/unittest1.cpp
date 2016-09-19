@@ -85,15 +85,37 @@ namespace NativeUnitTest1
 			//for (int i = 0; i < 1000; i++)
 			//	auto nc2 = shared_ptr<NetworkCase>(network.Clone());
 			shared_ptr<Solver> solver(Solver::Create(SolverType::NewtonRaphson));
+			shared_ptr<Solver> dcsolver(Solver::Create(SolverType::DcPowerFlow));
 			solver->MaxDeviationTolerance(1e-12);
-			auto s = solver->Solve((network));
-			s = solver->Solve(network);
+			auto s = solver->Solve(network);
 			stringstream ss;
-			ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
-			for (auto& item : s->NodeFlow())
-			{
-				ss << item.first << '\t' << abs(item.second.Voltage()) << '\t' << arg(item.second.Voltage()) << endl;
-			}
+			auto printSolution = [&]() {
+				ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
+				ss << "Node" << endl;
+				for (auto& item : s->NodeFlow())
+				{
+					ss << item.first << '\t'
+						<< abs(item.second.Voltage()) << '\t'
+						<< arg(item.second.Voltage()) << '\t'
+						<< item.second.PowerGeneration().real() << '\t'
+						<< item.second.PowerConsumption().real() << '\t'
+						<< endl;
+				}
+				ss << "Component" << endl;
+				for (auto& item : s->ComponentFlow())
+				{
+					ss << item.first << "\t->\t";
+					for (auto& pi : item.second.PowerInjections())
+						ss << pi.real() << '\t';
+					ss << endl;
+				}
+				ss << endl;
+			};
+			ss << "Newton Raphson" << endl;
+			printSolution();
+			ss << "DC Power Flow" << endl;
+			s = dcsolver->Solve(network);
+			printSolution();
 			Logger::WriteMessage(ss.str().c_str());
 		}
 
@@ -238,6 +260,54 @@ namespace NativeUnitTest1
 				ss << "子网络" << endl;
 				PrintNetwork(*sn);
 			}
+			Logger::WriteMessage(ss.str().c_str());
+		}
+
+		TEST_METHOD(NativeDcPowerFlowTest1)
+		{
+			// TODO:  在此输入测试代码
+			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+			NetworkCase network;
+			auto b1 = network.CreateBus(),
+				b2 = network.CreateBus(),
+				b3 = network.CreateBus();
+			network.AddObject({
+				new PQLoad(b1, 2),
+				new PQLoad(b2, -0.5),
+				new SlackGenerator(b3, 1),
+				new Line(b1, b2,complexd(0, 0.2),0),
+				new Line(b1, b3, complexd(0, 0.1),0),
+				new Line(b2, b3, complexd(0, 0.2),0),
+				//new ThreeWindingTransformer(b1, b2, b3, 0.001, 0.002, 0.003, 0.005, 1, 1.1, 1.5)
+			});
+			shared_ptr<Solver> dcsolver(Solver::Create(SolverType::DcPowerFlow));
+			stringstream ss;
+			auto s = dcsolver->Solve(network);
+			auto printSolution = [&]() {
+				ss << s->IterationCount() << "times , maxDev = " << (int)s->MaxDeviation() << endl;
+				ss << "Node" << endl;
+				for (auto& item : s->NodeFlow())
+				{
+					ss << item.first << '\t'
+						<< abs(item.second.Voltage()) << '\t'
+						<< arg(item.second.Voltage()) << '\t'
+						<< item.second.PowerGeneration().real() << '\t'
+						<< item.second.PowerConsumption().real() << '\t'
+						<< endl;
+				}
+				ss << "Component" << endl;
+				for (auto& item : s->ComponentFlow())
+				{
+					ss << typeid(*item.first).name() << "\t"
+						<< item.first << "\t->\t";
+					for (auto& pi : item.second.PowerInjections())
+						ss << pi.real() << '\t';
+					ss << endl;
+				}
+				ss << endl;
+			};
+			ss << "DC Power Flow" << endl;
+			printSolution();
 			Logger::WriteMessage(ss.str().c_str());
 		}
 	};

@@ -3,6 +3,7 @@
 #include "NRSolver.h"
 #include "Exceptions.h"
 #include <PrimitiveNetwork.h>
+#include "DCFlowSolver.h"
 
 using namespace std;
 using namespace PowerSolutions::ObjectModel;
@@ -27,6 +28,8 @@ namespace PowerSolutions
 				return new NRSolver();
 			case SolverType::FastDecoupled:
 				throw Exception(ExceptionCode::NotSupported);
+			case SolverType::DcPowerFlow:
+				return new DCFlowSolver();
 			}
 			assert(false);
 			return nullptr;

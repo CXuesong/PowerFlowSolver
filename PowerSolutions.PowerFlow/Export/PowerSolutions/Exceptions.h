@@ -13,6 +13,7 @@ namespace PowerSolutions {
 		ArgumentOutOfRange = InvalidArgument + 2,
 		InvalidOperation = 0x00020000,
 		NotSupported = InvalidOperation + 1,
+		EmptyNetwork = InvalidOperation + 2,
 		Validation = 0x00030000,
 		VoltageMismatch = Validation + 1,
 		SlackBus = Validation + 2,

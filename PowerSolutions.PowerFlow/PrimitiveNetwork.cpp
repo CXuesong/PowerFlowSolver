@@ -20,10 +20,10 @@ namespace PowerSolutions {
 		PrimitiveNetwork::~PrimitiveNetwork()
 		{
 			_PS_TRACE("PN Dispose " << this);
-			//BUG FIXED 使用 m_Nodes 作为遍历删除的对象
-			//导致在形成 m_Nodes 前扔出异常时发生内存泄漏。
-			for (auto& p : m_BusDict) delete p.second;
-			for (auto& item : m_Branches) delete item;
+			//BUG FIXED 使用 _Nodes 作为遍历删除的对象
+			//导致在形成 _Nodes 前扔出异常时发生内存泄漏。
+			for (auto& p : _BusDict) delete p.second;
+			for (auto& item : _Branches) delete item;
 		}
 
 		template <class TNodeQueue, class TBranchQueue>
@@ -31,9 +31,9 @@ namespace PowerSolutions {
 		{
 			assert(source != nullptr);
 			//初始化公共属性。
-			m_Options = source->m_Options;
-			m_SourceNetwork = source->m_SourceNetwork;
-			m_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
+			_Options = source->_Options;
+			_SourceNetwork = source->_SourceNetwork;
+			_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
 			//用于将 source 中的节点映射到 this 中的对应节点。
 			unordered_map<NodeInfo*, NodeInfo*> NewNodeDict(nodes.size());
 			unordered_map<BranchInfo*, BranchInfo*> NewBranchDict(nodes.size());
@@ -44,14 +44,14 @@ namespace PowerSolutions {
 				auto newInst = new NodeInfo(*oldInst);
 				nodes.pop();
 				//在后面的代码中重新进行编号。
-				m_Nodes.push_back(newInst);
-				m_BusDict.emplace(newInst->Bus(), newInst);
+				_Nodes.push_back(newInst);
+				_BusDict.emplace(newInst->Bus(), newInst);
 				NewNodeDict.emplace(oldInst, newInst);
 				if (newInst->Type() == NodeType::SlackNode)
 				{
-					assert(m_SlackNode == nullptr);
+					assert(_SlackNode == nullptr);
 					assert(nodes.empty());
-					m_SlackNode = newInst;
+					_SlackNode = newInst;
 				}
 			}
 			//复制边对象模型。
@@ -59,24 +59,24 @@ namespace PowerSolutions {
 			{
 				BranchInfo* oldInst = branches.top();
 				auto newInst = new BranchInfo(*oldInst);
-				newInst->Index(m_Branches.size());
+				newInst->Index(_Branches.size());
 				newInst->Nodes(make_pair(NewNodeDict.at(oldInst->Nodes().first),
 					NewNodeDict.at(oldInst->Nodes().second)));
-				m_Branches.push_back(newInst);
+				_Branches.push_back(newInst);
 				NewBranchDict.emplace(oldInst, newInst);
 				branches.pop();
 			}
-			if (m_SlackNode == nullptr)
+			if (_SlackNode == nullptr)
 			{
 				//需要手动分配一个平衡节点。
 				AssignSlackNode();
-				swap(*find(m_Nodes.begin(), m_Nodes.end(), m_SlackNode), m_Nodes.back());
+				swap(*find(_Nodes.begin(), _Nodes.end(), _SlackNode), _Nodes.back());
 			}
 			//为节点重新编号。
 			int NodeCounter1 = 0, NodeCounter2 = 0;
 			vector<int> AdmittanceColSpace;
-			AdmittanceColSpace.reserve(m_Nodes.size());
-			for (auto& node : m_Nodes)
+			AdmittanceColSpace.reserve(_Nodes.size());
+			for (auto& node : _Nodes)
 			{
 				node->Index(NodeCounter1 + NodeCounter2);
 				switch (node->Type())
@@ -84,18 +84,18 @@ namespace PowerSolutions {
 				case NodeType::PQNode:
 					node->SubIndex(NodeCounter1);
 					NodeCounter1++;
-					m_PQNodes.push_back(node);
+					_PQNodes.push_back(node);
 					break;
 				case NodeType::PVNode:
 					node->SubIndex(NodeCounter2);
 					NodeCounter2++;
-					m_PVNodes.push_back(node);
+					_PVNodes.push_back(node);
 					break;
 				}
 				AdmittanceColSpace.push_back(node->AdjacentBranches().size() * 2 + 1);
 			}
-			m_SlackNode->SubIndex(m_Nodes.size() - 1);
-			Admittance.resize(m_Nodes.size(), m_Nodes.size());
+			_SlackNode->SubIndex(_Nodes.size() - 1);
+			Admittance.resize(_Nodes.size(), _Nodes.size());
 			Admittance.reserve(AdmittanceColSpace);
 			//修正旧的节点引用。
 			for (auto& nodeP : NewNodeDict)
@@ -119,27 +119,27 @@ namespace PowerSolutions {
 		void PrimitiveNetwork::LoadNetworkCase(ObjectModel::NetworkCase* network, PrimitiveNetworkOptions options)
 		{
 			//LoadNetworkCase 只能调用一次。
-			assert(m_SourceNetwork == nullptr);
+			assert(_SourceNetwork == nullptr);
 			_PS_TRACE("Load Network " << this << " From " << network);
-			m_SourceNetwork = network;
-			m_Options = options;
-			m_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
+			_SourceNetwork = network;
+			_Options = options;
+			_SlackNodeAssignment = SlackNodeAssignmentType::SlackGenerator;
 			//重置局部变量
-			//m_Buses.clear();
-			//m_BusDict.clear();
-			//m_Branches.clear();
-			//m_Nodes.clear();
-			//m_PQNodes.clear();
-			//m_PVNodes.clear();
-			//m_SlackNode = nullptr;
-			assert(m_SlackNode == nullptr);
+			//_Buses.clear();
+			//_BusDict.clear();
+			//_Branches.clear();
+			//_Nodes.clear();
+			//_PQNodes.clear();
+			//_PVNodes.clear();
+			//_SlackNode = nullptr;
+			assert(_SlackNode == nullptr);
 			//载入母线
 			for (auto& obj : network->Objects())
 			{
 				auto b = dynamic_cast<Bus*>(obj);
 				if (b != nullptr)
 				{
-					m_Buses.push_back(b);
+					_Buses.push_back(b);
 					_PS_TRACE("Bus " << b->_ID);
 					continue;
 				}
@@ -150,19 +150,19 @@ namespace PowerSolutions {
 					{
 						auto b = bc->ChildBusAt(i);
 						assert(b != nullptr);
-						m_Buses.push_back(b);
+						_Buses.push_back(b);
 					}
 				}
 			}
-			m_BusDict.reserve(m_Buses.size());
-			for (auto &obj : m_Buses)
+			_BusDict.reserve(_Buses.size());
+			for (auto &obj : _Buses)
 			{
 				//默认PQ节点
-				m_BusDict.emplace(obj, new NodeInfo(obj));
+				_BusDict.emplace(obj, new NodeInfo(obj));
 			}
 			//如果所有的节点均有连接，则支路数量为 n(n-1)/2
 			//此处假设每个母线上均有6回接线
-			m_Branches.reserve(m_Buses.size() * 3);
+			_Branches.reserve(_Buses.size() * 3);
 			//载入元件信息
 			for (auto& obj : network->Objects())
 			{
@@ -175,30 +175,30 @@ namespace PowerSolutions {
 			}
 			//注意，此时的统计的PQ节点数量中还包含了孤立的节点
 			//从 BusMapping 中移除未被引用的节点。
-			assert(m_BusDict.size() == m_Buses.size());
+			assert(_BusDict.size() == _Buses.size());
 			while (true)
 			{
-				auto i = find_if(m_BusDict.begin(), m_BusDict.end(),
+				auto i = find_if(_BusDict.begin(), _BusDict.end(),
 					[](NodeDictionary::value_type &item){return item.second->Degree() == 0; });
-				if (i != m_BusDict.end())
+				if (i != _BusDict.end())
 				{
 					//BUG FIXED 此处未 delete 造成内存泄漏。
 					//BUG FIXED 移除孤立的平衡节点。
 					if (i->second->Type() == NodeType::SlackNode)
-						m_SlackNode = nullptr;
+						_SlackNode = nullptr;
 					delete i->second;
-					m_BusDict.erase(i);
+					_BusDict.erase(i);
 				} else {
 					break;
 				}
 			};
 			//很不巧，所有的节点都被删完了。
-			if (m_BusDict.empty()) return;
+			if (_BusDict.empty()) return;
 			//检查是否存在平衡节点。
-			if (m_SlackNode == nullptr) AssignSlackNode();
+			if (_SlackNode == nullptr) AssignSlackNode();
 			//统计PQ/PV节点数量，便于预留空间。
 			size_t PQNodeCount = 0, PVNodeCount = 0;
-			for (auto& p : m_BusDict)
+			for (auto& p : _BusDict)
 			{
 				switch (p.second->Type())
 				{
@@ -211,16 +211,16 @@ namespace PowerSolutions {
 				}
 			}
 			//复制节点列表。
-			m_Nodes.resize(PQNodeCount + PVNodeCount + 1);
-			assert(m_Nodes.size() == m_BusDict.size());
-			transform(m_BusDict.cbegin(), m_BusDict.cend(), m_Nodes.begin(),
+			_Nodes.resize(PQNodeCount + PVNodeCount + 1);
+			assert(_Nodes.size() == _BusDict.size());
+			transform(_BusDict.cbegin(), _BusDict.cend(), _Nodes.begin(),
 				[](const NodeDictionary::value_type &item){return item.second; });
-			if ((m_Options & PrimitiveNetworkOptions::NodeReorder) == PrimitiveNetworkOptions::NodeReorder)
+			if ((_Options & PrimitiveNetworkOptions::NodeReorder) == PrimitiveNetworkOptions::NodeReorder)
 			{
 				_PS_TRACE("Node Reorder = True");
 				//采用静态节点优化编号,即将节点的出线数从小到大依次排列
 				//对Nodes列表进行排序。
-				sort(m_Nodes.begin(), m_Nodes.end(),
+				sort(_Nodes.begin(), _Nodes.end(),
 					[](const NodeCollection::value_type &x, const NodeCollection::value_type &y)
 				{
 					//将平衡节点放到列表的末尾
@@ -231,7 +231,7 @@ namespace PowerSolutions {
 			} else {
 #if _DEBUG
 				//在调试模式下，可以按照节点的 Id 为节点排序。
-				sort(m_Nodes.begin(), m_Nodes.end(),
+				sort(_Nodes.begin(), _Nodes.end(),
 					[](const NodeCollection::value_type &x, const NodeCollection::value_type &y)
 				{
 					//将平衡节点放到列表的末尾
@@ -242,16 +242,16 @@ namespace PowerSolutions {
 #else
 				//不论如何，平衡节点应该在 Nodes 集合的最后面。
 				//此处考虑到性能，仅仅交换平衡节点和除平衡节点以外最后一个节点的位置。
-				swap(*find_if(m_Nodes.begin(), m_Nodes.end(), [](NodeInfo* node){return node->Type() == NodeType::SlackNode; }),
-					m_Nodes.back());
+				swap(*find_if(_Nodes.begin(), _Nodes.end(), [](NodeInfo* node){return node->Type() == NodeType::SlackNode; }),
+					_Nodes.back());
 #endif
 			}
 			//按照新的顺序重新编号
 			int IndexCounter1 = 0, IndexCounter2 = 0;
-			m_PQNodes.reserve(PQNodeCount);
-			m_PVNodes.reserve(PVNodeCount);
+			_PQNodes.reserve(PQNodeCount);
+			_PVNodes.reserve(PVNodeCount);
 			//CASE 如果没有PV节点，会导致异常
-			for (auto node : m_Nodes)
+			for (auto node : _Nodes)
 			{
 				assert(node->Degree() > 0);
 				//为节点编号。
@@ -260,33 +260,33 @@ namespace PowerSolutions {
 				{
 					node->SubIndex(IndexCounter1);
 					IndexCounter1++;
-					m_PQNodes.push_back(node);
+					_PQNodes.push_back(node);
 				} else if (node->Type() == NodeType::PVNode)
 				{
 					node->SubIndex(IndexCounter2);
 					IndexCounter2++;
-					m_PVNodes.push_back(node);
+					_PVNodes.push_back(node);
 				}
 			}
 			//平衡节点编号放在最后面。
-			m_SlackNode->Index(IndexCounter1 + IndexCounter2);
-			m_SlackNode->SubIndex(0);
+			_SlackNode->Index(IndexCounter1 + IndexCounter2);
+			_SlackNode->SubIndex(0);
 
 			_PS_TRACE("Bus\tIndex\tNodeType");
-			for (auto& node : m_Nodes)
+			for (auto& node : _Nodes)
 			{
 				_PS_TRACE(node->Bus()->_ID << "\t" << node->Index() << "\t" << (int)node->Type());
 			}
 
 			//生成导纳矩阵。
-			Admittance.resize(m_Nodes.size(), m_Nodes.size());
-			if ((m_Options & PrimitiveNetworkOptions::NoAdmittanceMatrix) != PrimitiveNetworkOptions::NoAdmittanceMatrix)
+			Admittance.resize(_Nodes.size(), _Nodes.size());
+			if ((_Options & PrimitiveNetworkOptions::NoAdmittanceMatrix) != PrimitiveNetworkOptions::NoAdmittanceMatrix)
 			{
 				//为导纳稀疏矩阵预留空间
 				vector<int> ColSpace;
-				ColSpace.resize(m_Nodes.size());
+				ColSpace.resize(_Nodes.size());
 				//将节点表格映射为对应节点的支路数量
-				transform(m_Nodes.begin(), m_Nodes.end(), ColSpace.begin(),
+				transform(_Nodes.begin(), _Nodes.end(), ColSpace.begin(),
 					[](NodeInfo *node){ return node->Degree() * 2 + 1; });
 				Admittance.reserve(ColSpace);
 				//生成导纳矩阵
@@ -305,8 +305,8 @@ namespace PowerSolutions {
 		void PrimitiveNetwork::AddPi(Bus* pbus1, Bus* pbus2, PiEquivalencyParameters pieqv)
 		{
 			//具有π形等值电路
-			int index1 = Nodes(pbus1)->Index();
-			int index2 = Nodes(pbus2)->Index();
+			int index1 = Nodes(pbus1).Index();
+			int index2 = Nodes(pbus2).Index();
 			//BUG CLOSED
 			//当系数矩阵非零元素数量增加时，
 			//可能会导致预先获取的零元素对应地址被覆盖，
@@ -315,7 +315,7 @@ namespace PowerSolutions {
 			complexd transAdmittance = 1.0 / pieqv.Impedance();
 			_PS_TRACE(index1 << " -- " << index2 << "\t" << transAdmittance << "\t" << pieqv.Admittance1() << "\t" << pieqv.Admittance2());
 			//自导纳是正的
-			if ((m_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance)
+			if ((_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance)
 			{
 				//计入接地导纳。
 				Admittance.coeffRef(index1, index1) += transAdmittance + pieqv.Admittance1();
@@ -337,7 +337,7 @@ namespace PowerSolutions {
 
 		void PrimitiveNetwork::AddShunt(Bus* bus, complexd admittance)
 		{
-			if (((m_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance))
+			if (((_Options & PrimitiveNetworkOptions::IgnoreShuntAdmittance) != PrimitiveNetworkOptions::IgnoreShuntAdmittance))
 			{
 				auto node = TryGetNode(bus);
 				//如果 node == nullptr，说明节点是孤立的，已经被优化掉了。
@@ -381,7 +381,7 @@ namespace PowerSolutions {
 			auto node = TryGetNode(bus);
 			if (node != nullptr)
 			{
-				if (m_SlackNode == nullptr)
+				if (_SlackNode == nullptr)
 				{
 					//设置平衡机
 					if (node->Type() != NodeType::PQNode && abs(node->Voltage() - abs(voltagePhasor)) > 1e-10)
@@ -389,8 +389,8 @@ namespace PowerSolutions {
 					node->Voltage(abs(voltagePhasor));
 					node->Angle(arg(voltagePhasor));
 					node->Type(NodeType::SlackNode);
-					m_SlackNode = node;
-				} else if (m_SlackNode == node)
+					_SlackNode = node;
+				} else if (_SlackNode == node)
 				{
 					//在同一个母线上放置了多台平衡发电机
 					//检查平衡机电压
@@ -407,17 +407,17 @@ namespace PowerSolutions {
 		{
 			assert(bus1 != bus2);	//不允许自环。
 			//加入支路-组件列表中
-			auto node1 = Nodes(bus1);
-			auto node2 = Nodes(bus2);
-			auto result = m_BranchDict.emplace(make_pair(node1, node2), nullptr);
+			auto& node1 = Nodes(bus1);
+			auto& node2 = Nodes(bus2);
+			auto result = _BranchDict.emplace(make_pair(&node1, &node2), nullptr);
 			if (result.second)
 			{
 				//成功向支路列表中加入了新项，说明出现了新支路。
-				auto newBranch = new BranchInfo(m_Branches.size(), node1, node2);
-				m_Branches.push_back(newBranch);
+				auto newBranch = new BranchInfo(_Branches.size(), &node1, &node2);
+				_Branches.push_back(newBranch);
 				result.first->second = newBranch;
-				node1->AdjacentBranches().push_back(newBranch);
-				node2->AdjacentBranches().push_back(newBranch);
+				node1.AdjacentBranches().push_back(newBranch);
+				node2.AdjacentBranches().push_back(newBranch);
 			}
 			//为支路增加一个元件。
 			result.first->second->Components().push_back(c);
@@ -437,8 +437,8 @@ namespace PowerSolutions {
 			_PS_TRACE("=== BFS ConnectedSubnetworks ===");
 			vector<shared_ptr<PrimitiveNetwork>> rv;
 			// 进行广度优先搜索（BFS）。
-			vector<bool> NodeDiscovered(m_Nodes.size());	//黑色节点
-			vector<bool> BranchVisited(m_Branches.size());
+			vector<bool> NodeDiscovered(_Nodes.size());	//黑色节点
+			vector<bool> BranchVisited(_Branches.size());
 			queue<NodeInfo*> NodeQueue;
 			struct NodeInfoComparer {
 				bool operator() (NodeInfo* x, NodeInfo* y) const
@@ -460,7 +460,7 @@ namespace PowerSolutions {
 				if (i == NodeDiscovered.end()) break;	//所有连通子图已经遍历完毕。
 				assert(NodeQueue.empty() && SubNodes.empty() && SubBranches.empty());
 				auto startingIndex = distance(NodeDiscovered.begin(), i);
-				NodeQueue.push(m_Nodes[startingIndex]);
+				NodeQueue.push(_Nodes[startingIndex]);
 				NodeDiscovered[startingIndex] = true;
 				while (!NodeQueue.empty())
 				{
@@ -478,7 +478,7 @@ namespace PowerSolutions {
 							//如果不存在 node0 > node 的判断
 							//则每条边恰好被遍历两次。
 							_PS_TRACE("branch " << node0->Bus()->_ID << "\t" << node->Bus()->_ID);
-							SubBranches.push(m_BranchDict.at(NodePair(node0, node)));
+							SubBranches.push(_BranchDict.at(NodePair(node0, node)));
 						}
 						if (!NodeDiscovered[node->Index()])
 						{
@@ -502,13 +502,13 @@ namespace PowerSolutions {
 		void PrimitiveNetwork::AssignSlackNode()
 		{
 			//仅在系统中无显式指定平衡节点时提供平衡节点的转换逻辑。
-			if ((m_Options & PrimitiveNetworkOptions::AutoAssignSlackNode) != PrimitiveNetworkOptions::AutoAssignSlackNode)
+			if ((_Options & PrimitiveNetworkOptions::AutoAssignSlackNode) != PrimitiveNetworkOptions::AutoAssignSlackNode)
 				throw Exception(ExceptionCode::SlackBus);
 				//需要手动分配一个平衡节点。
 			const double NINF = -DBL_MAX * DBL_MAX;
 			double MaxPVActivePower = 0, MaxPQActivePower = NINF;
 			NodeInfo *MaxPV = nullptr, *MaxPQ = nullptr;
-			for (auto& p : m_BusDict)
+			for (auto& p : _BusDict)
 			{
 				if (p.second->Type() == NodeType::PVNode)
 				{
@@ -526,19 +526,19 @@ namespace PowerSolutions {
 					}
 				}
 			}
-			m_SlackNode = MaxPV;
-			m_SlackNodeAssignment = SlackNodeAssignmentType::PVNode;
-			if (m_SlackNode == nullptr)
+			_SlackNode = MaxPV;
+			_SlackNodeAssignment = SlackNodeAssignmentType::PVNode;
+			if (_SlackNode == nullptr)
 			{
 				//没有平衡节点和PV节点。
-				if ((m_Options & PrimitiveNetworkOptions::ForceSetSlackNode) != PrimitiveNetworkOptions::ForceSetSlackNode)
+				if ((_Options & PrimitiveNetworkOptions::ForceSetSlackNode) != PrimitiveNetworkOptions::ForceSetSlackNode)
 					throw Exception(ExceptionCode::SlackBus);
 				//只好使用有功出力最大/有功负荷最小的PQ节点。
-				m_SlackNode = MaxPQ;
-				m_SlackNodeAssignment = SlackNodeAssignmentType::PQNode;
-				if (m_SlackNode == nullptr) throw Exception(ExceptionCode::SlackBus);
+				_SlackNode = MaxPQ;
+				_SlackNodeAssignment = SlackNodeAssignmentType::PQNode;
+				if (_SlackNode == nullptr) throw Exception(ExceptionCode::SlackBus);
 			}
-			m_SlackNode->Type(NodeType::SlackNode);
+			_SlackNode->Type(NodeType::SlackNode);
 		}
 
 		void PrimitiveNetwork::DumpGraph() const
@@ -546,7 +546,7 @@ namespace PowerSolutions {
 #if _DEBUG
 			ofstream ofs("D:\\PNGraph.csv", ios::out | ios::ate);
 			ofs << "Source,Target,Type" << endl;
-			for (auto& b : m_Branches)
+			for (auto& b : _Branches)
 			{
 				ofs << b->Nodes().first->Index() << "," <<
 					b->Nodes().second->Index() << ",Undirected" << endl;
@@ -571,16 +571,16 @@ namespace PowerSolutions {
 						throw Exception(ExceptionCode::Validation);
 				return nb;
 			};
-			for (auto& b : m_Buses)
+			for (auto& b : _Buses)
 				b = PBus(b);
-			m_BusDict.clear();
-			for (auto& n : m_Nodes)
+			_BusDict.clear();
+			for (auto& n : _Nodes)
 			{
 				n->Bus(PBus(n->Bus()));
 				for (auto& c : n->Components()) c = PComponent(c);
-				m_BusDict.emplace(n->Bus(), n);
+				_BusDict.emplace(n->Bus(), n);
 			}
-			for (auto& b : m_Branches)
+			for (auto& b : _Branches)
 			{
 				for (auto& c : b->Components())
 					c = PComponent(c);
@@ -588,9 +588,9 @@ namespace PowerSolutions {
 		}
 
 		PrimitiveNetwork::NodeInfo::NodeInfo(ObjectModel::Bus* bus) 
-			: m_Bus(bus), m_Type(NodeType::PQNode),
-			m_Voltage(0), m_Angle(0),
-			m_ActivePowerInjection(0), m_ReactivePowerInjection(0)
+			: _Bus(bus), _Type(NodeType::PQNode),
+			_Voltage(0), _Angle(0),
+			_ActivePowerInjection(0), _ReactivePowerInjection(0)
 		{ }
 	}
 }

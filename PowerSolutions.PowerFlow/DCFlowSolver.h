@@ -5,14 +5,19 @@ by Chen [CXuesong.], 2015
 */
 
 #pragma once
-#include "PowerFlowSolversImpl.h"
+#include "PowerFlowSolvers.h"
 
 namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		class NRSolver final : public SolverImpl
+		// 稳态潮流求解实现部分（直流法）。
+		class DCFlowSolver : public Solver
 		{
+		public:
+			std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network) override;
+			std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) override;
+			~DCFlowSolver() override;
 		};
 	}
 }

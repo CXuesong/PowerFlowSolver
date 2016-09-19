@@ -45,6 +45,9 @@
     <ClCompile Include="PrimitiveNetwork.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="DCFlowSolver.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Export\PowerSolutions\Exceptions.h">

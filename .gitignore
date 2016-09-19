@@ -191,4 +191,5 @@ ModelManifest.xml
 /.vs
 /Debugging
 /*ClassDiagram.*
-/PowerFlowSolver.VC.opendb
+*.VC.db
+*.VC.opendb

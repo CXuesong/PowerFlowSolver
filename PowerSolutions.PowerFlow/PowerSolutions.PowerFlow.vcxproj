@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DCFlowSolver.cpp" />
     <ClCompile Include="Exceptions.cpp" />
     <ClCompile Include="PowerSolutions.cpp" />
     <ClCompile Include="NRSolver.cpp" />

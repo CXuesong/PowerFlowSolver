@@ -14,7 +14,8 @@ namespace PowerSolutions
 		enum class SolverType
 		{
 			NewtonRaphson = 0,
-			FastDecoupled = 1
+			FastDecoupled = 1,
+			DcPowerFlow = 10,
 		};
 
 		// 包含了求解器此时的状态信息。
@@ -98,7 +99,7 @@ namespace PowerSolutions
 		public:
 			const NodeStatusCollection& NodeStatus() const { return m_NodeStatus; }
 			const NodeEvaluationStatus& NodeStatus(int nodeIndex) const { return m_NodeStatus.at(nodeIndex); }
-			const NodeEvaluationStatus& NodeStatus(ObjectModel::Bus* bus) const { return m_NodeStatus.at(m_Network->Nodes(bus)->Index()); }
+			const NodeEvaluationStatus& NodeStatus(ObjectModel::Bus* bus) const { return m_NodeStatus.at(m_Network->Nodes(bus).Index()); }
 			ObjectModel::PrimitiveNetwork* Network() const { return m_Network; }
 		public:
 			PrimitiveSolution(ObjectModel::PrimitiveNetwork& network);
@@ -125,7 +126,7 @@ namespace PowerSolutions
 			// 求解网络的功率潮流分布，并生成一个潮流分析报告。
 			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) = 0;
 			std::shared_ptr<Solution> Solve(std::shared_ptr<ObjectModel::PrimitiveNetwork> network);
-			std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network);
+			virtual std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network);
 			Solver();
 			virtual ~Solver();
 		public:

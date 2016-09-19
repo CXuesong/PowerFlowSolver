@@ -164,8 +164,7 @@ namespace PowerSolutions
 			SolutionStatus m_Status;
 			int m_IterationCount;
 			double m_MaxDeviation;
-		protected:	//internal
-			friend class SolverImpl;
+		_PS_INTERNAL:
 			void NodeCount(size_t val) { m_NodeCount = val; }
 			void PQNodeCount(size_t val) { m_PQNodeCount = val; }
 			void PVNodeCount(size_t val) { m_PVNodeCount = val; }
@@ -175,7 +174,7 @@ namespace PowerSolutions
 			void TotalPowerLoss(complexd val) { m_TotalPowerLoss = val; }
 			void TotalPowerShunt(complexd val) { m_TotalPowerShunt = val; }
 			void Status(SolutionStatus val) { m_Status = val; }
-			void IterationCount(int val);
+			void IterationCount(int val) { m_IterationCount = val; }
 			void MaxDeviation(double val) { m_MaxDeviation = val; }
 			void AddNodeFlow(ObjectModel::Bus* node, const NodeEvaluationStatus& status);
 			void AddComponentFlow(ObjectModel::Component* c, ComponentFlowSolution&& solution);
@@ -202,7 +201,7 @@ namespace PowerSolutions
 				return m_ComponentFlow.at(c);
 			}
 			const BranchFlowCollection& BranchFlow() const { return m_BranchFlow; }
-		protected:	//internal
+		_PS_INTERNAL:
 			Solution();
 		};
 	}

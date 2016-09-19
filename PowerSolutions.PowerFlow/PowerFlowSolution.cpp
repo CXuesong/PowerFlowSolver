@@ -56,10 +56,5 @@ namespace PowerSolutions
 			}
 		}
 
-		void Solution::IterationCount(int val)
-		{
-			m_IterationCount = val;
-		}
-
 	}
 }

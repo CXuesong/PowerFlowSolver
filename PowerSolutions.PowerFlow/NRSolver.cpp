@@ -47,11 +47,11 @@ namespace PowerSolutions
 			vector<int> JocobianColSpace(EquationCount());		//雅可比矩阵中每一列的非零元素数量，用于为矩阵预留空间。
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
-				auto *node = PNetwork->Nodes(n);
-				JocobianColSpace[n] = min(node->Degree() * 2, EquationCount());
-				if (node->Type() == NodeType::PQNode)
+				auto& node = PNetwork->Nodes(n);
+				JocobianColSpace[n] = min(node.Degree() * 2, EquationCount());
+				if (node.Type() == NodeType::PQNode)
 				{
-					JocobianColSpace[Block1EquationCount() + node->SubIndex()] = min(node->Degree() * 2, EquationCount());
+					JocobianColSpace[Block1EquationCount() + node.SubIndex()] = min(node.Degree() * 2, EquationCount());
 				}
 			}
 			Jocobian.resize(EquationCount(), EquationCount());
@@ -99,11 +99,11 @@ namespace PowerSolutions
 
 		inline double NRSolver::NodeVoltage(int NodeIndex)
 		{
-			auto *node = PNetwork->Nodes(NodeIndex);
-			if (node->Type() == NodeType::PQNode)
-				return CurrentAnswer(Block1EquationCount() + node->SubIndex());
+			auto& node = PNetwork->Nodes(NodeIndex);
+			if (node.Type() == NodeType::PQNode)
+				return CurrentAnswer(Block1EquationCount() + node.SubIndex());
 			else
-				return node->Voltage();
+				return node.Voltage();
 		}
 
 		inline double NRSolver::NodeAngle(int NodeIndex)
