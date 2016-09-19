@@ -191,5 +191,6 @@ ModelManifest.xml
 /.vs
 /Debugging
 /*ClassDiagram.*
+*.cd
 *.VC.db
 *.VC.opendb
