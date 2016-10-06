@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6D63AA79-0929-4DE1-BC9C-A4E3DE722922}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,8 +9,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LOC.txt = LOC.txt
 		Performance1.psess = Performance1.psess
 	EndProjectSection
-EndProject
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "PFSGUI", "PFSGUI\PFSGUI.vbproj", "{2FFA7467-C4D8-4226-9648-6933D535D572}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerSolutions.PowerFlow", "PowerSolutions.PowerFlow\PowerSolutions.PowerFlow.vcxproj", "{F0A27E64-DFB4-4A02-94D7-04C6E66534EB}"
 EndProject
@@ -21,7 +19,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NativeUnitTest1", "NativeUn
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB} = {F0A27E64-DFB4-4A02-94D7-04C6E66534EB}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerSolutions.Interop", "PowerSolutions.Interop\PowerSolutions.Interop.vcxproj", "{3F461A67-845B-4B5B-B941-2CAB22E2494C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PowerSolutions.Interop.PowerFlow", "PowerSolutions.Interop\PowerSolutions.Interop.vcxproj", "{3F461A67-845B-4B5B-B941-2CAB22E2494C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB} = {F0A27E64-DFB4-4A02-94D7-04C6E66534EB}
 	EndProjectSection
@@ -36,12 +34,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{2FFA7467-C4D8-4226-9648-6933D535D572}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{2FFA7467-C4D8-4226-9648-6933D535D572}.Debug|x64.Build.0 = Debug|Any CPU
-		{2FFA7467-C4D8-4226-9648-6933D535D572}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{2FFA7467-C4D8-4226-9648-6933D535D572}.Debug|x86.Build.0 = Debug|Any CPU
-		{2FFA7467-C4D8-4226-9648-6933D535D572}.Release|x64.ActiveCfg = Release|Any CPU
-		{2FFA7467-C4D8-4226-9648-6933D535D572}.Release|x86.ActiveCfg = Release|Any CPU
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB}.Debug|x64.ActiveCfg = Debug|x64
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB}.Debug|x64.Build.0 = Debug|x64
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB}.Debug|x86.ActiveCfg = Debug|Win32
