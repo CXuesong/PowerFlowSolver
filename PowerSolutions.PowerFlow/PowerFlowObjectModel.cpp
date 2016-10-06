@@ -361,7 +361,9 @@ namespace PowerSolutions
 			//    |
 			//    Y
 			//    |
-			assert(Bus1() != nullptr);
+			// 考虑此函数可能会被 CloneInstance() 间接调用。
+			// 此时 m_Bus1 == nullptr
+			//assert(Bus1() != nullptr);
 			//设置变压器
 			m_Transformer1->Bus1(Bus1());
 			m_Transformer2->Bus1(Bus2());

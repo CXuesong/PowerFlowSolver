@@ -23,8 +23,8 @@ namespace PowerSolutions
 			}
 			// Δy = -J Δx
 			// ConstraintPower - CurrentPower = - Jocobian * CorrectionAnswer
-			Eigen::SparseMatrix<double> Jocobian;		//雅可比矩阵。
-			std::vector<int> JocobianColSpace;			//雅可比矩阵每一列预留的空间。
+			Eigen::SparseMatrix<double> Jocobian;			//雅可比矩阵。
+			int JocobianReservedValuesCount;				//雅可比矩阵非零元素数量的估计值。
 			Eigen::VectorXd ConstraintPowerInjection;
 			Eigen::VectorXd PowerInjectionDeviation;
 			Eigen::VectorXd CorrectionAnswer;

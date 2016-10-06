@@ -5,6 +5,7 @@
 #include <Eigen/Sparse>
 #include <Eigen/SparseLU>
 
+using Eigen::Triplet;
 using Eigen::SparseLU;
 using Eigen::SparseQR;
 using Eigen::SparseMatrix;
@@ -40,17 +41,16 @@ namespace PowerSolutions
 			CurrentAnswer.resize(EquationCount());
 			CorrectionAnswer.resize(EquationCount());
 			PowerInjectionDeviation.resize(EquationCount());
-			//确定雅可比矩阵每一列需要的非零元空间数量
-			//按照最不理想的情况来申请雅可比矩阵的空间
-			//具体的申请空间操作
-			JocobianColSpace.resize(EquationCount());		//雅可比矩阵中每一列的非零元素数量，用于为矩阵预留空间。
+			//估计雅可比矩阵非零元的数量
+			//按照最不理想的情况来考虑雅可比矩阵的空间
+			JocobianReservedValuesCount = 0;
 			for (int n = 0; n < Block1EquationCount(); n++)
 			{
 				auto& node = PNetwork->Nodes(n);
-				JocobianColSpace[n] = min(node.Degree() * 2, EquationCount());
+				JocobianReservedValuesCount += min(node.Degree() * 2, EquationCount());
 				if (node.Type() == NodeType::PQNode)
 				{
-					JocobianColSpace[Block1EquationCount() + node.SubIndex()] = min(node.Degree() * 2, EquationCount());
+					JocobianReservedValuesCount += min(node.Degree() * 2, EquationCount());
 				}
 			}
 			Jocobian.resize(EquationCount(), EquationCount());
@@ -166,8 +166,6 @@ namespace PowerSolutions
 		
 		void NRSolver::GenerateJacobian()
 		{
-			Jocobian.setZero();
-			Jocobian.reserve(JocobianColSpace);
 			//PQ节点：[dP dQ] = J * [V theta]
 			//PV节点：[dP] = J * [theta]
 			//       PQ/PV        PQ
@@ -183,27 +181,22 @@ namespace PowerSolutions
 			// H =  L
 			// N = -M
 			auto& Admittance = PNetwork->Admittance;
-			// ISSUE 矩阵是行主元的假定不成立。
-			// TODO 按顺序插入元素。
-			int lastM = -1;		// 缓存上次计算的编号。（假定矩阵是行主元）
-			double Um = 0;
-			double thetaM = 0;
-			int subM = -1;
+			// 雅可比矩阵非零元。
+			vector<Triplet<double>> values;
+			values.reserve(JocobianReservedValuesCount);
+			// 建议使用 Triplet 构造矩阵，可以取得不错的性能，而且生成的矩阵是压缩过的。
 			for (int outer = 0; outer < Admittance.outerSize(); outer++)
 				for (SparseMatrix<complexd>::InnerIterator it(Admittance, outer); it; ++it)
 				{
 					auto m = it.row();
 					auto n = it.col();
 					// 注意排除平衡节点
-					if (m == NodeCount - 1 || n == NodeCount - 1) continue;
+					if (m == NodeCount - 1 || n == NodeCount - 1) 
+						continue;
 					auto& nodeM = PSolution->NodeStatus(m);
-					if (m != lastM)
-					{
-						Um = NodeVoltage(m);
-						thetaM = NodeAngle(m);
-						subM = Block1EquationCount() + nodeM.SubIndex();
-						lastM = m;
-					}
+					auto Um = NodeVoltage(m);
+					auto thetaM = NodeAngle(m);
+					auto subM = Block1EquationCount() + nodeM.SubIndex();
 					//计算非对角元素
 					if (n > m)
 					{
@@ -214,9 +207,11 @@ namespace PowerSolutions
 						double sinMn = sin(thetaMn);
 						double cosMn = cos(thetaMn);
 						//H(m,n)
-						double H = Jocobian.insert(m, n) = -UmUn * (Ymn.real() * sinMn - Ymn.imag() * cosMn);
+						double H = -UmUn * (Ymn.real() * sinMn - Ymn.imag() * cosMn);
+						values.emplace_back(m, n, H);
 						//H(n,m)
-						double Hp = Jocobian.insert(n, m) = UmUn * (Ynm.real() * sinMn + Ynm.imag() * cosMn);
+						double Hp = UmUn * (Ynm.real() * sinMn + Ynm.imag() * cosMn);
+						values.emplace_back(n, m, Hp);
 						//i.e. H(n,m) = -UmUn * (-Y.real() * sinMn - Y.imag() * cosMn)
 						//N
 						double N = -UmUn * (Ymn.real() * cosMn + Ymn.imag() * sinMn);
@@ -230,26 +225,22 @@ namespace PowerSolutions
 							{
 								//PQ-PQ，子阵具有对称性
 								// N
-								Jocobian.insert(m, subN) = N;
-								Jocobian.insert(n, subM) = Np;
+								values.emplace_back(m, subN, N);
+								values.emplace_back(n, subM, Np);
 								// M = -N
-								Jocobian.insert(subM, n) = -N;
-								//BUG CLOSED
-								//Jocobian.insert(subM, n) = -Np;
-								//不正确的雅可比矩阵元素生成
-								//天坑。
-								Jocobian.insert(subN, m) = -Np;
+								values.emplace_back(subM, n, -N);
+								values.emplace_back(subN, m, -Np);
 								// L = H
-								Jocobian.insert(subM, subN) = H;
-								Jocobian.insert(subN, subM) = Hp;
+								values.emplace_back(subM, subN, H);
+								values.emplace_back(subN, subM, Hp);
 							}
 							else {
 								//PQ-PV（m,n）
 								// M = -N
-								Jocobian.insert(subM, n) = -N;
+								values.emplace_back(subM, n, -N);
 								//PV-PQ（n,m）
 								// N
-								Jocobian.insert(n, subM) = Np;
+								values.emplace_back(n, subM, Np);
 							}
 						}
 						else {
@@ -257,10 +248,10 @@ namespace PowerSolutions
 							{
 								//PV-PQ（m,n）
 								// N
-								Jocobian.insert(m, subN) = N;
+								values.emplace_back(m, subN, N);
 								//PQ-PV（n,m）
 								// M
-								Jocobian.insert(subN, m) = -Np;
+								values.emplace_back(subN, m, -Np);
 							}
 						}
 					}
@@ -270,18 +261,19 @@ namespace PowerSolutions
 						double UmSqr = Um * Um;
 						//计算对角元素
 						//H
-						Jocobian.insert(m, m) = UmSqr * Y.imag() + nodeM.ReactivePowerInjection();
+						values.emplace_back(m, m, UmSqr * Y.imag() + nodeM.ReactivePowerInjection());
 						if (nodeM.Type() == NodeType::PQNode)
 						{
 							//N
-							Jocobian.insert(m, subM) = -UmSqr * Y.real() - nodeM.ActivePowerInjection();
+							values.emplace_back(m, subM, -UmSqr * Y.real() - nodeM.ActivePowerInjection());
 							//M
-							Jocobian.insert(subM, m) = UmSqr * Y.real() - nodeM.ActivePowerInjection();
+							values.emplace_back(subM, m, UmSqr * Y.real() - nodeM.ActivePowerInjection());
 							//L
-							Jocobian.insert(subM, subM) = UmSqr * Y.imag() - nodeM.ReactivePowerInjection();
+							values.emplace_back(subM, subM, UmSqr * Y.imag() - nodeM.ReactivePowerInjection());
 						}
 					}
 				}
+			Jocobian.setFromTriplets(values.begin(), values.end());
 			_PS_TRACE("雅可比矩阵 ==========");
 			_PS_TRACE(Jocobian);
 		}
