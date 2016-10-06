@@ -189,8 +189,7 @@ Partial Public Class CaseManager
                         dest.WriteLine(Prompts.PFReportMessage4A, PadRight(node.Name, 20),
                                        .Voltage.Magnitude, Rad2Deg(.Voltage.Phase),
                                        .PowerGeneration.Real, .PowerGeneration.Imaginary,
-                                       .PowerConsumption.Real, .PowerConsumption.Imaginary,
-                                       .Degree)
+                                       .PowerConsumption.Real, .PowerConsumption.Imaginary)
                     End With
                 Else
                     dest.WriteLine(Prompts.PFReportMessage4B, PadRight(node.Name, 20))

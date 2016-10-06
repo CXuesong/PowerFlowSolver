@@ -12,10 +12,13 @@ namespace PowerSolutions
 			/// 表示一个母线。
 			/// （<see cref="PowerSolutions::ObjectModel::Bus" />）
 			/// </summary>
-			_WRAP_BEGIN_OBJECT_MODEL(Bus, _NATIVE_OM Bus)
+			_WRAP_BEGIN_OBJECT_MODEL(Bus, const _NATIVE_OM Bus)
 				// 获取句柄的文本表现形式。
 				_WRAP_OBJECT_MODEL_TOSTRING(_NATIVE_OM Bus)
 				;
+		internal: \
+			// 考虑到目前元件指向母线的引用不是 const 引用，所以这里只能先 const_cast 一下了。
+			_NATIVE_OM Bus* AsWritable() { return const_cast<_NATIVE_OM Bus*>(this->nativeObject); }
 			_WRAP_END_OBJECT_MODEL;
 
 			/// <summary>
@@ -34,7 +37,7 @@ namespace PowerSolutions
 				virtual bool Equals(Object^ obj) override;
 				int GetHashCode() override;
 			public:
-				operator _NATIVE_OM BusPair() { return _NATIVE_OM BusPair((_NATIVE_OM Bus*)Bus1, (_NATIVE_OM Bus*)Bus2); }
+				operator _NATIVE_OM BusPair() { return _NATIVE_OM BusPair((const _NATIVE_OM Bus*)Bus1, (const _NATIVE_OM Bus*)Bus2); }
 				BusPair(Bus bus1, Bus bus2);
 				BusPair(_NATIVE_OM BusPair pair);
 			};
@@ -73,6 +76,11 @@ namespace PowerSolutions
 				// 获取句柄的文本表现形式。
 				_WRAP_OBJECT_MODEL_TOSTRING(_NATIVE_OM Component)
 				;
+		internal:
+				// 不得不委曲一下了……
+			Component(const _NATIVE_OM Component* native)
+				: nativeObject(const_cast<_NATIVE_OM Component*>(native))
+			{ }
 			_WRAP_END_OBJECT_MODEL;
 
 			/// <summary>

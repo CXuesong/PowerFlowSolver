@@ -174,7 +174,7 @@
   <data name="PFReportMessage4" xml:space="preserve">
     <value>
 节点潮流============
-        母线              电压         相位       有功出力     无功出力     有功负载     无功负载   支路数
+        母线              电压         相位       有功出力     无功出力     有功负载     无功负载
                          [p.u.]       [ °]        [p.u.]       [p.u.]       [p.u.]      [p.u.]</value>
   </data>
   <data name="SolutionInProgress" xml:space="preserve">
@@ -184,7 +184,7 @@
     <value>64位进程</value>
   </data>
   <data name="PFReportMessage4A" xml:space="preserve">
-    <value>{0} {1,12:G6} {2,12:G6} {3,12:G6} {4,12:G6} {5,12:G6} {6,12:G6} {7,6}</value>
+    <value>{0} {1,12:G6} {2,12:G6} {3,12:G6} {4,12:G6} {5,12:G6} {6,12:G6}</value>
   </data>
   <data name="FileSaveComplete" xml:space="preserve">
     <value>已保存：{0}。</value>

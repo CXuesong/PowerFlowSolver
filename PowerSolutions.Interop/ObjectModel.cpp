@@ -45,7 +45,7 @@ namespace PowerSolutions
 			{
 				_CHECK_NON_NULLABLE_PARAM(bus1);
 				_CHECK_NON_NULLABLE_PARAM(bus2);
-				auto newInst = new _NATIVE_OM Line((bus1), (bus2), MarshalComplex(impedance), MarshalComplex(admittance));
+				auto newInst = new _NATIVE_OM Line(bus1.AsWritable(), bus2.AsWritable(), MarshalComplex(impedance), MarshalComplex(admittance));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
 			}
@@ -53,7 +53,7 @@ namespace PowerSolutions
 			Component NetworkCase::AddPVGenerator(Bus bus1, double activePower, double voltage)
 			{
 				_CHECK_NON_NULLABLE_PARAM(bus1);
-				auto newInst = new _NATIVE_OM PVGenerator((bus1), activePower, voltage);
+				auto newInst = new _NATIVE_OM PVGenerator(bus1.AsWritable(), activePower, voltage);
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
 			}
@@ -61,7 +61,7 @@ namespace PowerSolutions
 			Component NetworkCase::AddSlackGenerator(Bus bus1, Complex voltage)
 			{
 				_CHECK_NON_NULLABLE_PARAM(bus1);
-				auto newInst = new _NATIVE_OM SlackGenerator((bus1), MarshalComplex(voltage));
+				auto newInst = new _NATIVE_OM SlackGenerator(bus1.AsWritable(), MarshalComplex(voltage));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
 			}
@@ -69,7 +69,7 @@ namespace PowerSolutions
 			Component NetworkCase::AddPQLoad(Bus bus1, Complex power)
 			{
 				_CHECK_NON_NULLABLE_PARAM(bus1);
-				auto newInst = new _NATIVE_OM PQLoad((bus1), MarshalComplex(power));
+				auto newInst = new _NATIVE_OM PQLoad(bus1.AsWritable(), MarshalComplex(power));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
 			}
@@ -77,7 +77,7 @@ namespace PowerSolutions
 			Component NetworkCase::AddShuntAdmittance(Bus bus1, Complex admittance)
 			{
 				_CHECK_NON_NULLABLE_PARAM(bus1);
-				auto newInst = new _NATIVE_OM ShuntAdmittance((bus1), MarshalComplex(admittance));
+				auto newInst = new _NATIVE_OM ShuntAdmittance(bus1.AsWritable(), MarshalComplex(admittance));
 				nativeObject->AddObject(newInst);
 				return Component(newInst);
 			}
@@ -87,7 +87,7 @@ namespace PowerSolutions
 				_CHECK_NON_NULLABLE_PARAM(bus1);
 				_CHECK_NON_NULLABLE_PARAM(bus2);
 				auto newInst = new _NATIVE_OM Transformer(
-					(bus1), (bus2),
+					bus1.AsWritable(), bus2.AsWritable(),
 					MarshalComplex(impedance), MarshalComplex(admittance),
 					MarshalComplex(tapRatio));
 				nativeObject->AddObject(newInst);
@@ -100,7 +100,7 @@ namespace PowerSolutions
 				_CHECK_NON_NULLABLE_PARAM(bus2);
 				_CHECK_NON_NULLABLE_PARAM(bus3);
 				auto newInst = new _NATIVE_OM ThreeWindingTransformer(
-					(bus1), (bus2), (bus3),
+					bus1.AsWritable(), bus2.AsWritable(), bus3.AsWritable(),
 					MarshalComplex(impedance12), MarshalComplex(impedance13),
 					MarshalComplex(impedance23), MarshalComplex(admittance),
 					MarshalComplex(tapRatio1), MarshalComplex(tapRatio2),
