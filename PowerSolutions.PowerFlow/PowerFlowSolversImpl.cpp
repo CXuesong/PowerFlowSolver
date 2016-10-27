@@ -24,7 +24,7 @@ namespace PowerSolutions
 		{
 		}
 
-		std::shared_ptr<Solution> SolverImpl::Solve(ObjectModel::PrimitiveNetwork& network)
+		std::shared_ptr<Solution> SolverImpl::Solve(const ObjectModel::PrimitiveNetwork& network)
 		{
 			assert(MaxDeviationTolerance() >= 0);
 			PNetwork = &network;

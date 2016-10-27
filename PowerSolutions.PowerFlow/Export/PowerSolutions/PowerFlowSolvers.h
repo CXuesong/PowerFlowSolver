@@ -92,7 +92,7 @@ namespace PowerSolutions
 			typedef std::vector<NodeEvaluationStatus> NodeStatusCollection;
 		private:
 			NodeStatusCollection m_NodeStatus;
-			ObjectModel::PrimitiveNetwork* m_Network;
+			const ObjectModel::PrimitiveNetwork* m_Network;
 		_PS_INTERNAL:
 			NodeStatusCollection& NodeStatus() { return m_NodeStatus; }
 			NodeEvaluationStatus& NodeStatus(int nodeIndex) { return m_NodeStatus.at(nodeIndex); }
@@ -100,9 +100,9 @@ namespace PowerSolutions
 			const NodeStatusCollection& NodeStatus() const { return m_NodeStatus; }
 			const NodeEvaluationStatus& NodeStatus(int nodeIndex) const { return m_NodeStatus.at(nodeIndex); }
 			const NodeEvaluationStatus& NodeStatus(const ObjectModel::Bus* bus) const { return m_NodeStatus.at(m_Network->Nodes(bus).Index()); }
-			ObjectModel::PrimitiveNetwork* Network() const { return m_Network; }
+			const ObjectModel::PrimitiveNetwork* Network() const { return m_Network; }
 		public:
-			PrimitiveSolution(ObjectModel::PrimitiveNetwork& network);
+			PrimitiveSolution(const ObjectModel::PrimitiveNetwork& network);
 		};
 
 		// 抽象用于完成稳态潮流的解决过程。
@@ -124,9 +124,8 @@ namespace PowerSolutions
 			void IterationEvent(IterationEventHandler val) { m_IterationEvent = val; }
 		public:
 			// 求解网络的功率潮流分布，并生成一个潮流分析报告。
-			virtual std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) = 0;
-			std::shared_ptr<Solution> Solve(std::shared_ptr<ObjectModel::PrimitiveNetwork> network);
-			virtual std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network);
+			virtual std::shared_ptr<Solution> Solve(const ObjectModel::PrimitiveNetwork& network) = 0;
+			virtual std::shared_ptr<Solution> Solve(const ObjectModel::NetworkCase& network);
 			Solver();
 			virtual ~Solver();
 		public:

@@ -20,13 +20,13 @@ namespace PowerSolutions
 		{
 		}
 
-		shared_ptr<Solution> DCFlowSolver::Solve(NetworkCase& network)
+		shared_ptr<Solution> DCFlowSolver::Solve(const ObjectModel::NetworkCase& network)
 		{
 			auto pn = network.ToPrimitive(PrimitiveNetworkOptions::NodeReorder | PrimitiveNetworkOptions::IgnoreShuntAdmittance);
 			return this->Solve(*pn);
 		}
 
-		shared_ptr<Solution> DCFlowSolver::Solve(PrimitiveNetwork& network)
+		shared_ptr<Solution> DCFlowSolver::Solve(const ObjectModel::PrimitiveNetwork& network)
 		{
 			auto s = make_shared<Solution>();
 			s->Status(SolutionStatus::Success);

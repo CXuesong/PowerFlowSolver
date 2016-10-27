@@ -15,8 +15,8 @@ namespace PowerSolutions
 		class DCFlowSolver : public Solver
 		{
 		public:
-			std::shared_ptr<Solution> Solve(ObjectModel::NetworkCase& network) override;
-			std::shared_ptr<Solution> Solve(ObjectModel::PrimitiveNetwork& network) override;
+			std::shared_ptr<Solution> Solve(const ObjectModel::NetworkCase& network) override;
+			std::shared_ptr<Solution> Solve(const ObjectModel::PrimitiveNetwork& network) override;
 			~DCFlowSolver() override;
 		};
 	}

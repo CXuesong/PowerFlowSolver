@@ -89,7 +89,7 @@ namespace PowerSolutions
 						network->nativeObject->ToPrimitive(NodeReorder
 							? _NATIVE_OM PrimitiveNetworkOptions::NodeReorder
 							: _NATIVE_OM PrimitiveNetworkOptions::None);
-					nativeSolution = nativeObject->Solve(nativePM);
+					nativeSolution = nativeObject->Solve(*nativePM);
 				);
 				auto solution = gcnew Solution(*nativeSolution);
 				return solution;
