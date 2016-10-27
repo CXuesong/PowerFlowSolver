@@ -38,7 +38,7 @@ namespace PowerSolutions
 
 			Bus NetworkCase::AddBus(Complex initialVoltage)
 			{
-				return Bus(nativeObject->CreateBus(MarshalComplex(initialVoltage)));
+				return Bus(nativeObject->AddBus(MarshalComplex(initialVoltage)));
 			}
 
 			Component NetworkCase::AddLine(Bus bus1, Bus bus2, Complex impedance, Complex admittance)

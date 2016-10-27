@@ -32,10 +32,10 @@ namespace NativeUnitTest1
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 			NetworkCase network;
 			stringstream ss;
-			auto b1 = network.CreateBus(),
-				b2 = network.CreateBus(),
-				b3 = network.CreateBus(),
-				b4 = network.CreateBus();
+			auto b1 = network.AddBus(),
+				b2 = network.AddBus(),
+				b3 = network.AddBus(),
+				b4 = network.AddBus();
 			network.AddObject({
 				new Transformer(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636),
 				new PVGenerator(b3, 0.2, 1.05),
@@ -66,10 +66,10 @@ namespace NativeUnitTest1
 			// TODO:  ï¿½Ú´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½ï¿?
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 			NetworkCase network;
-			auto b1 = network.CreateBus(),
-				b2 = network.CreateBus(),
-				b3 = network.CreateBus(),
-				b4 = network.CreateBus();
+			auto b1 = network.AddBus(),
+				b2 = network.AddBus(),
+				b3 = network.AddBus(),
+				b4 = network.AddBus();
 			network.AddObject({
 				new Transformer(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636),
 				new PVGenerator(b3, 0.2, 1.05),
@@ -183,10 +183,10 @@ namespace NativeUnitTest1
 			*/
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 			NetworkCase network;
-			auto b1 = network.CreateBus(10),
-				b2 = network.CreateBus(110),
-				b3 = network.CreateBus(110),
-				b4 = network.CreateBus(35);
+			auto b1 = network.AddBus(10),
+				b2 = network.AddBus(110),
+				b3 = network.AddBus(110),
+				b4 = network.AddBus(35);
 			network.AddObject({
 				new PVGenerator(b1, 80, 10),
 				new SlackGenerator(b4, 35),
@@ -212,10 +212,10 @@ namespace NativeUnitTest1
 			// TODO:  ÔÚ´ËÊäÈë²âÊÔ´úÂë
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 			NetworkCase network;
-			auto b1 = network.CreateBus(),
-				b2 = network.CreateBus(),
-				b3 = network.CreateBus(),
-				b4 = network.CreateBus();
+			auto b1 = network.AddBus(),
+				b2 = network.AddBus(),
+				b3 = network.AddBus(),
+				b4 = network.AddBus();
 			network.AddObject({
 				new Transformer(b1, b2, complexd(0, 0.1666666666666666666666), 0.886363636363636),
 				new PVGenerator(b3, 0.2, 1.05),
@@ -268,9 +268,9 @@ namespace NativeUnitTest1
 			// TODO:  ÔÚ´ËÊäÈë²âÊÔ´úÂë
 			_CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 			NetworkCase network;
-			auto b1 = network.CreateBus(),
-				b2 = network.CreateBus(),
-				b3 = network.CreateBus();
+			auto b1 = network.AddBus(),
+				b2 = network.AddBus(),
+				b3 = network.AddBus();
 			network.AddObject({
 				new PQLoad(b1, 2),
 				new PQLoad(b2, -0.5),

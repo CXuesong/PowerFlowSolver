@@ -55,7 +55,7 @@ namespace PowerSolutions {
 			return true;
 		}
 
-		Bus* NetworkCase::CreateBus(complexd inititalVoltage)
+		Bus* NetworkCase::AddBus(complexd inititalVoltage)
 		{
 			auto newInst = new Bus(inititalVoltage);
 			AddObject(newInst);

@@ -73,9 +73,9 @@ namespace PowerSolutions {
 		public:
 			const NetworkObjectCollection& Objects() const { return m_Objects; }
 			//向网络案例中加入一条母线。
-			Bus* CreateBus(complexd inititalVoltage);
+			Bus* AddBus(complexd inititalVoltage);
 			//向网络案例中加入一条母线。
-			Bus* CreateBus() { return CreateBus(1); };
+			Bus* AddBus() { return AddBus(1); };
 			//指示是否应在此实例析构时自动删除子级网络对象。
 			bool AutoDeleteChildren() const { return m_AutoDeleteChildren; }
 			void AutoDeleteChildren(bool val) { m_AutoDeleteChildren = val; }
