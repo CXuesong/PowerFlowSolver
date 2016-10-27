@@ -53,6 +53,7 @@ namespace PowerSolutions
 		}
 #else
 		NetworkObject::NetworkObject()
+			: _Annotation(nullptr)
 		{ }
 #endif
 
@@ -81,7 +82,7 @@ namespace PowerSolutions
 			//约定：Clone不会复制指向父级的指针，
 			//且不在对应 caseInfo 中主动调用 Attach 以确定依存关系。
 			//但可以复制母线的引用（此处需要用到 context 参数）
-			newInstance->_Tag = this->_Tag;
+			newInstance->_Annotation = this->_Annotation;
 		}
 
 		////////// 组件 //////////

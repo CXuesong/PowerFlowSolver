@@ -77,10 +77,11 @@ namespace PowerSolutions {
 			unsigned long _ID;	//一个标识符，用于在调试模式下区分不同的网络对象。
 #endif
 		private:
-			void* _Tag;
+			void* _Annotation;
 		public:
-			void* Tag() const { return _Tag; }
-			void Tag(void* val) { _Tag = val; }
+			// 获取客户端程序自定义的数据内容。
+			void* Annotation() const { return _Annotation; }
+			void Annotation(void* val) { _Annotation = val; }
 		public:
 			virtual void Validate() const;
 			//获取此对象的一个副本。

@@ -72,8 +72,6 @@ namespace PowerSolutions {
 		private:	//internal
 		public:
 			const NetworkObjectCollection& Objects() const { return m_Objects; }
-			//按照 Index 属性查找一个母线。
-			Bus* Buses(int index) const;
 			//向网络案例中加入一条母线。
 			Bus* CreateBus(complexd inititalVoltage);
 			//向网络案例中加入一条母线。
@@ -81,14 +79,11 @@ namespace PowerSolutions {
 			//指示是否应在此实例析构时自动删除子级网络对象。
 			bool AutoDeleteChildren() const { return m_AutoDeleteChildren; }
 			void AutoDeleteChildren(bool val) { m_AutoDeleteChildren = val; }
-		private:
-			static void ExpandCore(PrimitiveNetwork* enc, NetworkObject* obj);
 		public:
 			void AddObject(NetworkObject* obj);
 			void AddObject(std::initializer_list<NetworkObject*> init);
 			bool RemoveObject(NetworkObject* obj);
 			void DeleteChildren();				//移除并删除此网络实例中的所有子级。
-			void Validate() const;				//验证整个网络实例的有效性。
 			//根据当前网络，生成一个经过初步分析的 PrimitiveNetwork。
 			std::shared_ptr<PrimitiveNetwork> ToPrimitive(PrimitiveNetworkOptions options = PrimitiveNetworkOptions::NodeReorder) const;
 			//构造此网络案例的一个浅层副本，包含了与此案例相同的 NetworkObject 引用。
