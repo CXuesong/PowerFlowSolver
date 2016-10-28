@@ -9,7 +9,7 @@ namespace PowerSolutions
 	namespace PowerFlow
 	{
 #if _DEBUG
-		ofstream& TraceFile = ofstream("TraceFile.txt", ios::out | ios::trunc);
+		ofstream TraceFile = ofstream("TraceFile.txt", ios::out | ios::trunc);
 
 		void TraceFilePath(char path[])
 		{

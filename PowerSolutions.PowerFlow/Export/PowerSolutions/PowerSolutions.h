@@ -60,7 +60,7 @@ namespace PowerSolutions
 {
 	namespace PowerFlow
 	{
-		extern std::ofstream& TraceFile;
+		extern std::ofstream TraceFile;
 	}
 }
 #else

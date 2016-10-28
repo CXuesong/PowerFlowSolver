@@ -74,12 +74,14 @@ namespace PowerSolutions
 			_PS_TRACE(ConstraintPowerInjection);
 		}
 
-		double NRSolver::EvalDeviation()
+		pair<int, double> NRSolver::EvalDeviation()
 		{
 			EvalPowerInjection();
-			//BUG CLOSED
-			//最小系数不一定是绝对值最小的系数
-			return PowerInjectionDeviation.cwiseAbs().maxCoeff();
+			//注意，最小系数不一定是绝对值最小的系数
+			int nodeIndex;
+			double dev;
+			dev = PowerInjectionDeviation.cwiseAbs().maxCoeff(&nodeIndex);
+			return make_pair(nodeIndex, dev);
 		}
 
 		bool NRSolver::OnIteration()

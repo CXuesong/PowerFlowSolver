@@ -34,7 +34,7 @@ namespace PowerSolutions
 		protected:
 			//约定：以下函数将会按照声明顺序被依次调用。
 			virtual void BeforeIterations() = 0;
-			virtual double EvalDeviation() = 0;		//计算当前结果的迭代误差。
+			virtual std::pair<int, double> EvalDeviation() = 0;		//计算当前结果中误差最大的节点编号以及迭代误差。
 			virtual bool OnIteration() = 0;
 			virtual void AfterIterations() = 0;
 			std::shared_ptr<Solution> GenerateSolution(SolutionStatus status, int iterCount, double maxDev);

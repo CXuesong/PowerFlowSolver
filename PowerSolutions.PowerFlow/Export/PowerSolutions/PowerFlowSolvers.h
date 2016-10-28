@@ -22,18 +22,23 @@ namespace PowerSolutions
 		class IterationEventArgs
 		{
 		private:
-			int m_IterationCount;
-			double m_MaxDeviation;
+			int _IterationCount;
+			double _MaxDeviation;
+			ObjectModel::PrimitiveNetwork::NodeInfo* _MaxDeviationNode;
 		public:
 			// 获取已经完成的迭代次数。0表示迭代尚未开始。
-			int IterationCount() const { return m_IterationCount; }
+			int IterationCount() const { return _IterationCount; }
 			// 此次迭代结束时最大功率误差的绝对值。
-			double MaxDeviation() const { return m_MaxDeviation; }
+			double MaxDeviation() const { return _MaxDeviation; }
+			// 此次迭代结束时具有最大功率误差的节点。
+			ObjectModel::PrimitiveNetwork::NodeInfo& MaxDeviationNode() const { return *_MaxDeviationNode; }
 		public:
 			// 初始化一个表示当前正在进行求解的 SolverStatus。
-			IterationEventArgs(int iterationCount, double maxDeviation)
-				: m_IterationCount(iterationCount), m_MaxDeviation(maxDeviation)
-			{ }
+			IterationEventArgs(int iterationCount, double maxDeviation,
+				ObjectModel::PrimitiveNetwork::NodeInfo& maxDeviationNode)
+				: _IterationCount(iterationCount), _MaxDeviation(maxDeviation), _MaxDeviationNode(&maxDeviationNode)
+			{
+			}
 		};
 
 		// 用于在迭代过程中接收每一步的迭代信息。

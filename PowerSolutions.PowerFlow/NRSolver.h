@@ -41,7 +41,7 @@ namespace PowerSolutions
 			}
 		protected:
 			virtual void BeforeIterations() override;
-			virtual double EvalDeviation() override;
+			virtual std::pair<int, double> EvalDeviation() override;
 			virtual bool OnIteration() override;
 			virtual void AfterIterations() override;
 		public:
