@@ -42,7 +42,7 @@ namespace PowerSolutions
 				//回调函数
 				if (IterationEvent() != nullptr)
 				{
-					IterationEventArgs e(i, dev.second, network.Nodes(dev.first));
+					IterationEventArgs e(i, dev.second, *dev.first);
 					IterationEvent()(this, &e);
 				}
 				if (abs(dev.second) < MaxDeviationTolerance())

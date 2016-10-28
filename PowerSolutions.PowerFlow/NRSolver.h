@@ -15,9 +15,10 @@ namespace PowerSolutions
 		{
 		private:
 			//定位点。
-			int Block1EquationCount() { return NodeCount - 1; }		//矩阵子块 H 的阶数。
-			int Block2EquationCount() { return PQNodeCount; }		//矩阵子块 L 的阶数。
-			int EquationCount()										//需要求解的方程组的维数。
+			int Block1EquationCount() const { return NodeCount - 1; }		//矩阵子块 H 的阶数。
+			int Block2EquationCount() const { return PQNodeCount; }		//矩阵子块 L 的阶数。
+			int EquationCount() const
+			//需要求解的方程组的维数。
 			{
 				return Block1EquationCount() + Block2EquationCount();
 			}
@@ -41,7 +42,7 @@ namespace PowerSolutions
 			}
 		protected:
 			virtual void BeforeIterations() override;
-			virtual std::pair<int, double> EvalDeviation() override;
+			virtual std::pair<const ObjectModel::PrimitiveNetwork::NodeInfo*, double> EvalDeviation() override;
 			virtual bool OnIteration() override;
 			virtual void AfterIterations() override;
 		public:

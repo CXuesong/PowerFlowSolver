@@ -24,18 +24,18 @@ namespace PowerSolutions
 		private:
 			int _IterationCount;
 			double _MaxDeviation;
-			ObjectModel::PrimitiveNetwork::NodeInfo* _MaxDeviationNode;
+			const ObjectModel::PrimitiveNetwork::NodeInfo* _MaxDeviationNode;
 		public:
 			// 获取已经完成的迭代次数。0表示迭代尚未开始。
 			int IterationCount() const { return _IterationCount; }
 			// 此次迭代结束时最大功率误差的绝对值。
 			double MaxDeviation() const { return _MaxDeviation; }
 			// 此次迭代结束时具有最大功率误差的节点。
-			ObjectModel::PrimitiveNetwork::NodeInfo& MaxDeviationNode() const { return *_MaxDeviationNode; }
+			const ObjectModel::PrimitiveNetwork::NodeInfo& MaxDeviationNode() const { return *_MaxDeviationNode; }
 		public:
 			// 初始化一个表示当前正在进行求解的 SolverStatus。
 			IterationEventArgs(int iterationCount, double maxDeviation,
-				ObjectModel::PrimitiveNetwork::NodeInfo& maxDeviationNode)
+				const ObjectModel::PrimitiveNetwork::NodeInfo& maxDeviationNode)
 				: _IterationCount(iterationCount), _MaxDeviation(maxDeviation), _MaxDeviationNode(&maxDeviationNode)
 			{
 			}

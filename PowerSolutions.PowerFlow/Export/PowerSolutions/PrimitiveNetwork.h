@@ -97,11 +97,13 @@ namespace PowerSolutions {
 				{
 					_ActivePowerInjection = _ReactivePowerInjection = 0;
 				}
-				complexd VoltagePhasor()		//复数形式的电压相量
+				//复数形式的电压相量
+				complexd VoltagePhasor() const
 				{
 					return std::polar(_Voltage, _Angle);
 				}
-				bool HasPowerInjection()		//获取一个值，指示此节点是否存在注入功率。
+				//获取一个值，指示此节点是否存在注入功率。
+				bool HasPowerInjection() const
 				{
 					//如果以后发现此方法判断不严格，可以修改。
 					return ActivePowerInjection() != 0 || ReactivePowerInjection() != 0;
@@ -126,7 +128,7 @@ namespace PowerSolutions {
 				BusPair Buses() const { return std::make_pair(_Nodes.first->Bus(), _Nodes.second->Bus()); }
 				void Nodes(NodePair val) { _Nodes = val; }
 				ComponentCollection& Components() { return _Components; }
-				NodeInfo* AnotherNode(NodeInfo* thisNode)
+				NodeInfo* AnotherNode(NodeInfo* thisNode) const
 				{
 					assert(_Nodes.first == thisNode || _Nodes.second == thisNode);
 					if (_Nodes.first == thisNode) return _Nodes.second;
@@ -180,7 +182,9 @@ namespace PowerSolutions {
 			//const ComponentCollection& Components() const { return _Components; }
 			//const BusComponentCollection& BusComponents() const { return _BusComponents; }
 			const NodeCollection& PQNodes() const { return _PQNodes; }
+			const NodeInfo& PQNodes(size_t index) const { return *_PQNodes.at(index); }
 			const NodeCollection& PVNodes() const { return _PVNodes; }
+			const NodeInfo& PVNodes(size_t index) const { return *_PVNodes.at(index); }
 			const NodeCollection& Nodes() const { return _Nodes; }	//参与计算的三种节点，按照矩阵索引连续排序，注意平衡节点放在最后。
 			NodeInfo& Nodes(size_t index) const { return *_Nodes.at(index); }
 			NodeInfo& Nodes(const Bus* busRef) const { return *_BusDict.at(busRef); }

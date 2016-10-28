@@ -74,14 +74,17 @@ namespace PowerSolutions
 			_PS_TRACE(ConstraintPowerInjection);
 		}
 
-		pair<int, double> NRSolver::EvalDeviation()
+		pair<const PrimitiveNetwork::NodeInfo*, double> NRSolver::EvalDeviation()
 		{
 			EvalPowerInjection();
 			//注意，最小系数不一定是绝对值最小的系数
-			int nodeIndex;
+			int row;
 			double dev;
-			dev = PowerInjectionDeviation.cwiseAbs().maxCoeff(&nodeIndex);
-			return make_pair(nodeIndex, dev);
+			dev = PowerInjectionDeviation.cwiseAbs().maxCoeff(&row);
+			if (row < Block1EquationCount())
+				return make_pair(&PNetwork->Nodes(row), dev);
+			else
+				return make_pair(&PNetwork->PQNodes(row - Block1EquationCount()), dev);
 		}
 
 		bool NRSolver::OnIteration()
