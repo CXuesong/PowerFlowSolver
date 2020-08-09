@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30404.54
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{6D63AA79-0929-4DE1-BC9C-A4E3DE722922}"
 	ProjectSection(SolutionItems) = preProject
@@ -43,6 +43,7 @@ Global
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB}.Release|x86.ActiveCfg = Release|Win32
 		{F0A27E64-DFB4-4A02-94D7-04C6E66534EB}.Release|x86.Build.0 = Release|Win32
 		{C79AB260-5777-4CBE-A335-6F97B804AE85}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{C79AB260-5777-4CBE-A335-6F97B804AE85}.Debug|x64.Build.0 = Debug|Any CPU
 		{C79AB260-5777-4CBE-A335-6F97B804AE85}.Debug|x86.ActiveCfg = Debug|Any CPU
 		{C79AB260-5777-4CBE-A335-6F97B804AE85}.Debug|x86.Build.0 = Debug|Any CPU
 		{C79AB260-5777-4CBE-A335-6F97B804AE85}.Release|x64.ActiveCfg = Release|Any CPU
@@ -75,5 +76,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FF59B287-4112-48C2-B7B3-BDE979B985CA}
 	EndGlobalSection
 EndGlobal

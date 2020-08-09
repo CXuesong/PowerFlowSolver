@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "PowerFlowSolver": {
+      "commandName": "Project",
+      "commandLineArgs": "/case:rts24.txt",
+      "nativeDebugging": true
+    }
+  }
+}
